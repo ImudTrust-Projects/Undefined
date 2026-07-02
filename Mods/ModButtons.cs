@@ -18,7 +18,10 @@ public class ModButtons
 
             new ButtonInfo { buttonText = "Room Mods", method =() => activeCategory = 3, isTogglable = false, },
             new ButtonInfo { buttonText = "Movement Mods", method =() => activeCategory = 4, isTogglable = false, },
-            new ButtonInfo { buttonText = "Visual Mods", method =() => activeCategory = 5, isTogglable = false, },
+            new ButtonInfo { buttonText = "Fun Mods", method =() => activeCategory = 5, isTogglable = false, },
+            new ButtonInfo { buttonText = "Visual Mods", method =() => activeCategory = 6, isTogglable = false, },
+            new ButtonInfo { buttonText = "Master Mods", method =() => activeCategory = 7, isTogglable = false, },
+            new ButtonInfo { buttonText = "Overpowered Mods", method =() => activeCategory = 8, isTogglable = false, },
         },
 
         new ButtonInfo[] { // Settings [1]
@@ -57,10 +60,29 @@ public class ModButtons
             new ButtonInfo { buttonText = "Teleport gun", method =() => Movement.TeleportGun(), isTogglable = true, toolTip = "You can teleport by pressing trigger on ur controller."},
         },
 
-        new ButtonInfo[] { // Safety Mods [5]
+        new ButtonInfo[] { // Fun Mods [5]
+            new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+
+            new ButtonInfo { buttonText = "Console Spoof", enableMethod =() => Fun.EnableConsoleSpoof(), disableMethod =() => Fun.DisableConsoleSpoof(), isTogglable = true, toolTip = "Spoofs Console Name."},
+            new ButtonInfo { buttonText = "Quest Score 67", method =() => Fun.SetQuestScore(67), isTogglable = true, toolTip = "Sets ur Quest Score to 67."},
+            new ButtonInfo { buttonText = "Quest Score 420", method =() => Fun.SetQuestScore(420), isTogglable = true, toolTip = "Sets ur Quest Score to 420."},
+            new ButtonInfo { buttonText = "Quest Score Max", method =() => Fun.SetQuestScore(999999999), isTogglable = true, toolTip = "Sets ur Quest Score to the max."},
+        },
+
+        new ButtonInfo[] { // Visual Mods [6]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
 
             new ButtonInfo { buttonText = "2D Box ESP", enableMethod =() => Visuals.BoxESP2DEnable(), method =() => Visuals.BoxESP2D(), disableMethod =() => Visuals.BoxESP2DDisable(), isTogglable = true, toolTip = "Shows 2D box ESP on players"},
+        },
+
+        new ButtonInfo[] { // Master Mods [7]
+            new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+
+            new ButtonInfo { buttonText = "Grey Screen", enableMethod =() => Master.GreyScreen(), disableMethod =() => Master.DisableGreyScreen(), isTogglable = true},
+        },
+
+        new ButtonInfo[] { // Overpowered Mods [8]
+            new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
         },
 
         new ButtonInfo[] { // Admin

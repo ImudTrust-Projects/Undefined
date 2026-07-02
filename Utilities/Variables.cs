@@ -76,7 +76,18 @@ public class Variables
 
     public static bool IsMaster()
     {
-        return PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient;
+        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+        {
+            return true;
+        }
+
+        NotificationLib.SendNotification(
+            NotificationLib.NotificationType.Error,
+            "You are not the master client!",
+            3f
+        );
+
+        return false;
     }
 
     public static void RPCProtection()
