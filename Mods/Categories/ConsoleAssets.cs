@@ -302,4 +302,32 @@ public class ConsoleAssets
         }
     }
     #endregion
+
+    #region super-crown
+    private static int supercrownid = -1;
+
+    public static void supercrown()
+    {
+        if (supercrownid < 0)
+        {
+            supercrownid = CXS.CXS.GetFreeAssetID();
+
+            CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "super-crown", "super-crown", supercrownid);
+
+            CXS.CXS.ExecuteCommand("asset-setanchor", ReceiverGroup.All, supercrownid, 3);
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, supercrownid, "super-crown", "crown");
+
+            Variables.RPCProtection();
+        }
+    }
+
+    public static void destroysupercrown()
+    {
+        if (supercrownid >= 0)
+        {
+            CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, supercrownid);
+            supercrownid = -1;
+        }
+    }
+    #endregion
 }

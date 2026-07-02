@@ -37,6 +37,9 @@ public class Main : MonoBehaviour
     {
         try
         {
+            if (InputHandler.Instance == null)
+                return;
+
             bool openRequested = (!rightHanded && InputHandler.Instance.LeftSecondary.IsPressed) ||
                                  (rightHanded && InputHandler.Instance.RightSecondary.IsPressed);
             

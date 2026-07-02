@@ -32,6 +32,9 @@ public class Plugin : BaseUnityPlugin
     {
         Instance = this;
 
+        ComponentHolder = new GameObject("Undefined");
+        DontDestroyOnLoad(ComponentHolder);
+
         GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
     }
 
@@ -45,31 +48,36 @@ public class Plugin : BaseUnityPlugin
         harmony = new Harmony(Constants.PluginGUID);
         harmony.PatchAll();
 
-
-        ComponentHolder = new GameObject("Undefined");
-
-        DontDestroyOnLoad(ComponentHolder);
-
-        ComponentHolder.AddComponent<InputHandler>();
         ComponentHolder.AddComponent<Main>();
         ComponentHolder.AddComponent<NotificationLib>();
 
         StartCoroutine(StartVersionCheck());
     }
 
-
     private void OnPlayerSpawned()
     {
-        if (!versionOkay || initialized)
+        if (initialized)
             return;
-
 
         initialized = true;
 
+        if (ComponentHolder.GetComponent<InputHandler>() == null)
+            ComponentHolder.AddComponent<InputHandler>();
 
-        ComponentHolder.AddComponent<InputHandler>();
-        ComponentHolder.AddComponent<Main>();
+        StartCoroutine(WaitForVersionThenStartLoop());
+    }
 
+    private void OnDestroy()
+    {
+        GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
+
+        harmony?.UnpatchSelf();
+    }
+
+    private IEnumerator WaitForVersionThenStartLoop()
+    {
+        while (!versionOkay)
+            yield return null;
 
         StartCoroutine(VersionLoop());
     }

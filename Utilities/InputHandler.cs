@@ -26,15 +26,18 @@ public class InputHandler : Singleton<InputHandler>
 
     private void Update()
     {
+        if (ControllerInputPoller.instance == null)
+            return;
+
         HandleInput(ref RightPrimary, ControllerInputPoller.instance.rightControllerPrimaryButton);
         HandleInput(ref RightSecondary, ControllerInputPoller.instance.rightControllerSecondaryButton);
         HandleInput(ref RightTrigger, ControllerInputPoller.instance.rightControllerTriggerButton);
         HandleInput(ref RightGrip, ControllerInputPoller.instance.rightGrab);
+
         HandleInput(ref LeftPrimary, ControllerInputPoller.instance.leftControllerPrimaryButton);
         HandleInput(ref LeftSecondary, ControllerInputPoller.instance.leftControllerSecondaryButton);
         HandleInput(ref LeftTrigger, ControllerInputPoller.instance.leftControllerTriggerButton);
         HandleInput(ref LeftGrip, ControllerInputPoller.instance.leftGrab);
-
 
         LeftJoystick.Axis = ControllerInputPoller.instance.leftControllerPrimary2DAxis;
         RightJoystick.Axis = ControllerInputPoller.instance.rightControllerPrimary2DAxis;
