@@ -128,7 +128,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
 
             new ButtonInfo { buttonText = "Grey Screen", enableMethod =() => Master.GreyScreen(), disableMethod =() => Master.DisableGreyScreen(), isTogglable = true},
-            new ButtonInfo { buttonText = "Guardian All", method =() => Master.GuardianAll(), disableMethod =() => Master.DisableGuardianAll(), isTogglable = true},
+            new ButtonInfo { buttonText = "Guardian All", enableMethod =() => Master.GuardianAll(), disableMethod =() => Master.DisableGuardianAll(), isTogglable = true},
         },
 
         new ButtonInfo[] { // Overpowered Mods [11]
