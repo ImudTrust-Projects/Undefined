@@ -15,7 +15,7 @@ public class SoundMods
         static List<string> BuildSoundOptions()
         {
             var list = new List<string>();
-            for (int i = 1; i <= 324; i++) list.Add(i.ToString());
+            for (int i = 1; i <= GTPlayer.Instance.materialData.Count; i++) list.Add(i.ToString());
             return list;
         }
 
