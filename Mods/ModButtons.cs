@@ -150,11 +150,9 @@ public class ModButtons
             new ButtonInfo { buttonText = "Spaz Targets", method = () => SpazTargets(), toolTip = "Spazes all the targets"},
             new ButtonInfo { buttonText = "Break Targets", method = () => BreakTargets(), toolTip = "Breaks all the targets"},
             new ButtonInfo { buttonText = "Break Elevator", method = () => BreakElevator(), toolTip = "Breaks The Elevator so people can phase through it"},
-            new ButtonInfo { buttonText = "Break Targets", method = () => BreakTargets(), toolTip = "Breaks all the targets"},
             new ButtonInfo { buttonText = "Untag Self", method = () => UntagSelf(), isTogglable = false, toolTip = "Untags you"},
             new ButtonInfo { buttonText = "Untag All", method = () => UntagAll(), isTogglable = false, toolTip = "Untags everyone"},
             new ButtonInfo { buttonText = "Force Tag Lag", method = () => ForceTagLag(), toolTip = "Forces tag lag in the lobby"},
-            new ButtonInfo { buttonText = "No Tag Cooldown", method = () => NoTagCooldown(), toolTip = "Makes it so there is no tag cooldown"},
             new ButtonInfo { buttonText = "No Tag Cooldown", method = () => NoTagCooldown(), toolTip = "Makes it so there is no tag cooldown"},
         },
 

@@ -173,7 +173,7 @@ public class Main : MonoBehaviour
             TextMeshPro text = mapInfoText.GetComponent<TextMeshPro>();
 
             if (text != null)
-                text.text = "<color=black>Undefined-Edited</color>";
+                text.text = "<color=black>Undefined</color>";
 
 
             if (loadingText != null)
@@ -249,13 +249,7 @@ public class Main : MonoBehaviour
         bgObject.GetComponent<Renderer>().material.color = backgroundColor.colors[0].color;
         bgObject.transform.position = new Vector3(0.05f, 0f, 0f);
 
-        menuCanvas = new GameObject();
-        menuCanvas.transform.parent = activeMenu.transform;
-        Canvas canvasComp = menuCanvas.AddComponent<Canvas>();
-        CanvasScaler scalerComp = menuCanvas.AddComponent<CanvasScaler>();
-        menuCanvas.AddComponent<GraphicRaycaster>();
-        canvasComp.renderMode = RenderMode.WorldSpace;
-        scalerComp.dynamicPixelsPerUnit = 1000f;
+        CreateImage();
 
         Text titleText = new GameObject { transform = { parent = menuCanvas.transform } }.AddComponent<Text>();
         titleText.font = currentFont;
@@ -473,6 +467,38 @@ public class Main : MonoBehaviour
         handPointer.transform.localPosition = new Vector3(0f, -0.1f, 0f);
         handPointer.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
         triggerCollider = handPointer.GetComponent<SphereCollider>();
+    }
+
+
+    public static void CreateImage()
+    {
+        if (Variables.backgroundTexture != null)
+        {
+            GameObject iconBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            Destroy(iconBack.GetComponent<Rigidbody>());
+            Destroy(iconBack.GetComponent<BoxCollider>());
+            Destroy(iconBack.GetComponent<MeshCollider>());
+        
+            iconBack.transform.parent = bgObject.transform;
+            iconBack.transform.localRotation = Quaternion.Euler(0f, 90f, 90f);
+            iconBack.transform.localPosition = new Vector3(-0.51f, 0f, 0f);
+            iconBack.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+
+            Renderer iconRenderer = iconBack.GetComponent<Renderer>();
+            Material iconMaterial = new Material(Shader.Find("UI/Default"));
+            iconMaterial.mainTexture = Variables.backgroundTexture;
+            iconRenderer.material = iconMaterial;
+            iconRenderer.material.color = new Color(1, 1, 1, 0.6f);
+            iconRenderer.sortingOrder = 1;
+        }
+
+        menuCanvas = new GameObject();
+        menuCanvas.transform.parent = activeMenu.transform;
+        Canvas canvasComp = menuCanvas.AddComponent<Canvas>();
+        CanvasScaler scalerComp = menuCanvas.AddComponent<CanvasScaler>();
+        menuCanvas.AddComponent<GraphicRaycaster>();
+        canvasComp.renderMode = RenderMode.WorldSpace;
+        scalerComp.dynamicPixelsPerUnit = 1000f;
     }
 
     public static void ChangePage(bool next)
