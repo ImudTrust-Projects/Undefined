@@ -10,12 +10,14 @@ using Undefined.Utilities;
 using UnityEngine;
 using UnityEngine.Networking;
 using JObject = Newtonsoft.Json.Linq.JObject;
+using GorillaLocomotion;
 
 namespace Undefined;
 
 [BepInPlugin(Constants.PluginGUID, Constants.PluginName, Constants.PluginVersion)]
 public class Plugin : BaseUnityPlugin
 {
+    public static int allsoundsids;
     public static Plugin Instance { get; private set; }
 
     public GameObject ComponentHolder { get; private set; }
@@ -64,6 +66,8 @@ public class Plugin : BaseUnityPlugin
             return;
 
         initialized = true;
+        allsoundsids = GTPlayer.Instance.materialData.Count;
+        SoundMods.PopulateSoundOptions();
 
         if (ComponentHolder.GetComponent<InputHandler>() == null)
             ComponentHolder.AddComponent<InputHandler>();
