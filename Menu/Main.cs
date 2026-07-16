@@ -173,7 +173,7 @@ public class Main : MonoBehaviour
             TextMeshPro text = mapInfoText.GetComponent<TextMeshPro>();
 
             if (text != null)
-                text.text = "<color=black>Undefined</color>";
+                text.text = "<color=black>Undefined-Edited</color>";
 
 
             if (loadingText != null)

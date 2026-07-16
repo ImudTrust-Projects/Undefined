@@ -1,4 +1,4 @@
-using GorillaLocomotion;
+﻿using GorillaLocomotion;
 using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
@@ -87,3 +87,35 @@ public class SoundMods
             Sound(39);
             Sound(30);
         } 
+
+        public static void Override_HandTap_Sounds(bool disable)
+        {
+            if (!disable)
+            {
+                enabled = true;
+                material = currentSoundId;
+            }
+            else
+            {
+                enabled = false;
+                material = -1;
+            }
+        }
+
+        public static void No_hand_taps(bool disable)
+        {
+            if (!disable)
+            {
+                enabled = true;
+                material = -1;
+                tapsEnabled = false;
+            }
+            else
+            {
+                enabled = false;
+                material = -1;
+                tapsEnabled = true;
+            }
+            
+        }
+}

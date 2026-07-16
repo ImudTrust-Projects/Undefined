@@ -8,6 +8,7 @@ using static Undefined.MENUSETTINGS.Settings;
 using static Undefined.Utilities.NotificationLib;
 using static Undefined.Utilities.Variables;
 using static Undefined.Mods.Categories.SoundMods;
+using static Undefined.Mods.Categories.Overpowered;
 
 namespace Undefined.Mods;
 
@@ -98,6 +99,9 @@ public class ModButtons
             new ButtonInfo { buttonText = "Quest Score 420", method =() => Fun.SetQuestScore(420), isTogglable = false, toolTip = "Sets ur Quest Score to 420."},
             new ButtonInfo { buttonText = "Quest Score Max", method =() => Fun.SetQuestScore(999999999), isTogglable = false, toolTip = "Sets ur Quest Score to the max."},
             new ButtonInfo { buttonText = "Bracelet", enableMethod = () => Fun.Get_Bracelet(true, true), disableMethod = () => Fun.Get_Bracelet(false, true) , isTogglable = true},
+            new ButtonInfo { buttonText = "Water Splash Gun", method = () => Watergun(), disableMethod = () => VRRig.LocalRig.enabled = true, toolTip = "Splashes water on whoever you put the gun on"},
+            new ButtonInfo { buttonText = "Water Splash", method = () => Watersplash(), toolTip = "Splashes water on your left or right hand"},
+            new ButtonInfo { buttonText = "Hover Board Minigun", method = () => HoverboardMinigun(), toolTip = "Spams hoverboards out of your hand"},
             new ButtonInfo { buttonText = "Random Sound Spam", method = () => RandomSoundspam(), isTogglable = true},
             new ButtonInfo { buttonText = "Wolf Sound Spam", method = () => Wolf(), isTogglable = true},
             new ButtonInfo { buttonText = "Lemming Sound Spam", method = () => Lemming(), isTogglable = true},
@@ -108,9 +112,10 @@ public class ModButtons
             new ButtonInfo { buttonText = "Bouncy Sound Spam", method = () => Bouncythings(), isTogglable = true},
             new ButtonInfo { buttonText = "Voting Rock Sound Spam", method = () => Voting_Rock(), isTogglable = true},
             new ButtonInfo { buttonText = "AK47", method = () => AK_47(), isTogglable = true},
-            new ButtonInfo { buttonText = "Sound ID", isTogglable = false, isIncremental = true, incrementalDisplayName = "ID", incrementalValues = SoundMods.soundOptions, incrementalMethod = SoundMods.SetSound, toolTip = "Selects the sound ID (1-324)." },
+            new ButtonInfo { buttonText = "Sound ID", isTogglable = false, isIncremental = true, incrementalDisplayName = "ID", incrementalValues = soundOptions, incrementalMethod = SetSound, toolTip = "Selects the sound ID (1-324)." },
             new ButtonInfo { buttonText = "Sound Spam", method = () => PlaySelectedSound(), isTogglable = true, toolTip = "Spams the selected sound ID." },
-         
+            new ButtonInfo { buttonText = "Override Hand Tap Sounds", method = () => Override_HandTap_Sounds(false), disableMethod = () => Override_HandTap_Sounds(true), isTogglable = true, toolTip = "Makes your hand tap sounds the custom sound id" },
+            new ButtonInfo { buttonText = "No Hand Taps", method = () => No_hand_taps(false), disableMethod = () => No_hand_taps(true), toolTip = "Disables your hand taps"}
         },
 
         new ButtonInfo[] { // Visual Mods [7]
@@ -142,10 +147,21 @@ public class ModButtons
 
             new ButtonInfo { buttonText = "Grey Screen", enableMethod =() => Master.GreyScreen(), disableMethod =() => Master.DisableGreyScreen(), isTogglable = true},
             new ButtonInfo { buttonText = "Guardian All", enableMethod = () => Master.GuardianAll(), disableMethod =() => Master.DisableGuardianAll(), isTogglable = true},
+            new ButtonInfo { buttonText = "Spaz Targets", method = () => SpazTargets(), toolTip = "Spazes all the targets"},
+            new ButtonInfo { buttonText = "Break Targets", method = () => BreakTargets(), toolTip = "Breaks all the targets"},
+            new ButtonInfo { buttonText = "Break Elevator", method = () => BreakElevator(), toolTip = "Breaks The Elevator so people can phase through it"},
+            new ButtonInfo { buttonText = "Break Targets", method = () => BreakTargets(), toolTip = "Breaks all the targets"},
+            new ButtonInfo { buttonText = "Untag Self", method = () => UntagSelf(), isTogglable = false, toolTip = "Untags you"},
+            new ButtonInfo { buttonText = "Untag All", method = () => UntagAll(), isTogglable = false, toolTip = "Untags everyone"},
+            new ButtonInfo { buttonText = "Force Tag Lag", method = () => ForceTagLag(), toolTip = "Forces tag lag in the lobby"},
+            new ButtonInfo { buttonText = "No Tag Cooldown", method = () => NoTagCooldown(), toolTip = "Makes it so there is no tag cooldown"},
+            new ButtonInfo { buttonText = "No Tag Cooldown", method = () => NoTagCooldown(), toolTip = "Makes it so there is no tag cooldown"},
         },
 
         new ButtonInfo[] { // Overpowered Mods [11]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+            new ButtonInfo { buttonText = "Stutter Master Client", method = () => StutterMaster(), toolTip = "Stutters Master Client"},
+            new ButtonInfo { buttonText = "Destroy All", method = () => DestroyAll(), isTogglable = false, toolTip = "Destroys everyone"},
         },
 
         new ButtonInfo[] { // Admin
