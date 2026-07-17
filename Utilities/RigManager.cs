@@ -104,6 +104,12 @@ public class RigManager
 
 public static class extarstuff
 {
+
+    public static NetworkView GetNetViewFromVRRig(VRRig VRRig)
+    {
+        return (NetworkView)Traverse.Create(VRRig).Field("netView").GetValue();
+    }
+
     public static NetPlayer GetPlayer(this VRRig rig) =>
     RigManager.GetPlayerFromVRRigg(rig);
 

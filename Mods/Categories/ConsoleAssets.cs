@@ -92,13 +92,13 @@ public class ConsoleAssets
     #endregion
 
     #region Battle Arena
-    private static int assetId = -1;
+    private static int assetId;
     private static Vector3 cachedStartPosition;
     private static Coroutine platfRoutine;
 
     public static void spawnBattleArena()
     {
-        if (assetId >= 0) return;
+        if (assetId != 0) return;
 
         cachedStartPosition = GorillaTagger.Instance.bodyCollider.transform.position;
 

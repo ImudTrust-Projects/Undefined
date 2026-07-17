@@ -69,4 +69,25 @@ public class Fun
         var B = Mathf.Sin(time + 4f * Mathf.PI / 3f) * 0.5f + 0.5f;
         GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[] { R, G, B });
     }
+
+    public static void Rainbowhoverboard()
+    {
+        if (VRRig.LocalRig.hoverboardVisual.IsHeld)
+        {
+            float time = Time.time * 1.8f;
+
+            float R = Mathf.Sin(time) * 0.5f + 0.5f;
+            float G = Mathf.Sin(time + 2f * Mathf.PI / 3f) * 0.5f + 0.5f;
+            float B = Mathf.Sin(time + 4f * Mathf.PI / 3f) * 0.5f + 0.5f;
+
+            Color RGB = new Color(R, G, B);
+
+            VRRig.LocalRig.hoverboardVisual.SetIsHeld(
+                VRRig.LocalRig.hoverboardVisual.IsLeftHanded,
+                VRRig.LocalRig.hoverboardVisual.NominalLocalPosition,
+                VRRig.LocalRig.hoverboardVisual.NominalLocalRotation,
+                RGB
+            );
+        }
+    }
 }

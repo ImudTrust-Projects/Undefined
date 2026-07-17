@@ -1,14 +1,15 @@
 using Photon.Pun;
+using PlayFab.ExperimentationModels;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Undefined.Mods.Categories;
 using Undefined.Utilities;
 using static Undefined.Menu.Main;
 using static Undefined.MENUSETTINGS.Settings;
+using static Undefined.Mods.Categories.Overpowered;
+using static Undefined.Mods.Categories.SoundMods;
 using static Undefined.Utilities.NotificationLib;
 using static Undefined.Utilities.Variables;
-using static Undefined.Mods.Categories.SoundMods;
-using static Undefined.Mods.Categories.Overpowered;
 
 namespace Undefined.Mods;
 
@@ -129,6 +130,8 @@ public class ModButtons
             new ButtonInfo { buttonText = "Override Hand Tap Sounds", method = () => Override_HandTap_Sounds(false), disableMethod = () => Override_HandTap_Sounds(true), isTogglable = true, toolTip = "Makes your hand tap sounds the custom sound id" },
             new ButtonInfo { buttonText = "No Hand Tap Sounds", method = () => No_hand_taps(false), disableMethod = () => No_hand_taps(true), toolTip = "Disables your hand taps"},
             new ButtonInfo { buttonText = "RGB Monkey Stump", method = () => Fun.RGBMonke(), toolTip = "Makes you RGB"},
+            new ButtonInfo { buttonText = "Rainbow hoverboard", method = () => Fun.Rainbowhoverboard(), toolTip = "Makes your hoverboard RGB"},
+            new ButtonInfo { buttonText = "Unlock all cosmetics", method = () => Console.UnlockAllCosmetics(), toolTip = "ok"},
         },
 
         new ButtonInfo[] { // Visual Mods [7]
@@ -174,6 +177,10 @@ public class ModButtons
 
             new ButtonInfo { buttonText = "Stutter Master Client", method = () => StutterMaster(), toolTip = "Stutters Master Client"},
             new ButtonInfo { buttonText = "Destroy All", method = () => DestroyAll(), isTogglable = false, toolTip = "Destroys everyone"},
+            new ButtonInfo { buttonText = "Lag Gun", method = () => LagGun(), isTogglable = true, toolTip = "Lags the person you point the gun at."},
+            new ButtonInfo { buttonText = "Lag All", method = () => LagAll(), isTogglable = true, toolTip = "Lags everyone in the lobby."},
+            new ButtonInfo { buttonText = "Lag On Touch", method = () => LagOnTouch(), isTogglable = true, toolTip = "Lags the person that touches you."},
+            new ButtonInfo { buttonText = "Fling Gun", method = () => FlingGun(), isTogglable = true, toolTip = "Flings the person you point the gun at."},
         },
         
         
@@ -189,6 +196,13 @@ public class ModButtons
 
             new ButtonInfo { buttonText = "No Admin Indicator", enableMethod =() => Console.EnableNoAdminIndicator(), method =() => Console.UpdateNoAdminIndicator(), disableMethod =() => Console.DisableNoAdminIndicator(), isTogglable = true},
             new ButtonInfo { buttonText = "Admin Notificator", enableMethod =() => Console.AdminNotificatorEnable(), disableMethod =() => Console.AdminNotificatorDisable(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Punch Mod", method =() => Console.AdminPunchMod(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Laser", method =() => Console.AdminLaser(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Beam", method =() => Console.AdminBeam(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Fractals", method =() => Console.AdminFractals(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Bring Gun", method =() => Console.AdminBringGun(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Bring All", method =() => Console.BringAllUsing(), isTogglable = true},
+            new ButtonInfo { buttonText = "Admin Fake Cosmetics", overlapText = "Admin Spoof Cosmetics", method =() => Console.AdminSpoofCosmetics(), enableMethod =() => { NetworkSystem.Instance.OnPlayerJoined += Console.OnPlayerJoinSpoof; Console.AdminSpoofCosmetics(true); }, disableMethod =() => { NetworkSystem.Instance.OnPlayerJoined -= Console.OnPlayerJoinSpoof; Console.oldCosmetics = null; }, toolTip = "Makes everyone using the menu see whatever cosmetics you have on as if you owned them."},
         },
 
         new ButtonInfo[] { // Super Admin

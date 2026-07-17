@@ -9,6 +9,7 @@ using GorillaTagScripts;
 using Undefined.Utilities;
 using UnityEngine;
 using static Undefined.Utilities.GunLib;
+using Object = UnityEngine.Object;
 
 namespace Undefined.Mods.Categories;
 
@@ -176,9 +177,92 @@ public class Overpowered
         }
         Variables.RPCProtection();
     }
-    
-    
-    
-    
-    
+
+
+    public static void LagGun()
+    {
+        start2guns(() =>
+        {
+            if (Time.time > LagDelay)
+            {
+                for (int i = 0; i < 900; i++)
+                {
+                    PhotonNetwork.NetworkingClient.OpRaiseEvent(3, new Hashtable() { }, new RaiseEventOptions() { TargetActors = new int[] { LockedRigOrPlayerOrwhatever.creator.ActorNumber } }, SendOptions.SendUnreliable);
+                }
+                Variables.RPCProtection();
+                LagDelay = Time.time + 2.5f;
+            }
+        }, true);
+    }
+
+    public static void LagAll()
+    {
+        if (Time.time > LagDelay)
+        {
+            for (int i = 0; i < 900; i++)
+            {
+                PhotonNetwork.NetworkingClient.OpRaiseEvent(3, new Hashtable() { }, new RaiseEventOptions() { Receivers = ReceiverGroup.Others }, SendOptions.SendUnreliable);
+            }
+            Variables.RPCProtection();
+            LagDelay = Time.time + 2.2f;
+        }
+    }
+
+    public static void LagOnTouch()
+    {
+        if (Time.time > LagDelay)
+        {
+            foreach (VRRig vrrig in VRRigCache.ActiveRigs)
+            {
+                if (vrrig != GorillaTagger.Instance.offlineVRRig &&
+                    (Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, vrrig.headMesh.transform.position) < 0.25f ||
+                     Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, vrrig.headMesh.transform.position) < 0.25f ||
+                     Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, vrrig.bodyTransform.position) < 0.25f ||
+                     Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, vrrig.bodyTransform.position) < 0.25f))
+                {
+                    PhotonNetwork.NetworkingClient.OpRaiseEvent(
+                        3,
+                        new Hashtable(),
+                        new RaiseEventOptions()
+                        {
+                            TargetActors = new int[] { vrrig.Creator.ActorNumber }
+                        },
+                        SendOptions.SendUnreliable
+                    );
+
+                    Variables.RPCProtection();
+                }
+            }
+
+            LagDelay = Time.time + 2.2f;
+        }
+    }
+
+    public static bool IsLocalPlayerGuardian() =>
+        GorillaGuardianZoneManager.zoneManagers[0].IsPlayerGuardian(PhotonNetwork.LocalPlayer);
+
+    public static void FlingGun()
+    {
+        try
+        {
+            GunLib.start2guns(() =>
+            {
+                try
+                {
+                    if (PhotonNetwork.InRoom && GunLib.LockedRigOrPlayerOrwhatever != null && Overpowered.IsLocalPlayerGuardian())
+                    {
+                        NetworkView view = extarstuff.GetNetViewFromVRRig(GunLib.LockedRigOrPlayerOrwhatever);
+
+                        if (view != null)
+                        {
+                            view.SendRPC("GrabbedByPlayer", 1, true, false, false);
+                            view.SendRPC("DroppedByPlayer", 1, new Vector3(0f, 9998.99f, 0f));
+                        }
+                    }
+                }
+                catch { }
+            }, true);
+        }
+        catch { }
+    }
 }

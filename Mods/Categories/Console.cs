@@ -1,10 +1,18 @@
 ﻿using ExitGames.Client.Photon;
+using GorillaLocomotion;
+using GorillaNetworking;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
+using Undefined.Patches;
 using Undefined.Utilities;
+using UnityEngine;
+using static Bindings;
+using Random = UnityEngine.Random;
 
 namespace Undefined.Mods.Categories;
 
@@ -78,5 +86,189 @@ public class Console
             NotificationLib.NotificationType.Info,
             $"{player.NickName} is using CXS version {version} - {menu}"
         );
+    }
+
+    private static float aaaaa;
+    public static void AdminPunchMod()
+    {
+        if (Time.time > aaaaa)
+        {
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                bool leftHand = Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, rig.headMesh.transform.position) < 0.25f;
+                bool rightHand = Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, rig.headMesh.transform.position) < 0.25f;
+
+                if (!rig.isLocal && (leftHand || rightHand))
+                {
+                    Vector3 vel = rightHand ? GTPlayer.Instance.RightHand.velocityTracker.GetAverageVelocity(true, 0) : GTPlayer.Instance.LeftHand.velocityTracker.GetAverageVelocity(true, 0);
+
+                    CXS.CXS.ExecuteCommand("vel", RigManager.GetPlayerFromVRRig(rig).ActorNumber, vel);
+                    aaaaa = Time.time + 0.1f;
+                }
+            }
+        }
+    }
+
+    private static float beamDelay;
+    public static void AdminBeam()
+    {
+        if (InputHandler.Instance.RightTrigger.IsPressed && Time.time > beamDelay)
+        {
+            beamDelay = Time.time + 0.05f;
+            float h = Time.frameCount / 180f % 1f;
+            Color color = Color.HSVToRGB(h, 1f, 1f);
+            CXS.CXS.ExecuteCommand("lr", ReceiverGroup.All, color.r, color.g, color.b, color.a, 0.5f, GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 0.5f, 0f), GorillaTagger.Instance.headCollider.transform.position + new Vector3(Mathf.Cos((float)Time.frameCount / 30) * 100f, 0.5f, Mathf.Sin((float)Time.frameCount / 30) * 100f), 0.1f);
+        }
+    }
+
+    private static float startTimeTrigger;
+    private static bool lastTriggerLaserSpam;
+    public static void AdminFractals()
+    {
+        if (InputHandler.Instance.RightTrigger.IsPressed && !lastTriggerLaserSpam)
+            startTimeTrigger = Time.time;
+
+        lastTriggerLaserSpam = InputHandler.Instance.RightTrigger.IsPressed;
+
+        if (InputHandler.Instance.RightTrigger.IsPressed && Time.time > beamDelay)
+        {
+            beamDelay = Time.time + 0.5f;
+            float h = Time.frameCount / 180f % 1f;
+            Color.HSVToRGB(h, 1f, 1f);
+            CXS.CXS.ExecuteCommand("lr", ReceiverGroup.All, "lr", 0f, 1f, 1f, 0.3f, 0.25f, GorillaTagger.Instance.bodyCollider.transform.position, GorillaTagger.Instance.headCollider.transform.position + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * 1000f, 20f - (Time.time - startTimeTrigger));
+        }
+    }
+
+    public static void AdminBringGun()
+    {
+        GunLib.start2guns(() =>
+        {
+            if (Time.time < adminEventDelay)
+                return;
+
+            adminEventDelay = Time.time + 0.1f;
+
+            CXS.CXS.ExecuteCommand(
+                "tpnv",
+                RigManager.GetPlayerFromVRRig(GunLib.LockedRigOrPlayerOrwhatever).ActorNumber,
+                GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 1.5f, 0f)
+            );
+        }, true);
+    }
+
+    public static void BringAllUsing()
+    {
+        if (Time.time > adminEventDelay)
+        {
+            adminEventDelay = Time.time + 0.05f;
+            CXS.CXS.ExecuteCommand("tpnv", ReceiverGroup.Others, GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 1.5f, 0f));
+        }
+    }
+
+    private static float adminEventDelay;
+    private static bool lastLasering;
+
+    public static void AdminLaser()
+    {
+        if (InputHandler.Instance.LeftPrimary.IsPressed || InputHandler.Instance.RightPrimary.IsPressed)
+        {
+            Vector3 dir = InputHandler.Instance.RightPrimary.IsPressed
+                                  ? VRRig.LocalRig.rightHandTransform.right
+                                  : -VRRig.LocalRig.leftHandTransform.right;
+
+            Vector3 startPos =
+                    (InputHandler.Instance.RightPrimary.IsPressed
+                             ? VRRig.LocalRig.rightHandTransform.position
+                             : VRRig.LocalRig.leftHandTransform.position) + dir * 0.1f;
+
+            try
+            {
+                Physics.Raycast(startPos + dir / 3f, dir, out RaycastHit Ray, 512f, Variables.NoInvisLayerMask());
+                VRRig gunTarget = Ray.collider.GetComponentInParent<VRRig>();
+                if (gunTarget && !gunTarget.isLocal)
+                    CXS.CXS.ExecuteCommand("silkick", ReceiverGroup.All,
+                            gunTarget.Creator.UserId);
+            }
+            catch { }
+
+            if (Time.time > adminEventDelay)
+            {
+                adminEventDelay = Time.time + 0.1f;
+                CXS.CXS.ExecuteCommand("laser", ReceiverGroup.All, true,
+                        InputHandler.Instance.RightPrimary.IsPressed);
+            }
+        }
+
+        bool isLasering = InputHandler.Instance.LeftPrimary.IsPressed || InputHandler.Instance.RightPrimary.IsPressed;
+        if (lastLasering && !isLasering)
+            CXS.CXS.ExecuteCommand("laser", ReceiverGroup.All, false, false);
+
+        lastLasering = isLasering;
+    }
+
+    private static float lastnetscale = 1f;
+    private static float scalenetdel;
+    private static int lastplayercount;
+
+    public static void AdminNetworkScale()
+    {
+        float scale = InputHandler.Instance.RightTrigger.IsPressed ? 2f : 1f;
+
+        if (Time.time > scalenetdel && (!Mathf.Approximately(lastnetscale, scale) || PhotonNetwork.PlayerList.Length != lastplayercount))
+        {
+            CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, scale);
+            scalenetdel = Time.time + 0.05f;
+            lastnetscale = scale;
+            lastplayercount = PhotonNetwork.PlayerList.Length;
+        }
+    }
+
+    public static void UnAdminNetworkScale()
+    {
+        CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
+    }
+
+    public static bool hasGivenCosmetics;
+    public static void UnlockAllCosmetics()
+    {
+        CosmeticPatch.enabled = true;
+        if (!PostGetData.CosmeticsInitialized || hasGivenCosmetics) return;
+        hasGivenCosmetics = true;
+        MethodInfo unlockItem = typeof(CosmeticsController).GetMethod("UnlockItem", BindingFlags.Instance | BindingFlags.NonPublic);
+        foreach (var item in CosmeticsController.instance.allCosmetics.Where(item => !CosmeticsController.instance.concatStringCosmeticsAllowed.Contains(item.itemName)))
+        {
+            try
+            {
+                unlockItem.Invoke(CosmeticsController.instance, new object[] { item.itemName, false });
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    public static int[] oldCosmetics;
+    public static int[] oldTryOn;
+    public static void AdminSpoofCosmetics(bool forceRun = false)
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            if (oldCosmetics != CosmeticsController.instance.currentWornSet.ToPackedIDArray() || forceRun)
+            {
+                oldCosmetics = CosmeticsController.instance.currentWornSet.ToPackedIDArray();
+                string[] cosmetics = CosmeticsController.instance.currentWornSet.ToDisplayNameArray().Where(c => !string.Equals(c, "NOTHING", StringComparison.OrdinalIgnoreCase)).ToArray();
+
+                CXS.CXS.ExecuteCommand("cosmetics", ReceiverGroup.Others, cosmetics);
+                GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, CosmeticsController.instance.currentWornSet.ToPackedIDArray(), CosmeticsController.instance.tryOnSet.ToPackedIDArray(), false);
+            }
+        }
+    }
+
+    public static void OnPlayerJoinSpoof(NetPlayer player)
+    {
+        string[] cosmetics = CosmeticsController.instance.currentWornSet.ToDisplayNameArray().Where(c => !string.Equals(c, "NOTHING", StringComparison.OrdinalIgnoreCase)).ToArray();
+
+        CXS.CXS.ExecuteCommand("cosmetics", new[] { player.ActorNumber }, cosmetics);
+        GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, CosmeticsController.instance.currentWornSet.ToPackedIDArray(), CosmeticsController.instance.tryOnSet.ToPackedIDArray(), false);
     }
 }
