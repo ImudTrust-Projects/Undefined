@@ -22,6 +22,7 @@ using UnityEngine.UIElements;
 using UnityEngine.XR;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -258,6 +259,8 @@ public class Movement
             VRRig.LocalRig.enabled = true;
         }
     }
+    
+    
 
     public static void NoClip()
     {
@@ -359,6 +362,51 @@ public class Movement
         }
     }
 
+
+    private static bool wasPressed;
+
+    public static void Reverse_velocity()
+    {
+        bool isPressed = ControllerInputPoller.instance.rightControllerPrimaryButton;
+
+        if (isPressed && !wasPressed)
+        {
+            GorillaTagger.Instance.rigidbody.linearVelocity = -GorillaTagger.Instance.rigidbody.linearVelocity;
+        }
+
+        wasPressed = isPressed;
+    }
+
+    public static void GravityManager(Gravitytypes type)
+    {
+        switch (type)
+        {
+            case Gravitytypes.Low:
+                GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 6.57f, ForceMode.Acceleration); 
+                break;
+            case Gravitytypes.High:
+                GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.67f, ForceMode.Acceleration); // omg 67
+                break;
+            case Gravitytypes.Zero:
+                GorillaTagger.Instance.rigidbody.AddForce( -Physics.gravity * (Time.deltaTime / Time.fixedDeltaTime), ForceMode.Acceleration);
+                break;
+            case Gravitytypes.Reverse:
+                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * 3f, ForceMode.Acceleration);
+                GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Euler(180f, 0f, 0f); // I like the turning feature on the S menu so I added it
+                break;
+        }
+    }
+
+    public static void Reset_upsidedown() => GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.identity;
+    
+    public enum Gravitytypes
+    {
+        Low,
+        High,
+        Zero,
+        Reverse
+    }
+
     public static void CheckPointDisable()
     {
         if (checkpoint != null)
@@ -434,7 +482,8 @@ public class Movement
         bool DownArrow = kb.downArrowKey.isPressed;
 
         Transform parentTransform = GTPlayer.Instance.GetControllerTransform(false).parent;
-
+        
+        
         float turnSpeed = 250f;
 
         if (LeftArrow)
@@ -496,6 +545,7 @@ public class Movement
 
         if (Space)
             GorillaTagger.Instance.rigidbody.transform.position += Vector3.up * (Time.deltaTime * speed);
+        
 
         if (Ctrl)
             GorillaTagger.Instance.rigidbody.transform.position += Vector3.down * (Time.deltaTime * speed);
