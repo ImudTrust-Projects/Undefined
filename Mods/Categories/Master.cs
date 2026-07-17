@@ -18,11 +18,12 @@ public class Master
         if (!Variables.IsMaster()) return;
 
         GreyZoneManager.Instance.ActivateGreyZoneAuthority();
-
-        GTPlayer.Instance?.SetGravityOverride(
+        
+        // Patched
+        /*GTPlayer.Instance?.SetGravityOverride(
             GreyZoneManager.Instance,
             GreyZoneManager.Instance.GravityOverrideFunction
-        );
+        );*/
     }
 
     public static void DisableGreyScreen()

@@ -37,7 +37,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
 
             new ButtonInfo { buttonText = "Menu", method =() => activeCategory = 2, isTogglable = false},
-            new ButtonInfo { buttonText = "Discord RPC", enableMethod = () => Settings.DiscordRPC = true, disableMethod = () => Settings.DiscordRPC = false, isTogglable = true},
+            new ButtonInfo { buttonText = "Discord RPC Settings", method = () => activeCategory = 12, isTogglable = false},
         },
 
         new ButtonInfo[] { // Menu Settings [2]
@@ -52,6 +52,8 @@ public class ModButtons
             new ButtonInfo { buttonText = "Font", isTogglable = false, isIncremental = true, incrementalDisplayName = "Font", incrementalValues = MENUSETTINGS.Settings.fontOptions, incrementalMethod = MENUSETTINGS.Settings.SetFont, toolTip = "Changes the menu font." },
             new ButtonInfo { buttonText = "Platform Mode", isTogglable = false, isIncremental = true, incrementalDisplayName = "Mode", incrementalValues = Movement.PlatformMode, incrementalMethod = Movement.SetPlatformMode, toolTip = "Changes the platform type." },
         },
+        
+        
 
         new ButtonInfo[] { // Enabled Mods [3]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
@@ -125,7 +127,8 @@ public class ModButtons
             new ButtonInfo { buttonText = "Sound ID", isTogglable = false, isIncremental = true, incrementalDisplayName = "ID", incrementalValues = soundOptions, incrementalMethod = SetSound, toolTip = "Selects the sound ID (1-324)." },
             new ButtonInfo { buttonText = "Sound Spam", method = () => PlaySelectedSound(), isTogglable = true, toolTip = "Spams the selected sound ID." },
             new ButtonInfo { buttonText = "Override Hand Tap Sounds", method = () => Override_HandTap_Sounds(false), disableMethod = () => Override_HandTap_Sounds(true), isTogglable = true, toolTip = "Makes your hand tap sounds the custom sound id" },
-            new ButtonInfo { buttonText = "No Hand Tap Sounds", method = () => No_hand_taps(false), disableMethod = () => No_hand_taps(true), toolTip = "Disables your hand taps"}
+            new ButtonInfo { buttonText = "No Hand Tap Sounds", method = () => No_hand_taps(false), disableMethod = () => No_hand_taps(true), toolTip = "Disables your hand taps"},
+            new ButtonInfo { buttonText = "RGB Monkey Stump", method = () => Fun.RGBMonke(), toolTip = "Makes you RGB"},
         },
 
         new ButtonInfo[] { // Visual Mods [7]
@@ -172,6 +175,14 @@ public class ModButtons
             new ButtonInfo { buttonText = "Stutter Master Client", method = () => StutterMaster(), toolTip = "Stutters Master Client"},
             new ButtonInfo { buttonText = "Destroy All", method = () => DestroyAll(), isTogglable = false, toolTip = "Destroys everyone"},
         },
+        
+        
+        new ButtonInfo[] { // Discord RPC settings 12
+            new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+            
+            new ButtonInfo { buttonText = "Enable RPC", enableMethod =() => Settings.DiscordRPC = true, disableMethod =() => Settings.DiscordRPC = false, toolTip = "Enables the Discord RPC."},
+        },
+        
 
         new ButtonInfo[] { // Admin
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false, categoryName = "Admin"},

@@ -3,6 +3,7 @@ using System;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading.Tasks;
+using CXS;
 using Photon.Pun;
 using UnityEngine;
 
@@ -12,15 +13,15 @@ public class DiscordPresence : MonoBehaviour
 {
     private const string ClientId = "1527431390130475129";
     private const string LargeImageKey = "undefined_logo";
-    private static string Currentroom;
-    private static string Playersinlobby;
+    private string Currentroom;
+    private string Playersinlobby;
 
     public static DiscordPresence Instance;
 
     private NamedPipeClientStream pipe;
     private bool connected;
     private float retryTimer = 15f;
-    private long startTimestamp;
+    private static long startTimestamp;
 
     private string details = "Undefined Menu";
     private string state = "In room: Just joined";
@@ -30,6 +31,8 @@ public class DiscordPresence : MonoBehaviour
         Instance = this;
         startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
+
+    
 
     private void Update()
     {
