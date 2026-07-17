@@ -46,6 +46,7 @@ public class SoundMods
                         }
                     }
                 }
+                Utilities.Variables.RPCProtection();
             }
             else
             {
@@ -68,6 +69,7 @@ public class SoundMods
                         }
                     }
                 }
+                Utilities.Variables.RPCProtection();
             }
         }
         

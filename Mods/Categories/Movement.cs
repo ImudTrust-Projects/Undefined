@@ -219,6 +219,45 @@ public class Movement
         GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
         Noclipistuff(false);
     }
+    
+    private static bool Ghost_Toggled = false;
+    private static bool ghost_wasPressed = false;
+
+    public static void GhostMonke()
+    {
+        bool isPressed = ControllerInputPoller.instance.rightControllerSecondaryButton;
+
+        if (isPressed && !ghost_wasPressed)
+        {
+            Ghost_Toggled = !Ghost_Toggled;
+            VRRig.LocalRig.enabled = !Ghost_Toggled;
+        }
+
+        ghost_wasPressed = isPressed;
+    }
+
+    private static bool Invis_Toggled = false;
+    private static bool invis_wasPressed = false;
+
+    public static void InvisMonke()
+    {
+        bool isPressed = ControllerInputPoller.instance.rightControllerPrimaryButton;
+
+        if (isPressed && !invis_wasPressed)
+            Invis_Toggled = !Invis_Toggled;
+
+        invis_wasPressed = isPressed;
+
+        if (Invis_Toggled)
+        {
+            VRRig.LocalRig.enabled = false;
+            VRRig.LocalRig.transform.position = new Vector3(0f, -100f, 0f);
+        }
+        else
+        {
+            VRRig.LocalRig.enabled = true;
+        }
+    }
 
     public static void NoClip()
     {
@@ -229,7 +268,6 @@ public class Movement
         {
             collider.enabled = !DisableColliders;
         }
-
     }
 
     public static void Bouncy()

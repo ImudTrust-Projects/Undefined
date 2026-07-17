@@ -36,6 +36,7 @@ public class ModButtons
         new ButtonInfo[] { // Settings [1]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
             new ButtonInfo { buttonText = "Menu", method =() => activeCategory = 2, isTogglable = false},
+            new ButtonInfo { buttonText = "Discord RPC", enableMethod = () => Settings.DiscordRPC = true, disableMethod = () => Settings.DiscordRPC = false, isTogglable = true},
         },
 
         new ButtonInfo[] { // Menu Settings [2]
@@ -77,6 +78,8 @@ public class ModButtons
 
             new ButtonInfo { buttonText = "PlatForms", method =() => Movement.Platforms(), disableMethod =() => Movement.PlatformDisable(), isTogglable = true, toolTip = "You can fly."},
             new ButtonInfo { buttonText = "Fly", method =() => Movement.Fly(), isTogglable = true, toolTip = "You can fly."},
+            new ButtonInfo { buttonText = "Ghost Monkey", method =() => Movement.GhostMonke(), isTogglable = true, toolTip = "Makes you ghost monkey"},
+            new ButtonInfo { buttonText = "Invis Monkey", method =() => Movement.InvisMonke(), isTogglable = true, toolTip = "Makes you invis monkey"},
             new ButtonInfo { buttonText = "Bark Fly", method =() => Movement.BarkFly(), isTogglable = true, toolTip = "You can fly like the og bark fly."},
             new ButtonInfo { buttonText = "CheckPoint", method =() => Movement.CheckPoint(), disableMethod =() => Movement.CheckPointDisable(), isTogglable = true, toolTip = "You can fly."},
             new ButtonInfo { buttonText = "NoClip", method =() => Movement.NoClip(), isTogglable = true, toolTip = "You can go through Objects by holding right trigger."},
@@ -115,7 +118,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Sound ID", isTogglable = false, isIncremental = true, incrementalDisplayName = "ID", incrementalValues = soundOptions, incrementalMethod = SetSound, toolTip = "Selects the sound ID (1-324)." },
             new ButtonInfo { buttonText = "Sound Spam", method = () => PlaySelectedSound(), isTogglable = true, toolTip = "Spams the selected sound ID." },
             new ButtonInfo { buttonText = "Override Hand Tap Sounds", method = () => Override_HandTap_Sounds(false), disableMethod = () => Override_HandTap_Sounds(true), isTogglable = true, toolTip = "Makes your hand tap sounds the custom sound id" },
-            new ButtonInfo { buttonText = "No Hand Taps", method = () => No_hand_taps(false), disableMethod = () => No_hand_taps(true), toolTip = "Disables your hand taps"}
+            new ButtonInfo { buttonText = "No Hand Tap Sounds", method = () => No_hand_taps(false), disableMethod = () => No_hand_taps(true), toolTip = "Disables your hand taps"}
         },
 
         new ButtonInfo[] { // Visual Mods [7]

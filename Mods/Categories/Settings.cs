@@ -8,7 +8,7 @@ namespace Undefined.Mods.Categories;
 public class Settings
 {
     public static string currentButtonSound = "click3";
-
+    public static bool DiscordRPC = false;
     public static string currentMenuOpenSound = "Open";
     public static string currentMenuCloseSound = "Close";
 

@@ -101,6 +101,6 @@ public class Room
                     $"Copied ID: {id}"
                 );
             }
-        }, false);
+        }, true);
     }
 }

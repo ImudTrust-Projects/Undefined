@@ -48,6 +48,8 @@ public class Fun
 
     public static void Get_Bracelet(bool Enable, bool isleft)
     {
+        if (!NetworkSystem.Instance.IsMasterClient) { return; }
+        
         if (Enable)
         {
             GorillaTagger.Instance.myVRRig.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, true, isleft);

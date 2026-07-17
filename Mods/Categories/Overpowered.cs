@@ -132,10 +132,12 @@ public class Overpowered
                 if (ControllerInputPoller.instance.rightGrab)
                 {
                     GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, GorillaTagger.Instance.rightHandTransform.position, GorillaTagger.Instance.rightHandTransform.rotation, 100f, 100f, true, false);
+                    Variables.RPCProtection();
                 }
                 if (ControllerInputPoller.instance.leftGrab)
                 {
                     GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, GorillaTagger.Instance.leftHandTransform.position, GorillaTagger.Instance.leftHandTransform.rotation, 100f, 100f, true, false);
+                    Variables.RPCProtection();
                 }
             }
         }
@@ -153,6 +155,7 @@ public class Overpowered
                 {
                     waterdelay = Time.time + 0.3f;
                     GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, LockedRigOrPlayerOrwhatever.transform.position, LockedRigOrPlayerOrwhatever.transform.rotation, 100f, 100f, true, false);
+                    Variables.RPCProtection();
                 }
             }
         }, true);
@@ -171,6 +174,7 @@ public class Overpowered
                 whackamole.RPC("WhackAMoleButtonPressed", RpcTarget.MasterClient, null);
             }
         }
+        Variables.RPCProtection();
     }
     
     
