@@ -35,12 +35,14 @@ public class ModButtons
 
         new ButtonInfo[] { // Settings [1]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+
             new ButtonInfo { buttonText = "Menu", method =() => activeCategory = 2, isTogglable = false},
             new ButtonInfo { buttonText = "Discord RPC", enableMethod = () => Settings.DiscordRPC = true, disableMethod = () => Settings.DiscordRPC = false, isTogglable = true},
         },
 
         new ButtonInfo[] { // Menu Settings [2]
             new ButtonInfo { buttonText = "Return to Settings", method =() => activeCategory = 1, isTogglable = false},
+
             new ButtonInfo { buttonText = "Right Hand", enableMethod =() => rightHanded = true, disableMethod =() => rightHanded = false, toolTip = "Puts the menu on your right hand."},
             //new ButtonInfo { buttonText = "FPS Counter", enableMethod =() => fpsCounter = true, disableMethod =() => fpsCounter = false, enabled = fpsCounter, toolTip = "Toggles the FPS counter."},
             new ButtonInfo { buttonText = "Disconnect Button", enableMethod =() => disconnectButton = true, disableMethod =() => disconnectButton = false, enabled = disconnectButton, toolTip = "Toggles the disconnect button."},
@@ -161,6 +163,7 @@ public class ModButtons
 
         new ButtonInfo[] { // Overpowered Mods [11]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+
             new ButtonInfo { buttonText = "Stutter Master Client", method = () => StutterMaster(), toolTip = "Stutters Master Client"},
             new ButtonInfo { buttonText = "Destroy All", method = () => DestroyAll(), isTogglable = false, toolTip = "Destroys everyone"},
         },

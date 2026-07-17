@@ -55,6 +55,7 @@ public class Plugin : BaseUnityPlugin
         ComponentHolder.AddComponent<NotificationLib>();
         ComponentHolder.AddComponent<RoomNotifications>();
         ComponentHolder.AddComponent<DiscordPresence>();
+        ComponentHolder.AddComponent<SearchAndKeyboard>();
 
         Variables.LoadEmbeddedBackground("Undefined.Resources.Embedded.icon.png");
 

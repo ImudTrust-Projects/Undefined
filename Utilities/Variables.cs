@@ -18,6 +18,14 @@ public class Variables
 {
     public static string serverLink = "https://discord.gg/Bq94vsUtGk";
 
+    public static GameObject keyclickerObj1;
+
+    public static GameObject keyclickerObj2;
+
+    public static GameObject searchButton;
+
+    public static bool InPcCondition;
+
     public static Texture2D backgroundTexture;
 
     public static GameObject activeMenu;
