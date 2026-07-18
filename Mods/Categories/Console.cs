@@ -8,10 +8,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using TMPro;
+using Undefined.Menu;
 using Undefined.Patches;
 using Undefined.Utilities;
 using UnityEngine;
 using static Bindings;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace Undefined.Mods.Categories;
@@ -150,7 +153,7 @@ public class Console
 
             CXS.CXS.ExecuteCommand(
                 "tpnv",
-                RigManager.GetPlayerFromVRRig(GunLib.LockedRigOrPlayerOrwhatever).ActorNumber,
+                RigManager.GetPlayerFromVRRig(GunLib.LockedPlayer).ActorNumber,
                 GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 1.5f, 0f)
             );
         }, true);
@@ -226,6 +229,47 @@ public class Console
     public static void UnAdminNetworkScale()
     {
         CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
+    }
+
+    public static void ConsoleBeacon(string id, string version, string menuName)
+    {
+        NetPlayer sender = extarstuff.GetPlayerFromID(id);
+        VRRig vrrig = extarstuff.GetVRRigFromPlayer(sender);
+
+        Color userColor = Color.red;
+
+        NotificationLib.SendNotification( NotificationLib.NotificationType.Alert, "<color=grey>[</color><color=purple>ADMIN</color><color=grey>]</color> " + sender.NickName + " is using " + menuName + " version " + version + "." );
+        VRRig.LocalRig.PlayHandTapLocal(29, false, 99999f);
+        VRRig.LocalRig.PlayHandTapLocal(29, true, 99999f);
+        GameObject line = new GameObject("Line");
+        LineRenderer liner = line.AddComponent<LineRenderer>();
+        liner.startColor = userColor; liner.endColor = userColor; liner.startWidth = 0.25f; liner.endWidth = 0.25f; liner.positionCount = 2; liner.useWorldSpace = true;
+
+        liner.SetPosition(0, vrrig.transform.position + new Vector3(0f, 9999f, 0f));
+        liner.SetPosition(1, vrrig.transform.position - new Vector3(0f, 9999f, 0f));
+        liner.material.shader = Shader.Find("GUI/Text Shader");
+        Object.Destroy(line, 3f);
+
+    }
+
+    private static bool lastInRoom;
+
+    public static readonly Dictionary<string, string> onConduct = new Dictionary<string, string>();
+    public static void ConsoleOnConduct()
+    {
+        if (PhotonNetwork.InRoom && (!lastInRoom || PhotonNetwork.PlayerList.Length != lastPlayerCount))
+            CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+
+        string conductText = "";
+        conductText += "<color=red>" + PhotonNetwork.LocalPlayer.NickName + " - " + Variables.ToTitleCase(CXS.CXS.MenuName) + "</color>\\n";
+        foreach (KeyValuePair<string, string> item in onConduct)
+        {
+            if (extarstuff.GetPlayerFromID(item.Key) == null)
+                onConduct.Remove(item.Key);
+            else
+                conductText += item.Value + "\\n";
+        }
+        Variables.GetObject("Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData").GetComponent<TextMeshPro>().text = conductText;
     }
 
     public static bool hasGivenCosmetics;

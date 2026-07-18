@@ -602,4 +602,152 @@ public class ConsoleAssets
         CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, videoplayerId);
 
     #endregion
+
+    #region NoliStar
+
+    private static int noliStarId = -1;
+    private static int noliMusicId = -1;
+    private static float updatedTimeDelay;
+    private static float respawnTime;
+    private static bool holdingTrigger;
+    private static Vector3 throwDirection;
+    private static Vector3 networkedPosition;
+    private static Quaternion networkedRotation;
+    private static NoliStarState noliStarState = NoliStarState.Default;
+
+    private enum NoliStarState
+    {
+        Default,
+        Throwing,
+        Respawning
+    }
+
+    public static void Star()
+    {
+        if (noliStarId >= 0)
+            return;
+
+        if (ControllerInputPoller.instance.rightGrab)
+        {
+            SpawnStar(true);
+        }
+        else if (ControllerInputPoller.instance.leftGrab)
+        {
+            SpawnStar(false);
+        }
+    }
+
+    public static void NoStar()
+    {
+        if (noliStarId >= 0)
+        {
+            CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, noliStarId);
+            noliStarId = -1;
+        }
+        if (noliMusicId >= 0)
+        {
+            CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, noliMusicId);
+            noliMusicId = -1;
+        }
+    }
+
+    private static void SpawnStar(bool isRight)
+    {
+        if (noliStarId < 0)
+        {
+            noliStarId = CXS.CXS.GetFreeAssetID();
+            CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "console.main1", "Star", noliStarId);
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliStarId, "Model", "StarSpawn");
+
+            noliMusicId = CXS.CXS.GetFreeAssetID();
+            CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "console.main1", "RangedMusic", noliMusicId);
+            CXS.CXS.ExecuteCommand("asset-setanchor", ReceiverGroup.All, noliMusicId, 0);
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliMusicId, "Level1", "NoliLevel1");
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliMusicId, "Level2", "NoliLevel2");
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliMusicId, "Level3", "NoliLevel3");
+            Variables.RPCProtection();
+        }
+
+        if (!CXS.CXS.CXSAssets.ContainsKey(noliStarId))
+            return;
+
+        GameObject star = CXS.CXS.CXSAssets[noliStarId].assetObject;
+        Transform handTransform = isRight ? GorillaTagger.Instance.rightHandTransform : GorillaTagger.Instance.leftHandTransform;
+        float controllerIndex = isRight ? ControllerInputPoller.instance.rightControllerIndexFloat : ControllerInputPoller.instance.leftControllerIndexFloat;
+
+        if (controllerIndex > 0.5f && noliStarState == NoliStarState.Default)
+        {
+            Physics.Raycast(GorillaTagger.Instance.headCollider.transform.position, GorillaTagger.Instance.headCollider.transform.forward, out var RayPoint, 512f, GorillaLocomotion.GTPlayer.Instance.locomotionEnabledLayers);
+            GameObject Crosshair = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Crosshair.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+            Crosshair.transform.position = RayPoint.point == Vector3.zero ? (RayPoint.transform.position + (RayPoint.transform.forward * 20f)) : RayPoint.point;
+            Crosshair.GetComponent<Renderer>().material.color = Color.white;
+            UnityEngine.Object.Destroy(Crosshair, Time.deltaTime);
+            UnityEngine.Object.Destroy(Crosshair.GetComponent<Collider>());
+        }
+
+        if (controllerIndex < 0.5f && holdingTrigger && noliStarState == NoliStarState.Default)
+        {
+            noliStarState = NoliStarState.Throwing;
+            CXS.CXS.ExecuteCommand("asset-playanimation", ReceiverGroup.All, noliStarId, "Model", "Throw");
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliStarId, "Model", "ThrowStar");
+            Physics.Raycast(GorillaTagger.Instance.headCollider.transform.position, GorillaTagger.Instance.headCollider.transform.forward, out var RayPoint, 512f, GorillaLocomotion.GTPlayer.Instance.locomotionEnabledLayers);
+            throwDirection = (RayPoint.point - star.transform.position).normalized;
+        }
+
+        holdingTrigger = controllerIndex > 0.5f;
+
+        switch (noliStarState)
+        {
+            case NoliStarState.Default:
+                star.transform.position = handTransform.position + (Vector3.up * 0.2f);
+                star.transform.rotation = Quaternion.Euler(Time.time * 32f, Time.time * 10f, Time.time * 47f);
+                break;
+            case NoliStarState.Throwing:
+                Physics.Raycast(star.transform.position, throwDirection, out var RayPoint, 0.5f, GorillaLocomotion.GTPlayer.Instance.locomotionEnabledLayers);
+                if (RayPoint.point == Vector3.zero)
+                {
+                    star.transform.position += throwDirection * (Time.deltaTime * 15f);
+                    star.transform.rotation = Quaternion.Euler(Time.time * 239f, Time.time * 201f, Time.time * 170f);
+                }
+                else
+                {
+                    CXS.CXS.ExecuteCommand("asset-playanimation", ReceiverGroup.All, noliStarId, "Model", "Explode");
+                    bool kill = false;
+                    foreach (VRRig rig in VRRigCache.ActiveRigs)
+                    {
+                        if (rig.isLocal || rig == extarstuff.GhostRig)
+                            continue;
+                        if (Vector3.Distance(star.transform.position, rig.transform.position) < 2.32775f)
+                        {
+                            CXS.CXS.ExecuteCommand("silkick", ReceiverGroup.All, RigManager.GetPlayerFromVRRig(rig).UserId);
+                            kill = true;
+                        }
+                    }
+                    CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliStarId, "Model", kill ? "KillStar" : "BreakStar");
+                    noliStarState = NoliStarState.Respawning;
+                    respawnTime = Time.time + 3f;
+                }
+                break;
+            case NoliStarState.Respawning:
+                if (Time.time > respawnTime)
+                {
+                    CXS.CXS.ExecuteCommand("asset-playanimation", ReceiverGroup.All, noliStarId, "Model", "Default");
+                    CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, noliStarId, "Model", "StarSpawn");
+                    noliStarState = NoliStarState.Default;
+                }
+                break;
+        }
+
+        if (Time.time > updatedTimeDelay && (networkedRotation != star.transform.rotation || networkedPosition != star.transform.position))
+        {
+            updatedTimeDelay = Time.time + 0.05f;
+            networkedPosition = star.transform.position;
+            networkedRotation = star.transform.rotation;
+            CXS.CXS.ExecuteCommand("asset-setposition", ReceiverGroup.All, noliStarId, star.transform.position);
+            CXS.CXS.ExecuteCommand("asset-setrotation", ReceiverGroup.All, noliStarId, star.transform.rotation);
+        }
+    }
+
+    #endregion
 }

@@ -3,6 +3,7 @@ using Photon.Pun;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -219,6 +220,39 @@ public class Variables
             backgroundTexture = null;
         }
     }
+
+    public static string ToTitleCase(string text) =>
+    CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+
+    private static readonly Dictionary<string, GameObject> objectPool = new Dictionary<string, GameObject>();
+    public static GameObject GetObject(string find)
+    {
+        if (objectPool.TryGetValue(find, out GameObject go))
+            return go;
+
+        GameObject tgo = GameObject.Find(find);
+        if (!tgo && find.Contains("/"))
+        {
+            var split = find.Split('/');
+            var rootName = split[0];
+
+            var root = GameObject.Find(rootName);
+
+            if (root != null)
+            {
+                var path = find[(rootName.Length + 1)..];
+                var tr = root.transform.Find(path);
+
+                if (tr != null)
+                    tgo = tr.gameObject;
+            }
+        }
+        if (tgo != null)
+            objectPool.Add(find, tgo);
+
+        return tgo;
+    }
+
 }
 
 

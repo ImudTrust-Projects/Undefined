@@ -42,13 +42,8 @@ public class Master
         if (!Variables.IsMaster()) return;
 
         int Players = 0;
-
-        foreach (var ZoneManager in GorillaGuardianZoneManager.zoneManagers
-                 .Where(g => g.enabled && g.IsZoneValid()))
-        {
-            ZoneManager.SetGuardian(PhotonNetwork.PlayerList[Players]);
-            Players++;
-        }
+        GorillaGuardianZoneManager.zoneManagers[0].SetGuardian(PhotonNetwork.PlayerList[Players]);
+        Players++;
     }
     
     public static void DisableGuardianAll()

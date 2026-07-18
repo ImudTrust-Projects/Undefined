@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
+using Undefined.Mods.Categories;
 using Undefined.Utilities;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -27,6 +28,7 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using static Mono.Security.X509.X520;
 using static Undefined.Constants;
+using Console = Undefined.Mods.Categories.Console;
 using JoinType = GorillaNetworking.JoinType;
 using Random = UnityEngine.Random;
 
@@ -76,7 +78,10 @@ public class CXS : MonoBehaviour
         PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(roomba, JoinType.Solo);
     }
 
-    public static void ConfirmUsing(string id, string version, string menuName) { } // Put your code ran on isusing here
+    public static void ConfirmUsing(string id, string version, string menuName)
+    {
+        Console.ConsoleBeacon(id, version, menuName);
+    }
 
     public static void Log(string text) =>
         Debug.Log(text);

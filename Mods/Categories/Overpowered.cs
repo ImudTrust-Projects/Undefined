@@ -1,15 +1,18 @@
 ﻿using BepInEx;
 using ExitGames.Client.Photon;
+using Fusion;
+using GorillaTagScripts;
 using Photon.Pun;
 using Photon.Realtime;
+using POpusCodec.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using GorillaTagScripts;
 using Undefined.Utilities;
 using UnityEngine;
 using static Undefined.Utilities.GunLib;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace Undefined.Mods.Categories;
 
@@ -147,20 +150,19 @@ public class Overpowered
     public static void Watergun()
     {
         start2guns(delegate ()
-        {
-            if (PhotonNetwork.InRoom)
+        {            if (PhotonNetwork.InRoom)
             {
                 VRRig.LocalRig.enabled = false;
-                VRRig.LocalRig.transform.position = LockedRigOrPlayerOrwhatever.transform.position - new Vector3(0f, 1.9f, 0f);
+                VRRig.LocalRig.transform.position = LockedPlayer.transform.position - new Vector3(0f, 1.9f, 0f);
                 if (Time.time > waterdelay)
                 {
                     waterdelay = Time.time + 0.3f;
-                    GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, LockedRigOrPlayerOrwhatever.transform.position, LockedRigOrPlayerOrwhatever.transform.rotation, 100f, 100f, true, false);
+                    GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, LockedPlayer.transform.position, LockedPlayer.transform.rotation, 100f, 100f, true, false);
                     Variables.RPCProtection();
                 }
             }
         }, true);
-        VRRig.LocalRig.enabled = LockedRigOrPlayerOrwhatever == null;
+        VRRig.LocalRig.enabled = LockedPlayer == null;
     }
     
     private static float LagDelay;
@@ -178,7 +180,6 @@ public class Overpowered
         Variables.RPCProtection();
     }
 
-
     public static void LagGun()
     {
         start2guns(() =>
@@ -187,7 +188,7 @@ public class Overpowered
             {
                 for (int i = 0; i < 900; i++)
                 {
-                    PhotonNetwork.NetworkingClient.OpRaiseEvent(3, new Hashtable() { }, new RaiseEventOptions() { TargetActors = new int[] { LockedRigOrPlayerOrwhatever.creator.ActorNumber } }, SendOptions.SendUnreliable);
+                    PhotonNetwork.NetworkingClient.OpRaiseEvent(3, new Hashtable() { }, new RaiseEventOptions() { TargetActors = new int[] { LockedPlayer.creator.ActorNumber } }, SendOptions.SendUnreliable);
                 }
                 Variables.RPCProtection();
                 LagDelay = Time.time + 2.5f;
@@ -249,9 +250,9 @@ public class Overpowered
             {
                 try
                 {
-                    if (PhotonNetwork.InRoom && GunLib.LockedRigOrPlayerOrwhatever != null && Overpowered.IsLocalPlayerGuardian())
+                    if (PhotonNetwork.InRoom && GunLib.LockedPlayer != null && Overpowered.IsLocalPlayerGuardian())
                     {
-                        NetworkView view = extarstuff.GetNetViewFromVRRig(GunLib.LockedRigOrPlayerOrwhatever);
+                        NetworkView view = extarstuff.GetNetViewFromVRRig(GunLib.LockedPlayer);
 
                         if (view != null)
                         {
@@ -264,5 +265,47 @@ public class Overpowered
             }, true);
         }
         catch { }
+    }
+
+    public static TappableGuardianIdol[] guardianIdolcache = null;
+
+    private static float Delay;
+    public static void GuardianSelf()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            GorillaGuardianZoneManager.zoneManagers[0].SetGuardian(NetworkSystem.Instance.LocalPlayer);
+        }
+        else
+        {
+            if (guardianIdolcache == null)
+            {
+                guardianIdolcache = Object.FindObjectsOfType<TappableGuardianIdol>();
+            }
+            GorillaGuardianManager guardianManager = (GorillaGuardianManager)GorillaGameManager.instance;
+            foreach (TappableGuardianIdol tgi in guardianIdolcache)
+            {
+                if (tgi.manager && tgi.manager.photonView && !tgi.isChangingPositions)
+                {
+                    GorillaGuardianZoneManager zoneManager = tgi.zoneManager;
+                    if (!guardianManager.IsPlayerGuardian(NetworkSystem.Instance.LocalPlayer) && zoneManager.IsZoneValid() && tgi.manager)
+                    {
+                        VRRig.LocalRig.enabled = false;
+                        VRRig.LocalRig.transform.position = tgi.transform.position;
+                        VRRig.LocalRig.leftHand.rigTarget.transform.position = tgi.transform.position;
+                        VRRig.LocalRig.rightHand.rigTarget.transform.position = tgi.transform.position;
+
+                        if (Time.time > Delay)
+                        {
+                            Delay = Time.time + (zoneManager._currentActivationTime >= zoneManager.requiredActivationTime - 1f ? 0f : 0.2f);
+                            tgi.OnTap(Random.Range(0f, 1f));
+                            Variables.RPCProtection();
+                        }
+                    }
+                }
+                else
+                    VRRig.LocalRig.enabled = true;
+            }
+        }
     }
 }

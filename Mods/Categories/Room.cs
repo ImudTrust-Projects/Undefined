@@ -89,7 +89,7 @@ public class Room
     {
         GunLib.start2guns(() =>
         {
-            var targetedPlayer = GunLib.LockedRigOrPlayerOrwhatever;
+            var targetedPlayer = GunLib.LockedPlayer;
 
             if (targetedPlayer != null)
             {

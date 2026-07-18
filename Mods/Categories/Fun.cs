@@ -48,8 +48,6 @@ public class Fun
 
     public static void Get_Bracelet(bool Enable, bool isleft)
     {
-        if (!NetworkSystem.Instance.IsMasterClient) { return; }
-        
         if (Enable)
         {
             GorillaTagger.Instance.myVRRig.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, true, isleft);
@@ -59,6 +57,13 @@ public class Fun
         {
             GorillaTagger.Instance.myVRRig.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, false, isleft);
         }
+    }
+
+    public static void FakeBodyTracking()
+    {
+        GorillaTagger.Instance.offlineVRRig.transform.rotation = Camera.main.transform.rotation;
+        GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.position = Variables.playerInstance.LeftHand.handFollower.transform.position;
+        GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.position = Variables.playerInstance.RightHand.handFollower.transform.position;
     }
 
     public static void RGBMonke()
@@ -72,22 +77,29 @@ public class Fun
 
     public static void Rainbowhoverboard()
     {
-        if (VRRig.LocalRig.hoverboardVisual.IsHeld)
+        if (Hoverboard_Stuff.IsHeld)
         {
             float time = Time.time * 1.8f;
-
-            float R = Mathf.Sin(time) * 0.5f + 0.5f;
-            float G = Mathf.Sin(time + 2f * Mathf.PI / 3f) * 0.5f + 0.5f;
-            float B = Mathf.Sin(time + 4f * Mathf.PI / 3f) * 0.5f + 0.5f;
-
+            var R = Mathf.Sin(time) * 0.5f + 0.5f;
+            var G = Mathf.Sin(time + 2f * Mathf.PI / 3f) * 0.5f + 0.5f;
+            var B = Mathf.Sin(time + 4f * Mathf.PI / 3f) * 0.5f + 0.5f;
             Color RGB = new Color(R, G, B);
-
-            VRRig.LocalRig.hoverboardVisual.SetIsHeld(
-                VRRig.LocalRig.hoverboardVisual.IsLeftHanded,
-                VRRig.LocalRig.hoverboardVisual.NominalLocalPosition,
-                VRRig.LocalRig.hoverboardVisual.NominalLocalRotation,
-                RGB
-            );
+            VRRig.LocalRig.hoverboardVisual.SetIsHeld(Hoverboard_Stuff.Hand, Hoverboard_Stuff.HandPosition, Hoverboard_Stuff.HandRotation, RGB);
         }
     }
+
+    public static void Colorhoverboard(Color color)
+    {
+        if (!Hoverboard_Stuff.IsHeld) return;
+
+        VRRig.LocalRig.hoverboardVisual.SetIsHeld(Hoverboard_Stuff.Hand, Hoverboard_Stuff.HandPosition, Hoverboard_Stuff.HandRotation, color);
+    }
+}
+
+public struct Hoverboard_Stuff
+{
+    public static bool Hand = VRRig.LocalRig.hoverboardVisual.IsLeftHanded;
+    public static Vector3 HandPosition = VRRig.LocalRig.hoverboardVisual.NominalLocalPosition;
+    public static Quaternion HandRotation = VRRig.LocalRig.hoverboardVisual.NominalLocalRotation;
+    public static bool IsHeld = VRRig.LocalRig.hoverboardVisual.IsHeld;
 }

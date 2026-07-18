@@ -259,12 +259,10 @@ public class Movement
             VRRig.LocalRig.enabled = true;
         }
     }
-    
-    
 
     public static void NoClip()
     {
-        bool DisableColliders = InputHandler.Instance.RightPrimary.IsPressed;
+        bool DisableColliders = InputHandler.Instance.RightTrigger.IsPressed;
         MeshCollider[] colliders = Resources.FindObjectsOfTypeAll<MeshCollider>();
 
         foreach (MeshCollider collider in colliders)
@@ -350,6 +348,7 @@ public class Movement
         {
             if (InputHandler.Instance.RightPrimary.WasPressed)
             {
+                Noclipistuff(true);
                 checkpoint.GetComponent<Renderer>().material.color = Color.gray;
 
                 Variables.TeleportPlayer(checkpoint.transform.position);
@@ -358,6 +357,7 @@ public class Movement
             else
             {
                 checkpoint.GetComponent<Renderer>().material.color = Color.navyBlue;
+                Noclipistuff(false);
             }
         }
     }

@@ -111,6 +111,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Quest Score 67", method =() => Fun.SetQuestScore(67), isTogglable = false, toolTip = "Sets ur Quest Score to 67."},
             new ButtonInfo { buttonText = "Quest Score 420", method =() => Fun.SetQuestScore(420), isTogglable = false, toolTip = "Sets ur Quest Score to 420."},
             new ButtonInfo { buttonText = "Quest Score Max", method =() => Fun.SetQuestScore(999999999), isTogglable = false, toolTip = "Sets ur Quest Score to the max."},
+            new ButtonInfo { buttonText = "Fake Body Tracking", method =() => Fun.FakeBodyTracking(), isTogglable = true, toolTip = "Make it look like u have full body tracking."},
             new ButtonInfo { buttonText = "Bracelet", enableMethod = () => Fun.Get_Bracelet(true, true), disableMethod = () => Fun.Get_Bracelet(false, true) , isTogglable = true},
             new ButtonInfo { buttonText = "Water Splash Gun", method = () => Watergun(), disableMethod = () => VRRig.LocalRig.enabled = true, toolTip = "Splashes water on whoever you put the gun on"},
             new ButtonInfo { buttonText = "Water Splash", method = () => Watersplash(), toolTip = "Splashes water on your left or right hand"},
@@ -181,6 +182,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Lag All", method = () => LagAll(), isTogglable = true, toolTip = "Lags everyone in the lobby."},
             new ButtonInfo { buttonText = "Lag On Touch", method = () => LagOnTouch(), isTogglable = true, toolTip = "Lags the person that touches you."},
             new ButtonInfo { buttonText = "Fling Gun", method = () => FlingGun(), isTogglable = true, toolTip = "Flings the person you point the gun at."},
+            new ButtonInfo { buttonText = "Guardian Self", method = () => GuardianSelf(), isTogglable = true, toolTip = "Makes ur self Guardian."},
         },
         
         
@@ -202,6 +204,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Admin Fractals", method =() => Console.AdminFractals(), isTogglable = true},
             new ButtonInfo { buttonText = "Admin Bring Gun", method =() => Console.AdminBringGun(), isTogglable = true},
             new ButtonInfo { buttonText = "Admin Bring All", method =() => Console.BringAllUsing(), isTogglable = true},
+            //new ButtonInfo { buttonText = "Admin Beacon", method =() => Console.ConsoleBeacon(), isTogglable = true},
             new ButtonInfo { buttonText = "Admin Fake Cosmetics", overlapText = "Admin Spoof Cosmetics", method =() => Console.AdminSpoofCosmetics(), enableMethod =() => { NetworkSystem.Instance.OnPlayerJoined += Console.OnPlayerJoinSpoof; Console.AdminSpoofCosmetics(true); }, disableMethod =() => { NetworkSystem.Instance.OnPlayerJoined -= Console.OnPlayerJoinSpoof; Console.oldCosmetics = null; }, toolTip = "Makes everyone using the menu see whatever cosmetics you have on as if you owned them."},
         },
 
@@ -211,6 +214,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "Rainbow Sword", enableMethod =() => ConsoleAssets.spawnRainbowSword(), method =() => ConsoleAssets.UpdateRainbowSword(), disableMethod =() => ConsoleAssets.destroyRainbowSword(), isTogglable = true},
             new ButtonInfo { buttonText = "Ban Hammer", enableMethod =() => ConsoleAssets.spawnBanHammer(), method =() => ConsoleAssets.UpdateBanHammer(), disableMethod =() => ConsoleAssets.destroyBanHammer(), isTogglable = true},
             new ButtonInfo { buttonText = "Roblox Sword", enableMethod =() => ConsoleAssets.spawnRobloxSword(), method =() => ConsoleAssets.UpdateRobloxSword(), disableMethod =() => ConsoleAssets.destroyRobloxSword(), isTogglable = true},
+            new ButtonInfo { buttonText = "Noli Star", method =() => ConsoleAssets.Star(), disableMethod =() => ConsoleAssets.NoStar(), isTogglable = true},
             new ButtonInfo { buttonText = "Battle Arena", enableMethod =() => ConsoleAssets.spawnBattleArena(), disableMethod =() => ConsoleAssets.destroyBattleArena(), isTogglable = true},
             new ButtonInfo { buttonText = "Video Player", enableMethod =() => ConsoleAssets.VideoPlayer(), disableMethod =() => ConsoleAssets.destroyVideoPlayer(), isTogglable = true},
             new ButtonInfo { buttonText = "Pistol", enableMethod =() => ConsoleAssets.spawnPistol(), method =() => ConsoleAssets.UpdatePistol(), disableMethod =() => ConsoleAssets.destroyPistol(), isTogglable = true},

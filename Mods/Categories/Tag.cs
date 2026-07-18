@@ -15,8 +15,8 @@ public class Tag
         GunLib.start2guns(delegate ()
         {
             rig.enabled = false;
-            rig.transform.position = GunLib.LockedRigOrPlayerOrwhatever.transform.position + new Vector3(0f, -2f, 0f);
-            GameMode.ReportTag(GunLib.LockedRigOrPlayerOrwhatever.Creator);
+            rig.transform.position = GunLib.LockedPlayer.transform.position + new Vector3(0f, -2f, 0f);
+            GameMode.ReportTag(GunLib.LockedPlayer.Creator);
         }, true);
         rig.enabled = true;
     }
