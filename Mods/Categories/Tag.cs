@@ -59,7 +59,7 @@ public class Tag
         }
     }
 
-    private static float tagReachDistance = 0.8f;
+    private static float tagReachDistance = 2.5f;
 
     public static void TagReach()
     {

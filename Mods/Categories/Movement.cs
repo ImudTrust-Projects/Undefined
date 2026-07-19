@@ -459,6 +459,9 @@ public class Movement
         GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.Lerp(GorillaTagger.Instance.rigidbody.linearVelocity, velocity, 0.12875f);
     }
 
+    public static void SpiderCrawl() =>
+            GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0);
+
     private static bool wasLeftTouching;
     private static bool wasRightTouching;
 

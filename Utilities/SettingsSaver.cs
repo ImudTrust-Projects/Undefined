@@ -61,13 +61,25 @@ public static class SettingsSaver
             }
         }
 
-        foreach (var modName in data.ActiveMods)
+        foreach (var category in ModButtons.buttons)
         {
-            var btn = Main.FindButton(modName);
-            if (btn != null && btn.isTogglable && !btn.enabled)
+            foreach (var btn in category)
             {
-                btn.enabled = true;
-                btn.enableMethod?.Invoke();
+                if (btn != null && btn.isTogglable && !string.IsNullOrEmpty(btn.buttonText) && !btn.buttonText.StartsWith("Return"))
+                {
+                    bool shouldBeActive = data.ActiveMods.Contains(btn.buttonText);
+
+                    if (shouldBeActive && !btn.enabled)
+                    {
+                        btn.enabled = true;
+                        btn.enableMethod?.Invoke();
+                    }
+                    else if (!shouldBeActive && btn.enabled)
+                    {
+                        btn.enabled = false;
+                        btn.disableMethod?.Invoke();
+                    }
+                }
             }
         }
     }

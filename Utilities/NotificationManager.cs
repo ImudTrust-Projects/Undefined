@@ -56,8 +56,8 @@ public class NotificationLib : MonoBehaviour
     private readonly List<string> _enabledModsBuffer = new(32);
 
     public static bool inRoom;
-    public static bool RoomNotifications;
-    public static bool ArrayListEnabled;
+    public static bool RoomNotifications = true;
+    public static bool ArrayListEnabled = true;
 
     private static readonly Dictionary<NotificationType, string> _typeColors = new()
     {

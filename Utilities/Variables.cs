@@ -142,6 +142,74 @@ public class Variables
         catch { Debug.Log("RPC protection failed, are you in a lobby?"); }
     }
 
+    public static (Vector3 position, Quaternion rotation, Vector3 up, Vector3 forward, Vector3 right) TrueLeftHand()
+    {
+        var rotation = GorillaTagger.Instance.leftHandTransform.rotation * GTPlayer.Instance.LeftHand.handRotOffset;
+
+        return (
+            GorillaTagger.Instance.leftHandTransform.position + GorillaTagger.Instance.leftHandTransform.rotation * GTPlayer.Instance.LeftHand.handOffset,
+            rotation,
+            rotation * Vector3.up,
+            rotation * Vector3.forward,
+            rotation * Vector3.right
+        );
+    }
+
+    public static (Vector3 position, Quaternion rotation, Vector3 up, Vector3 forward, Vector3 right) TrueRightHand()
+    {
+        var rotation = GorillaTagger.Instance.rightHandTransform.rotation * GTPlayer.Instance.RightHand.handRotOffset;
+
+        return (
+            GorillaTagger.Instance.rightHandTransform.position + GorillaTagger.Instance.rightHandTransform.rotation * GTPlayer.Instance.RightHand.handOffset,
+            rotation,
+            rotation * Vector3.up,
+            rotation * Vector3.forward,
+            rotation * Vector3.right
+        );
+    }
+
+    public static int[] bones = new int[]
+        {
+            4,
+            3,
+            5,
+            4,
+            19,
+            18,
+            20,
+            19,
+            3,
+            18,
+            21,
+            20,
+            22,
+            21,
+            25,
+            21,
+            29,
+            21,
+            31,
+            29,
+            27,
+            25,
+            24,
+            22,
+            6,
+            5,
+            7,
+            6,
+            10,
+            6,
+            14,
+            6,
+            16,
+            14,
+            12,
+            10,
+            9,
+            7
+        };
+
 
     // gun lib stuff
 

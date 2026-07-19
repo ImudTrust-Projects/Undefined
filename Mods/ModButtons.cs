@@ -46,8 +46,8 @@ public class ModButtons
             new ButtonInfo { buttonText = "Disconnect Button", enableMethod =() => disconnectButton = true, disableMethod =() => disconnectButton = false, enabled = disconnectButton, toolTip = "Toggles the disconnect button."},
             new ButtonInfo { buttonText = "ArrayList", enableMethod =() => ArrayListEnabled = true, disableMethod =() => ArrayListEnabled = false, enabled = ArrayListEnabled = true, toolTip = "Toggles the ArrayList."},
             new ButtonInfo { buttonText = "Room Notifications", enableMethod =() => NotificationLib.RoomNotifications = true, disableMethod =() => NotificationLib.RoomNotifications = false, enabled = NotificationLib.RoomNotifications = true, toolTip = "Toggles the Room Notifications."},
-            new ButtonInfo { buttonText = "Button Sound", isTogglable = false, isIncremental = true, incrementalDisplayName = "Button Sound", incrementalValues = Settings.buttonSoundOptions, incrementalMethod = Settings.SetButtonSound, toolTip = "Changes the button click sound." },
-            new ButtonInfo { buttonText = "Font", isTogglable = false, isIncremental = true, incrementalDisplayName = "Font", incrementalValues = MENUSETTINGS.Settings.fontOptions, incrementalMethod = MENUSETTINGS.Settings.SetFont, toolTip = "Changes the menu font." },
+            new ButtonInfo { buttonText = "Button Sound", isTogglable = false, isIncremental = true, incrementalDisplayName = "Button Sound", incrementalValues = Settings.buttonSoundOptions, incrementalMethod = Settings.SetButtonSound, currentIncrementalIndex = 2, toolTip = "Changes the button click sound." },
+            new ButtonInfo { buttonText = "Font", isTogglable = false, isIncremental = true, incrementalDisplayName = "Font", incrementalValues = MENUSETTINGS.Settings.fontOptions, incrementalMethod = MENUSETTINGS.Settings.SetFont, currentIncrementalIndex = 2, toolTip = "Changes the menu font." },
             new ButtonInfo { buttonText = "Platform Mode", isTogglable = false, isIncremental = true, incrementalDisplayName = "Mode", incrementalValues = Movement.PlatformMode, incrementalMethod = Movement.SetPlatformMode, toolTip = "Changes the platform type." },
         },
 
@@ -86,6 +86,7 @@ public class ModButtons
             new ButtonInfo { buttonText = "CheckPoint", method =() => Movement.CheckPoint(), disableMethod =() => Movement.CheckPointDisable(), isTogglable = true, toolTip = "You can fly."},
             new ButtonInfo { buttonText = "NoClip", method =() => Movement.NoClip(), isTogglable = true, toolTip = "You can go through Objects by holding right trigger."},
             new ButtonInfo { buttonText = "Bouncy Monke", enableMethod =() => Movement.Bouncy(), disableMethod =() => Movement.ResetBouncy(), isTogglable = true, toolTip = "Makes you a Bouncy monke."},
+            new ButtonInfo { buttonText = "Spider Crawl", enableMethod =() => Movement.SpiderCrawl(), isTogglable = true, toolTip = "Makes you a Bouncy monke."},
             new ButtonInfo { buttonText = "Pull Mod", method =() => Movement.PullMod(), isTogglable = true, toolTip = "You go broom broom fast."},
             new ButtonInfo { buttonText = "Teleport to Stump", method =() => Movement.TPSTUMP(), isTogglable = false, toolTip = "You get teleported to stump."},
             new ButtonInfo { buttonText = "Teleport Gun", method =() => Movement.TeleportGun(), isTogglable = true, toolTip = "You can teleport by pressing trigger on ur controller."},
@@ -127,6 +128,11 @@ public class ModButtons
         new ButtonInfo[] { // Visual Mods [7]
             new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
             new ButtonInfo { buttonText = "2D Box ESP", enableMethod =() => Visuals.BoxESP2DEnable(), method =() => Visuals.BoxESP2D(), disableMethod =() => Visuals.BoxESP2DDisable(), isTogglable = true, toolTip = "Shows 2D box ESP on players"},
+            new ButtonInfo { buttonText = "Humanoid ESP", method =() => Visuals.HumanoidESP(), disableMethod =() => Visuals.HumanoidESPOff(), isTogglable = true},
+            new ButtonInfo { buttonText = "Trails", method =() => Visuals.Trails(), disableMethod =() => Visuals.DisableTrail(), isTogglable = true},
+            new ButtonInfo { buttonText = "Chams", method =() => Visuals.ChamESPOn(), disableMethod =() => Visuals.ChamESPOff(), isTogglable = true},
+            new ButtonInfo { buttonText = "BoneEsp", method =() => Visuals.BoneESP(), disableMethod =() => Visuals.BoneESPOff(), isTogglable = true},
+            new ButtonInfo { buttonText = "Tracers", method =() => Visuals.TracerESP(), disableMethod =() => Visuals.TracerESPOff(), isTogglable = true},
         },
 
         new ButtonInfo[] { // Tag Mods [8]
@@ -166,10 +172,13 @@ public class ModButtons
             new ButtonInfo { buttonText = "Lag On Touch", method = () => LagOnTouch(), isTogglable = true, toolTip = "Lags the person that touches you."},
             new ButtonInfo { buttonText = "Fling Gun", method = () => FlingGun(), isTogglable = true, toolTip = "Flings the person you point the gun at."},
             new ButtonInfo { buttonText = "Guardian Self", method = () => GuardianSelf(), isTogglable = true, toolTip = "Makes ur self Guardian."},
+            new ButtonInfo { buttonText = "Guardian Grab All", method = () => GuardianGrabAll(), isTogglable = true},
+            new ButtonInfo { buttonText = "Guardian Spaz All", method = () => GuardianSpazAll(), isTogglable = true},
+            new ButtonInfo { buttonText = "Guardian Fling All", method = () => GuardianFlingAll(), isTogglable = true},
         },
 
         new ButtonInfo[] { // Discord RPC settings 12
-            new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false},
+            new ButtonInfo { buttonText = "Return to Settings", method =() => activeCategory = 1, isTogglable = false},
             new ButtonInfo { buttonText = "Enable RPC", enableMethod =() => Settings.DiscordRPC = true, disableMethod =() => Settings.DiscordRPC = false, toolTip = "Enables the Discord RPC."},
         },
 
@@ -184,11 +193,10 @@ public class ModButtons
             new ButtonInfo { buttonText = "Admin Bring Gun", method =() => Console.AdminBringGun(), isTogglable = true},
             new ButtonInfo { buttonText = "Admin Bring All", method =() => Console.BringAllUsing(), isTogglable = true},
             new ButtonInfo { buttonText = "Conduct Menu Users", enableMethod =() => { Console.EnableAdminMenuUserTags(); GetObject("Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText").GetComponent<TextMeshPro>().text = "CONSOLE USER LIST"; GetObject("Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData").GetComponent<TextMeshPro>().richText = true; }, method = Console.ConsoleOnConduct, toolTip = "Shows menu users on the code of conduct."},
-            //new ButtonInfo { buttonText = "Admin Beacon", method =() => Console.ConsoleBeacon(), isTogglable = true},
         },
 
         new ButtonInfo[] { // Super Admin
-            new ButtonInfo { buttonText = "Return to Main", method =() => activeCategory = 0, isTogglable = false, categoryName = "SuperAdmin"},
+            new ButtonInfo { buttonText = "Return to Admin", method =() => activeCategory = ModButtons.FindCategory("Admin"), isTogglable = false, categoryName = "SuperAdmin"},
             new ButtonInfo { buttonText = "Rainbow Sword", enableMethod =() => ConsoleAssets.spawnRainbowSword(), method =() => ConsoleAssets.UpdateRainbowSword(), disableMethod =() => ConsoleAssets.destroyRainbowSword(), isTogglable = true},
             new ButtonInfo { buttonText = "Ban Hammer", enableMethod =() => ConsoleAssets.spawnBanHammer(), method =() => ConsoleAssets.UpdateBanHammer(), disableMethod =() => ConsoleAssets.destroyBanHammer(), isTogglable = true},
             new ButtonInfo { buttonText = "Roblox Sword", enableMethod =() => ConsoleAssets.spawnRobloxSword(), method =() => ConsoleAssets.UpdateRobloxSword(), disableMethod =() => ConsoleAssets.destroyRobloxSword(), isTogglable = true},

@@ -342,4 +342,89 @@ public class Overpowered
             }
         }
     }
+
+    public static void GuardianGrabAll()
+    {
+        var g = GorillaGameModes.GameMode.ActiveGameMode as GorillaGuardianManager;
+        if (g == null || !g.IsPlayerGuardian(PhotonNetwork.LocalPlayer))
+        {
+            return;
+        }
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            foreach (var rig in VRRigCache.ActiveRigs)
+            {
+                if (!rig.isOfflineVRRig)
+                {
+                    extarstuff.GetViewFromRig(rig).RPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
+                }
+            }
+        }
+        else
+        {
+            foreach (var rig in VRRigCache.ActiveRigs)
+            {
+                if (!rig.isOfflineVRRig)
+                {
+                    extarstuff.GetViewFromRig(rig).RPC("DroppedByPlayer", RpcTarget.Others, new object[] { new Vector3(0f, 10f, 0f) });
+                }
+            }
+        }
+    }
+    public static float flingCooldown = 0;
+    public static void GuardianFlingAll()
+    {
+        var g = GorillaGameModes.GameMode.ActiveGameMode as GorillaGuardianManager;
+        if (g == null || !g.IsPlayerGuardian(PhotonNetwork.LocalPlayer))
+        {
+            return;
+        }
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            foreach (var rig in VRRigCache.ActiveRigs)
+            {
+                if (!rig.isOfflineVRRig)
+                {
+                    if (flingCooldown < Time.time)
+                    {
+                        extarstuff.GetViewFromRig(rig).RPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
+                        extarstuff.GetViewFromRig(rig).RPC("DroppedByPlayer", RpcTarget.Others, new object[] { new Vector3(20f, Random.Range(-10, 10), 10f) });
+                        flingCooldown = Time.time + 0.1f;
+                    }
+                }
+            }
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+        }
+    }
+
+    public static void GuardianSpazAll()
+    {
+        var g = GorillaGameModes.GameMode.ActiveGameMode as GorillaGuardianManager;
+        if (g == null || !g.IsPlayerGuardian(PhotonNetwork.LocalPlayer))
+        {
+            return;
+        }
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            foreach (var rig in VRRigCache.ActiveRigs)
+            {
+                if (!rig.isOfflineVRRig)
+                {
+                    if (flingCooldown < Time.time)
+                    {
+                        extarstuff.GetViewFromRig(rig).RPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
+                        extarstuff.GetViewFromRig(rig).RPC("DroppedByPlayer", RpcTarget.Others, new object[] { new Vector3(Random.Range(-50, 50), Random.Range(-50, 50), Random.Range(-50, 50)) });
+                        flingCooldown = Time.time + 0.1f;
+                    }
+                }
+            }
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+        }
+    }
 }

@@ -113,6 +113,12 @@ public class RigManager
 
 public static class extarstuff
 {
+    public static PhotonView GetViewFromRig(VRRig rig) =>
+            rig2view(rig);
+
+    public static PhotonView rig2view(VRRig p) =>
+    p.netView.GetView;
+
     public static NetPlayer GetPlayerFromID(string id) =>
         PhotonNetwork.PlayerList.FirstOrDefault(player => player.UserId == id);
 
