@@ -18,7 +18,7 @@ public class Master
         if (!Variables.IsMaster()) return;
 
         GreyZoneManager.Instance.ActivateGreyZoneAuthority();
-        
+
         // Patched
         /*GTPlayer.Instance?.SetGravityOverride(
             GreyZoneManager.Instance,
@@ -45,7 +45,7 @@ public class Master
         GorillaGuardianZoneManager.zoneManagers[0].SetGuardian(PhotonNetwork.PlayerList[Players]);
         Players++;
     }
-    
+
     public static void DisableGuardianAll()
     {
         foreach (var ZoneManager in GorillaGuardianZoneManager.zoneManagers.Where(gorillaGuardianZoneManager => gorillaGuardianZoneManager.enabled && gorillaGuardianZoneManager.IsZoneValid()))

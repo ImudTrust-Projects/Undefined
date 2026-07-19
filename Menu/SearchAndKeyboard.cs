@@ -192,7 +192,7 @@ public class SearchAndKeyboard : MonoBehaviour
     private static Material MakeButtonMaterial()
     {
         Material m = new Material(Shader.Find("GorillaTag/UberShader"));
-        m.color = Undefined.MENUSETTINGS.Settings.buttonColors[0].colors[0].color;
+        m.color = MENUSETTINGS.Settings.buttonColors[0].colors[0].color;
         _materials.Add(m);
         return m;
     }
@@ -385,7 +385,7 @@ public class SearchAndKeyboard : MonoBehaviour
     private static Material MakeBackgroundMaterial()
     {
         Material m = new Material(Shader.Find("GorillaTag/UberShader"));
-        m.color = Undefined.MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+        m.color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
         _materials.Add(m);
         return m;
     }
@@ -423,7 +423,7 @@ public class SearchAndKeyboard : MonoBehaviour
 
         Text label = new GameObject("Label").AddComponent<Text>();
         label.transform.SetParent(canvas.transform, false);
-        label.font = Undefined.MENUSETTINGS.Settings.currentFont;
+        label.font = MENUSETTINGS.Settings.currentFont;
         label.text = key;
         label.fontSize = 50;
         label.color = Color.white;

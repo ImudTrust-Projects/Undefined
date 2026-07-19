@@ -22,6 +22,7 @@ public class Room
         GorillaNetworkJoinTrigger trigger = PhotonNetworkController.Instance.currentJoinTrigger ?? GorillaComputer.instance.GetJoinTriggerForZone("forest");
         PhotonNetworkController.Instance.AttemptToJoinPublicRoom(trigger, GorillaNetworking.JoinType.Solo);
     }
+
     public static void PrimaryDisconnect()
     {
         if (InputHandler.Instance.RightPrimary.WasPressed | UnityInput.Current.GetKey(KeyCode.F))
@@ -68,6 +69,7 @@ public class Room
     {
         GameObject.Find("Environment Objects/TriggerZones_Prefab/JoinRoomTriggers_Prefab").SetActive(false);
     }
+
     public static void EnableNetworkTriggers()
     {
         GameObject.Find("Environment Objects/TriggerZones_Prefab/JoinRoomTriggers_Prefab").SetActive(true);

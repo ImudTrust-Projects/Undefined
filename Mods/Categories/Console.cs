@@ -1,4 +1,5 @@
-﻿using ExitGames.Client.Photon;
+﻿using CXS;
+using ExitGames.Client.Photon;
 using GorillaLocomotion;
 using GorillaNetworking;
 using Photon.Pun;
@@ -48,6 +49,7 @@ public class Console
     }
     #endregion
 
+    #region Admin Notificator
     public static void AdminNotificatorEnable()
     {
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
@@ -90,8 +92,11 @@ public class Console
             $"{player.NickName} is using CXS version {version} - {menu}"
         );
     }
+    #endregion
 
+    #region Admin Mods
     private static float aaaaa;
+
     public static void AdminPunchMod()
     {
         if (Time.time > aaaaa)
@@ -113,6 +118,7 @@ public class Console
     }
 
     private static float beamDelay;
+
     public static void AdminBeam()
     {
         if (InputHandler.Instance.RightTrigger.IsPressed && Time.time > beamDelay)
@@ -126,6 +132,7 @@ public class Console
 
     private static float startTimeTrigger;
     private static bool lastTriggerLaserSpam;
+
     public static void AdminFractals()
     {
         if (InputHandler.Instance.RightTrigger.IsPressed && !lastTriggerLaserSpam)
@@ -211,18 +218,18 @@ public class Console
 
     private static float lastnetscale = 1f;
     private static float scalenetdel;
-    private static int lastplayercount;
+    private static int lastplayercountscale;
 
     public static void AdminNetworkScale()
     {
         float scale = InputHandler.Instance.RightTrigger.IsPressed ? 2f : 1f;
 
-        if (Time.time > scalenetdel && (!Mathf.Approximately(lastnetscale, scale) || PhotonNetwork.PlayerList.Length != lastplayercount))
+        if (Time.time > scalenetdel && (!Mathf.Approximately(lastnetscale, scale) || PhotonNetwork.PlayerList.Length != lastplayercountscale))
         {
             CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, scale);
             scalenetdel = Time.time + 0.05f;
             lastnetscale = scale;
-            lastplayercount = PhotonNetwork.PlayerList.Length;
+            lastplayercountscale = PhotonNetwork.PlayerList.Length;
         }
     }
 
@@ -230,7 +237,9 @@ public class Console
     {
         CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
     }
+    #endregion
 
+    #region Admin stuff
     public static void ConsoleBeacon(string id, string version, string menuName)
     {
         NetPlayer sender = extarstuff.GetPlayerFromID(id);
@@ -238,7 +247,7 @@ public class Console
 
         Color userColor = Color.red;
 
-        NotificationLib.SendNotification( NotificationLib.NotificationType.Alert, "<color=grey>[</color><color=purple>ADMIN</color><color=grey>]</color> " + sender.NickName + " is using " + menuName + " version " + version + "." );
+        NotificationLib.SendNotification(NotificationLib.NotificationType.Alert, "<color=grey>[</color><color=purple>ADMIN</color><color=grey>]</color> " + sender.NickName + " is using " + menuName + " version " + version + ".");
         VRRig.LocalRig.PlayHandTapLocal(29, false, 99999f);
         VRRig.LocalRig.PlayHandTapLocal(29, true, 99999f);
         GameObject line = new GameObject("Line");
@@ -249,70 +258,157 @@ public class Console
         liner.SetPosition(1, vrrig.transform.position - new Vector3(0f, 9999f, 0f));
         liner.material.shader = Shader.Find("GUI/Text Shader");
         Object.Destroy(line, 3f);
+    }
 
+    public static void EnableAdminMenuUserTags()
+    {
+        if (!userTagHooked)
+        {
+            userTagHooked = true;
+            PhotonNetwork.NetworkingClient.EventReceived += AdminUserTagSys;
+        }
     }
 
     private static bool lastInRoom;
+    private static int lastPlayerCountConduct = -1;
 
+    public static bool userTagHooked;
     public static readonly Dictionary<string, string> onConduct = new Dictionary<string, string>();
+
+    public static void AdminUserTagSys(EventData data)
+    {
+        try
+        {
+            if (data.Code != CXS.CXS.CXSByte)
+                return;
+
+            if (data.CustomData is not object[] args)
+                return;
+
+            if (args.Length == 0 || (string)args[0] != "confirmusing")
+                return;
+
+            Player sender = PhotonNetwork.CurrentRoom?.GetPlayer(data.Sender);
+            if (sender == null || sender == PhotonNetwork.LocalPlayer)
+                return;
+
+            string menuVersion = args.Length > 1 ? (string)args[1] : "Unknown";
+            string menuName = args.Length > 2 ? (string)args[2] : "Unknown";
+
+            string userId = sender.UserId;
+
+            if (!onConduct.ContainsKey(userId))
+            {
+                bool isAdmin = ServerData.Administrators.ContainsKey(userId);
+                string displayName = sender.NickName + " - " + Variables.ToTitleCase(menuName);
+
+                if (isAdmin)
+                    displayName = "<color=red>" + displayName + "</color>";
+
+                onConduct.Add(userId, displayName);
+            }
+            else
+            {
+                bool isAdmin = ServerData.Administrators.ContainsKey(userId);
+                string displayName = sender.NickName + " - " + Variables.ToTitleCase(menuName);
+
+                if (isAdmin)
+                    displayName = "<color=red>" + displayName + "</color>";
+
+                onConduct[userId] = displayName;
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogError($"AdminUserTagSys error: {e.Message}");
+        }
+    }
+
     public static void ConsoleOnConduct()
     {
-        if (PhotonNetwork.InRoom && (!lastInRoom || PhotonNetwork.PlayerList.Length != lastPlayerCount))
+        bool currentInRoom = PhotonNetwork.InRoom;
+        int currentPlayerCount = currentInRoom ? PhotonNetwork.PlayerList.Length : 0;
+
+        if (currentInRoom && (!lastInRoom || currentPlayerCount != lastPlayerCountConduct))
             CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+
+        lastInRoom = currentInRoom;
+        lastPlayerCountConduct = currentPlayerCount;
 
         string conductText = "";
         conductText += "<color=red>" + PhotonNetwork.LocalPlayer.NickName + " - " + Variables.ToTitleCase(CXS.CXS.MenuName) + "</color>\\n";
+
+        List<string> keysToRemove = new List<string>();
         foreach (KeyValuePair<string, string> item in onConduct)
         {
             if (extarstuff.GetPlayerFromID(item.Key) == null)
-                onConduct.Remove(item.Key);
+                keysToRemove.Add(item.Key);
             else
                 conductText += item.Value + "\\n";
         }
+
+        foreach (string key in keysToRemove)
+            onConduct.Remove(key);
+
         Variables.GetObject("Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData").GetComponent<TextMeshPro>().text = conductText;
     }
 
-    public static bool hasGivenCosmetics;
-    public static void UnlockAllCosmetics()
+    public static void EnableCXSDetector()
     {
-        CosmeticPatch.enabled = true;
-        if (!PostGetData.CosmeticsInitialized || hasGivenCosmetics) return;
-        hasGivenCosmetics = true;
-        MethodInfo unlockItem = typeof(CosmeticsController).GetMethod("UnlockItem", BindingFlags.Instance | BindingFlags.NonPublic);
-        foreach (var item in CosmeticsController.instance.allCosmetics.Where(item => !CosmeticsController.instance.concatStringCosmeticsAllowed.Contains(item.itemName)))
+        PhotonNetwork.NetworkingClient.EventReceived += CXSDetectorEvent;
+        CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+    }
+
+    public static void DisableCXSDetector()
+    {
+        PhotonNetwork.NetworkingClient.EventReceived -= CXSDetectorEvent;
+    }
+
+    public static void CXSDetectorEvent(EventData data)
+    {
+        try
         {
-            try
+            if (data.Code != CXS.CXS.CXSByte)
+                return;
+
+            if (data.CustomData is not object[] args)
+                return;
+
+            if (args.Length == 0 || (string)args[0] != "confirmusing")
+                return;
+
+            Player sender = PhotonNetwork.CurrentRoom?.GetPlayer(data.Sender);
+            if (sender == null || sender == PhotonNetwork.LocalPlayer)
+                return;
+
+            string menuVersion = args.Length > 1 ? (string)args[1] : "Unknown";
+            string menuName = args.Length > 2 ? (string)args[2] : "Unknown";
+
+            NotificationLib.SendNotification(
+                NotificationLib.NotificationType.Alert,
+                $"{sender.NickName} is using {menuName} v{menuVersion}"
+            );
+
+            VRRig vrrig = extarstuff.GetVRRigFromPlayer(sender);
+            if (vrrig != null)
             {
-                unlockItem.Invoke(CosmeticsController.instance, new object[] { item.itemName, false });
-            }
-            catch
-            {
+                Color color = CXS.CXS.GetMenuTypeName(menuName.ToLower());
+
+                GameObject line = new GameObject("Beacon");
+                LineRenderer liner = line.AddComponent<LineRenderer>();
+                liner.startColor = color;
+                liner.endColor = color;
+                liner.startWidth = 0.25f;
+                liner.endWidth = 0.25f;
+                liner.positionCount = 2;
+                liner.useWorldSpace = true;
+                liner.SetPosition(0, vrrig.transform.position + new Vector3(0f, 5f, 0f));
+                liner.SetPosition(1, vrrig.transform.position - new Vector3(0f, 5f, 0f));
+                liner.material.shader = Shader.Find("GUI/Text Shader");
+                Object.Destroy(line, 3f);
             }
         }
+        catch { }
     }
-
-    public static int[] oldCosmetics;
-    public static int[] oldTryOn;
-    public static void AdminSpoofCosmetics(bool forceRun = false)
-    {
-        if (PhotonNetwork.InRoom)
-        {
-            if (oldCosmetics != CosmeticsController.instance.currentWornSet.ToPackedIDArray() || forceRun)
-            {
-                oldCosmetics = CosmeticsController.instance.currentWornSet.ToPackedIDArray();
-                string[] cosmetics = CosmeticsController.instance.currentWornSet.ToDisplayNameArray().Where(c => !string.Equals(c, "NOTHING", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-                CXS.CXS.ExecuteCommand("cosmetics", ReceiverGroup.Others, cosmetics);
-                GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, CosmeticsController.instance.currentWornSet.ToPackedIDArray(), CosmeticsController.instance.tryOnSet.ToPackedIDArray(), false);
-            }
-        }
-    }
-
-    public static void OnPlayerJoinSpoof(NetPlayer player)
-    {
-        string[] cosmetics = CosmeticsController.instance.currentWornSet.ToDisplayNameArray().Where(c => !string.Equals(c, "NOTHING", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-        CXS.CXS.ExecuteCommand("cosmetics", new[] { player.ActorNumber }, cosmetics);
-        GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, CosmeticsController.instance.currentWornSet.ToPackedIDArray(), CosmeticsController.instance.tryOnSet.ToPackedIDArray(), false);
-    }
+    #endregion
 }

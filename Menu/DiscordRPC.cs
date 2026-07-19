@@ -32,8 +32,6 @@ public class DiscordPresence : MonoBehaviour
         startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
 
-    
-
     private void Update()
     {
         // Logic for room stuff idk

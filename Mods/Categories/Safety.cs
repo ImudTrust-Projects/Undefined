@@ -6,6 +6,7 @@ namespace Undefined.Mods.Categories;
 public class Safety
 {
     private static float delay;
+
     public static void AntiReport()
     {
         if (!NetworkSystem.Instance.InRoom) return;
@@ -25,7 +26,6 @@ public class Safety
 
                 if (!(Time.time > delay)) return;
                 delay = Time.time + 1f;
-
             }
         }
     }

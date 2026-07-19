@@ -19,6 +19,7 @@ namespace Undefined.Mods.Categories;
 public class Overpowered
 {
     public static HitTargetNetworkState[] tagetcache;
+
     public static void SpazTargets()
     {
         if (tagetcache == null)
@@ -34,7 +35,7 @@ public class Overpowered
             }
         }
     }
-    
+
     public static void BreakTargets()
     {
         if (tagetcache == null)
@@ -49,7 +50,7 @@ public class Overpowered
             }
         }
     }
-    
+
     public static void UntagSelf()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -70,8 +71,7 @@ public class Overpowered
             }
         }
     }
-    
-    
+
     public static void ForceTagLag()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -94,63 +94,95 @@ public class Overpowered
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.RemoveInstantiatedGO(GRElevatorManager._instance.gameObject, false); 
+            PhotonNetwork.RemoveInstantiatedGO(GRElevatorManager._instance.gameObject, false);
         }
     }
-    
+
     public static void DestroyAll()
     {
         PhotonNetwork.OpRemoveCompleteCache();
     }
-    
-    public static float hoverboarddelay = 0;
+
+    public static float hoverboarddelay = 0f;
+
     public static void HoverboardMinigun()
     {
-        if (ControllerInputPoller.instance.rightGrab)
+        if (hoverboarddelay >= Time.time)
+            return;
+
+        if (InputHandler.Instance.RightGrip.IsPressed)
         {
-            if (hoverboarddelay < Time.time)
-            {
-                FreeHoverboardManager.instance.SendDropBoardRPC(GorillaTagger.Instance.rightHandTransform.position, GorillaTagger.Instance.rightHandTransform.rotation, GorillaTagger.Instance.rightHandTransform.forward * 30f, Vector3.zero, new Color(0, 0, 0));
-                hoverboarddelay = Time.time + 0.5f;
-            }
+            FreeHoverboardManager.instance.SendDropBoardRPC(
+                GorillaTagger.Instance.rightHandTransform.position,
+                GorillaTagger.Instance.rightHandTransform.rotation,
+                GorillaTagger.Instance.rightHandTransform.forward * 30f,
+                Vector3.zero,
+                new Color(0, 0, 0));
+
+            hoverboarddelay = Time.time + 0.5f;
         }
-        if (ControllerInputPoller.instance.leftGrab)
+
+        if (InputHandler.Instance.LeftGrip.IsPressed)
         {
-            if (hoverboarddelay < Time.time)
-            {
-                FreeHoverboardManager.instance.SendDropBoardRPC(GorillaTagger.Instance.leftHandTransform.position, GorillaTagger.Instance.leftHandTransform.rotation, GorillaTagger.Instance.leftHandTransform.forward * 30f, Vector3.zero, new Color(0, 0, 0));
-                hoverboarddelay = Time.time + 0.5f;
-            }
+            FreeHoverboardManager.instance.SendDropBoardRPC(
+                GorillaTagger.Instance.leftHandTransform.position,
+                GorillaTagger.Instance.leftHandTransform.rotation,
+                GorillaTagger.Instance.leftHandTransform.forward * 30f,
+                Vector3.zero,
+                new Color(0, 0, 0));
+
+            hoverboarddelay = Time.time + 0.5f;
         }
     }
-    
+
     private static float waterdelay;
+
     public static void Watersplash()
     {
-        if (Time.time > waterdelay)
-        {
-            waterdelay = Time.time + 0.1f;
+        if (Time.time <= waterdelay)
+            return;
 
-            if (PhotonNetwork.InRoom)
-            {
-                if (ControllerInputPoller.instance.rightGrab)
-                {
-                    GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, GorillaTagger.Instance.rightHandTransform.position, GorillaTagger.Instance.rightHandTransform.rotation, 100f, 100f, true, false);
-                    Variables.RPCProtection();
-                }
-                if (ControllerInputPoller.instance.leftGrab)
-                {
-                    GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, GorillaTagger.Instance.leftHandTransform.position, GorillaTagger.Instance.leftHandTransform.rotation, 100f, 100f, true, false);
-                    Variables.RPCProtection();
-                }
-            }
+        waterdelay = Time.time + 0.1f;
+
+        if (!PhotonNetwork.InRoom)
+            return;
+
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.myVRRig.SendRPC(
+                "RPC_PlaySplashEffect",
+                RpcTarget.All,
+                GorillaTagger.Instance.rightHandTransform.position,
+                GorillaTagger.Instance.rightHandTransform.rotation,
+                100f,
+                100f,
+                true,
+                false);
+
+            Variables.RPCProtection();
+        }
+
+        if (InputHandler.Instance.LeftGrip.IsPressed)
+        {
+            GorillaTagger.Instance.myVRRig.SendRPC(
+                "RPC_PlaySplashEffect",
+                RpcTarget.All,
+                GorillaTagger.Instance.leftHandTransform.position,
+                GorillaTagger.Instance.leftHandTransform.rotation,
+                100f,
+                100f,
+                true,
+                false);
+
+            Variables.RPCProtection();
         }
     }
-    
+
     public static void Watergun()
     {
         start2guns(delegate ()
-        {            if (PhotonNetwork.InRoom)
+        {
+            if (PhotonNetwork.InRoom)
             {
                 VRRig.LocalRig.enabled = false;
                 VRRig.LocalRig.transform.position = LockedPlayer.transform.position - new Vector3(0f, 1.9f, 0f);
@@ -164,8 +196,9 @@ public class Overpowered
         }, true);
         VRRig.LocalRig.enabled = LockedPlayer == null;
     }
-    
+
     private static float LagDelay;
+
     public static void StutterMaster()
     {
         if (Time.time > LagDelay)
@@ -270,6 +303,7 @@ public class Overpowered
     public static TappableGuardianIdol[] guardianIdolcache = null;
 
     private static float Delay;
+
     public static void GuardianSelf()
     {
         if (PhotonNetwork.IsMasterClient)

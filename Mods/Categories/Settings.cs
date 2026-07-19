@@ -130,4 +130,6 @@ public class Settings
         PlayerPrefs.SetString("NotificationSound", currentNotificationSound);
         PlayerPrefs.Save();
     }
+
+    public static bool Ghostview;
 }

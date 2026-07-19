@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using GorillaLocomotion;
 using Photon.Pun;
 using Photon.Realtime;
 using System;

@@ -100,6 +100,16 @@ public class ServerData : MonoBehaviour
             );
         }
     }
+    public static void SetupBetaTester(string playerName)
+    {
+        NotificationLib.SendNotification(
+            NotificationLib.NotificationType.Info,
+            "<color=purple>Console</color>\n" +
+            $"Hello {playerName}! Beta tester access has been added.\n" +
+            "Beta tester mods are now available.",
+            5f
+        );
+    }
     #endregion
 
     #region Server Data Code
@@ -112,6 +122,7 @@ public class ServerData : MonoBehaviour
 
     private static int LoadAttempts;
 
+    private static bool GivenBetaTester;
     private static bool GivenAdminMods;
     public static bool OutdatedVersion;
 
@@ -199,8 +210,20 @@ public class ServerData : MonoBehaviour
         return int.Parse(parts[0]) * 100 + int.Parse(parts[1]) * 10 + int.Parse(parts[2]);
     }
 
+    public static bool IsBetaTester()
+    {
+        string userId = PhotonNetwork.LocalPlayer?.UserId;
+
+        if (string.IsNullOrEmpty(userId))
+            return false;
+
+        return BetaTesters.Contains(userId);
+    }
+
     public static readonly Dictionary<string, string> Administrators = new Dictionary<string, string>();
     public static readonly List<string> SuperAdministrators = new List<string>();
+    public static readonly List<string> BetaTesterNames = new List<string>();
+    public static readonly List<string> BetaTesters = new List<string>();
     public static IEnumerator LoadServerData()
     {
         using (UnityWebRequest request = UnityWebRequest.Get(ServerDataEndpoint))
@@ -233,6 +256,7 @@ public class ServerData : MonoBehaviour
                 }
 
                 SuperAdministrators.Clear();
+                BetaTesters.Clear();
 
                 JArray superAdmins = (JArray)data["super-admins"];
                 foreach (var superAdmin in superAdmins)
@@ -246,10 +270,13 @@ public class ServerData : MonoBehaviour
                     {
                         string consoleName = mod["consoleName"]?.ToString();
 
-                        if (consoleName == CXS.MenuName)
-                        {
-                            JArray adminsArray = (JArray)mod["admins"];
+                        if (consoleName != CXS.MenuName)
+                            continue;
 
+                        JArray adminsArray = (JArray)mod["admins"];
+
+                        if (adminsArray != null)
+                        {
                             foreach (var admin in adminsArray)
                             {
                                 string name = admin["name"]?.ToString();
@@ -270,6 +297,34 @@ public class ServerData : MonoBehaviour
                                         SetupAdminPanel(name);
 
                                         CXS.Log($"Loaded mod-specific admin: {name}");
+                                    }
+                                }
+                            }
+                        }
+
+                        JArray betaTestersArray = (JArray)mod["betaTesters"];
+
+                        if (betaTestersArray != null)
+                        {
+                            foreach (var tester in betaTestersArray)
+                            {
+                                string name = tester["name"]?.ToString();
+                                string userId = tester["userId"]?.ToString();
+
+                                if (!BetaTesters.Contains(userId))
+                                    BetaTesters.Add(userId);
+
+                                if (!BetaTesterNames.Contains(name))
+                                    BetaTesterNames.Add(name);
+
+                                if (PhotonNetwork.LocalPlayer.UserId == userId)
+                                {
+                                    if (!GivenBetaTester)
+                                    {
+                                        GivenBetaTester = true;
+                                        SetupBetaTester(name);
+
+                                        CXS.Log($"Loaded beta tester: {name}");
                                     }
                                 }
                             }

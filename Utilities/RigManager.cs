@@ -11,6 +11,15 @@ namespace Undefined.Utilities;
 
 public class RigManager
 {
+
+    public static Player GetPlayerFromRig(VRRig rig)
+    {
+        return rig.OwningNetPlayer.GetPlayerRef();
+    }
+
+    public static VRRig GetRigFromPlayer(Player p) =>
+            GorillaGameManager.instance.FindPlayerVRRig(p);
+
     public static VRRig GetVRRigFromPlayer(Player p) =>
         GorillaGameManager.instance.FindPlayerVRRig(p);
 

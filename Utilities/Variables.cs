@@ -221,6 +221,28 @@ public class Variables
         }
     }
 
+    public static AssetBundle assetBundle = null;
+    public static GameObject LoadAssetBundle(string assetName)
+    {
+        GameObject gameObject = null;
+
+        Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Undefined.Resources.Assets." + assetName);
+        if (stream != null)
+        {
+            if (assetBundle == null)
+            {
+                assetBundle = AssetBundle.LoadFromStream(stream);
+            }
+            gameObject = UnityEngine.Object.Instantiate(assetBundle.LoadAsset<GameObject>(assetName));
+        }
+        else
+        {
+            Debug.LogError("Failed to load asset from resource: " + assetName);
+        }
+
+        return gameObject;
+    }
+
     public static string ToTitleCase(string text) =>
     CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
 

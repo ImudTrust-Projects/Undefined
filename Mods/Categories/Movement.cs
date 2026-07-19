@@ -43,9 +43,9 @@ public class Movement
 
     public static List<string> PlatformMode = new()
     {
-            "Normal",
-            "Invisible",
-            "Noclip"
+        "Normal",
+        "Invisible",
+        "Noclip"
     };
 
     private static GameObject leftPlat;
@@ -56,13 +56,13 @@ public class Movement
 
     private static bool LeftInput =>
         platInput == 0
-            ? ControllerInputPoller.instance.leftGrab
-            : ControllerInputPoller.instance.leftControllerIndexFloat > 0.5f;
+            ? InputHandler.Instance.LeftGrip.IsPressed
+            : InputHandler.Instance.LeftTrigger.IsPressed;
 
     private static bool RightInput =>
         platInput == 0
-            ? ControllerInputPoller.instance.rightGrab
-            : ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
+            ? InputHandler.Instance.RightGrip.IsPressed
+            : InputHandler.Instance.RightTrigger.IsPressed;
 
     public static void Platforms()
     {
@@ -216,38 +216,32 @@ public class Movement
     public static void TPSTUMP()
     {
         Noclipistuff(true);
+        ZoneManagement.SetActiveZone(GTZone.forest);
         GTPlayer.Instance.TeleportTo(new Vector3(-68.647f, 12.406f, -83.699f), GTPlayer.Instance.transform.rotation, false, true);
         GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
         Noclipistuff(false);
     }
-    
+
     private static bool Ghost_Toggled = false;
-    private static bool ghost_wasPressed = false;
+    private static bool Invis_Toggled = false;
 
     public static void GhostMonke()
     {
-        bool isPressed = ControllerInputPoller.instance.rightControllerSecondaryButton;
+        bool isPressed = Variables.rightHanded
+            ? InputHandler.Instance.LeftSecondary.WasPressed
+            : InputHandler.Instance.RightSecondary.WasPressed;
 
-        if (isPressed && !ghost_wasPressed)
+        if (isPressed)
         {
             Ghost_Toggled = !Ghost_Toggled;
             VRRig.LocalRig.enabled = !Ghost_Toggled;
         }
-
-        ghost_wasPressed = isPressed;
     }
-
-    private static bool Invis_Toggled = false;
-    private static bool invis_wasPressed = false;
 
     public static void InvisMonke()
     {
-        bool isPressed = ControllerInputPoller.instance.rightControllerPrimaryButton;
-
-        if (isPressed && !invis_wasPressed)
+        if (InputHandler.Instance.RightPrimary.WasPressed)
             Invis_Toggled = !Invis_Toggled;
-
-        invis_wasPressed = isPressed;
 
         if (Invis_Toggled)
         {
@@ -289,6 +283,7 @@ public class Movement
     {
         GTPlayer.Instance.disableMovement = true;
     }
+
     public static void PbbvWalkDisable()
     {
         GTPlayer.Instance.disableMovement = false;
@@ -323,9 +318,21 @@ public class Movement
                 GTPlayer.Instance.bodyCollider.transform.up * sinValue +
                 GTPlayer.Instance.bodyCollider.transform.forward * 0.65f;
         }
+        if (InputHandler.Instance.LeftGrip.IsPressed)
+        {
+            float sinValue = MathF.Sin(Time.frameCount / 2.5f) * 0.6f;
+            float cosValue = MathF.Cos(Time.frameCount / 2.5f) * 0.3f;
+            GTPlayer.Instance.LeftHand.controllerTransform.position =
+                GTPlayer.Instance.bodyCollider.transform.position +
+                GTPlayer.Instance.bodyCollider.transform.right * (0.31f + cosValue) +
+                GTPlayer.Instance.bodyCollider.transform.up * sinValue +
+                GTPlayer.Instance.bodyCollider.transform.forward * 0.65f;
+        }
     }
 
     public static GameObject checkpoint;
+    private static bool teleporting;
+    private static float teleportTime;
 
     public static void CheckPoint()
     {
@@ -344,37 +351,55 @@ public class Movement
             checkpoint.transform.position = GorillaTagger.Instance.rightHandTransform.position;
         }
 
-        if (checkpoint != null)
-        {
-            if (InputHandler.Instance.RightPrimary.WasPressed)
-            {
-                Noclipistuff(true);
-                checkpoint.GetComponent<Renderer>().material.color = Color.gray;
+        if (checkpoint == null)
+            return;
 
-                Variables.TeleportPlayer(checkpoint.transform.position);
-                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
-            }
-            else
+        if (InputHandler.Instance.RightPrimary.WasPressed && !teleporting)
+        {
+            teleporting = true;
+            teleportTime = 0.1f;
+
+            Noclipistuff(true);
+
+            Color color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+            color = Color.Lerp(color, Color.white, 0.35f);
+            color.a = 0.5f;
+
+            checkpoint.GetComponent<Renderer>().material.color = color;
+
+            Variables.TeleportPlayer(checkpoint.transform.position);
+
+            GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        }
+
+        if (teleporting)
+        {
+            teleportTime -= Time.deltaTime;
+
+            if (teleportTime <= 0)
             {
-                checkpoint.GetComponent<Renderer>().material.color = Color.navyBlue;
                 Noclipistuff(false);
+                teleporting = false;
             }
+        }
+        else
+        {
+            Color color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+            color.a = 1f;
+
+            checkpoint.GetComponent<Renderer>().material.color = color;
         }
     }
 
-
-    private static bool wasPressed;
-
     public static void Reverse_velocity()
     {
-        bool isPressed = ControllerInputPoller.instance.rightControllerPrimaryButton;
-
-        if (isPressed && !wasPressed)
+        if (Variables.rightHanded
+            ? InputHandler.Instance.LeftPrimary.WasPressed
+            : InputHandler.Instance.RightPrimary.WasPressed)
         {
-            GorillaTagger.Instance.rigidbody.linearVelocity = -GorillaTagger.Instance.rigidbody.linearVelocity;
+            GorillaTagger.Instance.rigidbody.linearVelocity =
+                -GorillaTagger.Instance.rigidbody.linearVelocity;
         }
-
-        wasPressed = isPressed;
     }
 
     public static void GravityManager(Gravitytypes type)
@@ -382,13 +407,13 @@ public class Movement
         switch (type)
         {
             case Gravitytypes.Low:
-                GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 6.57f, ForceMode.Acceleration); 
+                GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 6.57f, ForceMode.Acceleration);
                 break;
             case Gravitytypes.High:
                 GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.67f, ForceMode.Acceleration); // omg 67
                 break;
             case Gravitytypes.Zero:
-                GorillaTagger.Instance.rigidbody.AddForce( -Physics.gravity * (Time.deltaTime / Time.fixedDeltaTime), ForceMode.Acceleration);
+                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration);
                 break;
             case Gravitytypes.Reverse:
                 GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * 3f, ForceMode.Acceleration);
@@ -398,7 +423,7 @@ public class Movement
     }
 
     public static void Reset_upsidedown() => GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.identity;
-    
+
     public enum Gravitytypes
     {
         Low,
@@ -416,7 +441,7 @@ public class Movement
         }
     }
 
-    public static void BarkFly()
+    public static void JoyStickFly()
     {
         Vector2 leftJoystick = SteamVR_Actions.gorillaTag_LeftJoystick2DAxis.GetAxis(SteamVR_Input_Sources.LeftHand);
         Vector2 rightJoystick = SteamVR_Actions.gorillaTag_RightJoystick2DAxis.GetAxis(SteamVR_Input_Sources.RightHand);
@@ -461,7 +486,7 @@ public class Movement
     }
 
     public static void NoTagFreeze() =>
-            GTPlayer.Instance.disableMovement = false;
+        GTPlayer.Instance.disableMovement = false;
 
     public static void WASDFly()
     {
@@ -482,8 +507,7 @@ public class Movement
         bool DownArrow = kb.downArrowKey.isPressed;
 
         Transform parentTransform = GTPlayer.Instance.GetControllerTransform(false).parent;
-        
-        
+
         float turnSpeed = 250f;
 
         if (LeftArrow)
@@ -545,7 +569,6 @@ public class Movement
 
         if (Space)
             GorillaTagger.Instance.rigidbody.transform.position += Vector3.up * (Time.deltaTime * speed);
-        
 
         if (Ctrl)
             GorillaTagger.Instance.rigidbody.transform.position += Vector3.down * (Time.deltaTime * speed);
@@ -554,21 +577,34 @@ public class Movement
             GorillaTagger.Instance.headCollider.transform.rotation;
     }
 
+    private static bool teleportGunPressed;
+
     public static void TeleportGun()
     {
         GunLib.start2guns(delegate ()
         {
-            Vector3 targetPos = GunLib.GetPointerPos();
+            if (!teleportGunPressed)
+            {
+                Vector3 targetPos = GunLib.GetPointerPos();
 
-            Noclipistuff(true);
+                Noclipistuff(true);
 
-            GorillaLocomotion.GTPlayer.Instance.transform.position = targetPos;
-            GorillaTagger.Instance.transform.position = targetPos;
+                GorillaLocomotion.GTPlayer.Instance.transform.position = targetPos;
+                GorillaTagger.Instance.transform.position = targetPos;
 
-            Noclipistuff(false);
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+
+                Noclipistuff(false);
+
+                teleportGunPressed = true;
+            }
+
         }, false);
 
-        Noclipistuff(false);
+        if (!InputHandler.Instance.RightTrigger.IsPressed)
+        {
+            teleportGunPressed = false;
+        }
     }
 
     public static void Noclipistuff(bool b)

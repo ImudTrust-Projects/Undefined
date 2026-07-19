@@ -14,7 +14,6 @@ public class Settings
         )
     };
 
-
     public static ExtGradient[] buttonColors =
     {
         new ExtGradient
@@ -23,7 +22,6 @@ public class Settings
                 new Color32(55, 55, 55, 255)
             )
         },
-
         new ExtGradient
         {
             colors = ExtGradient.GetSolidGradient(
@@ -32,16 +30,13 @@ public class Settings
         }
     };
 
-
     public static Color[] textColors =
     {
         Color.white,
         Color.white
     };
 
-
     public static Font[] Fonts;
-
 
     public static int fontIndex = 2;
 

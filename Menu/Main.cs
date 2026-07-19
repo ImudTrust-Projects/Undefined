@@ -41,9 +41,14 @@ public class Main : MonoBehaviour
             if (InputHandler.Instance == null)
                 return;
 
+            if (Settings.Ghostview && !VRRig.LocalRig.enabled)
+            {
+                Visuals.CreateCubes();
+            }
+
             bool openRequested = (!rightHanded && InputHandler.Instance.LeftSecondary.IsPressed) ||
                                  (rightHanded && InputHandler.Instance.RightSecondary.IsPressed);
-            
+
             bool keyboardOpen = pcMenu && UnityInput.Current.GetKey(keyboardButton);
 
             if (activeMenu == null)
@@ -155,7 +160,6 @@ public class Main : MonoBehaviour
             GameObject displayTextObj = GameObject.Find(
                 "Environment Objects/LocalObjects_Prefab/TreeRoom/ModIOFeaturedMapsDisplay/DisplayText");
 
-
             if (displayTextObj != null)
             {
                 foreach (Transform child in displayTextObj.transform)
@@ -165,57 +169,46 @@ public class Main : MonoBehaviour
                 }
             }
 
-
             if (mapInfoText == null || featuredMaps == null)
                 return;
-
 
             TextMeshPro text = mapInfoText.GetComponent<TextMeshPro>();
 
             if (text != null)
                 text.text = "<color=black>Undefined</color>";
 
-
             if (loadingText != null)
                 loadingText.Obliterate();
-
 
             GameObject featuredMapImage = featuredMaps.transform.Find("FeaturedMapImage")?.gameObject;
 
             if (featuredMapImage == null)
                 return;
 
-
             if (featuredMapImage.TryGetComponent(out SpriteRenderer spriteRenderer))
                 spriteRenderer.Obliterate();
 
-
             MeshFilter mf = featuredMapImage.GetOrAddComponent<MeshFilter>();
             mf.mesh = Resources.GetBuiltinResource<Mesh>("Quad.fbx");
-
 
             MeshRenderer mr = featuredMapImage.GetOrAddComponent<MeshRenderer>();
 
             Material mat = new Material(Shader.Find("Unlit/Texture"));
             mr.material = mat;
 
-
             videoPlayer = featuredMapImage.GetComponent<VideoPlayer>();
 
             if (videoPlayer == null)
                 videoPlayer = featuredMapImage.AddComponent<VideoPlayer>();
 
-
             videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
             videoPlayer.url = "https://github.com/ImudTrust/Mod-Resources/raw/refs/heads/main/%C3%B6.mp4";
             videoPlayer.isLooping = true;
-
 
             RenderTexture rt = new RenderTexture(512, 512, 0);
 
             videoPlayer.targetTexture = rt;
             mr.material.mainTexture = rt;
-
 
             featuredMapImage.transform.localScale = new Vector3(0.845f, 0.445f, 1f);
 
@@ -224,7 +217,6 @@ public class Main : MonoBehaviour
             videoPlayer.Play();
 
             hasSetupFeaturedMapVideo = true;
-
         }
         catch (Exception ex)
         {
@@ -469,7 +461,6 @@ public class Main : MonoBehaviour
         triggerCollider = handPointer.GetComponent<SphereCollider>();
     }
 
-
     public static void CreateImage()
     {
         if (Variables.backgroundTexture != null)
@@ -478,7 +469,7 @@ public class Main : MonoBehaviour
             Destroy(iconBack.GetComponent<Rigidbody>());
             Destroy(iconBack.GetComponent<BoxCollider>());
             Destroy(iconBack.GetComponent<MeshCollider>());
-        
+
             iconBack.transform.parent = bgObject.transform;
             iconBack.transform.localRotation = Quaternion.Euler(0f, 90f, 90f);
             iconBack.transform.localPosition = new Vector3(-0.51f, 0f, 0f);

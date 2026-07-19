@@ -566,6 +566,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Resources\Assets\" />
     <Folder Include="Resources\Sounds\" />
   </ItemGroup>
 </Project>
