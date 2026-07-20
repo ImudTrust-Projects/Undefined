@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using TMPro;
+using Undefined.Patches;
 using Undefined.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -402,6 +403,15 @@ public class Movement
         }
     }
 
+    public static void Dash()
+    {
+        if (!InputHandler.Instance.RightPrimary.WasPressed)
+            return;
+
+        GorillaTagger.Instance.rigidbody.linearVelocity += 
+            GTPlayer.Instance.headCollider.transform.forward * FlySpeed;
+    }
+
     public static void GravityManager(Gravitytypes type)
     {
         switch (type)
@@ -413,7 +423,7 @@ public class Movement
                 GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.67f, ForceMode.Acceleration); // omg 67
                 break;
             case Gravitytypes.Zero:
-                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration);
+                GTPlayer.Instance.bodyCollider.attachedRigidbody.AddForce(Vector3.up * 9.81f, ForceMode.Acceleration); // trying a new zero grav since the old one was weird.
                 break;
             case Gravitytypes.Reverse:
                 GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * 3f, ForceMode.Acceleration);
@@ -461,6 +471,31 @@ public class Movement
 
     public static void SpiderCrawl() =>
             GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0);
+    
+    public static void UpwardsBody() =>
+        GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-180, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.z);
+    
+    public static void SetBodyPatch(bool enabled, int mode = 0)
+    {
+        TorsoPatch.enabled = enabled;
+        TorsoPatch.mode = mode;
+
+        if (!enabled && recBodyRotary != null)
+            Object.Destroy(recBodyRotary);
+    }
+
+    
+    public static GameObject recBodyRotary;
+    public static void RecRoomBody()
+    {
+        SetBodyPatch(true, 3);
+
+        if (recBodyRotary == null)
+            recBodyRotary = new GameObject("recBodyRotary");
+
+        recBodyRotary.transform.rotation = Quaternion.Lerp(recBodyRotary.transform.rotation, Quaternion.Euler(0f, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0f), Time.deltaTime * 6.5f);
+    }
+
 
     private static bool wasLeftTouching;
     private static bool wasRightTouching;
@@ -622,6 +657,17 @@ public class Movement
             {
                 collider.enabled = true;
             }
+        }
+    }
+    
+    public static void WalkOnWater()
+    {
+        GameObject gameObject = GameObject.Find("Beach/B_WaterVolumes");
+        Transform transform = gameObject.transform;
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            GameObject gameObject2 = transform.GetChild(i).gameObject;
+            gameObject2.layer = LayerMask.NameToLayer("Default");
         }
     }
 }

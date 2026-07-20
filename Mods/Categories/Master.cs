@@ -36,21 +36,4 @@ public class Master
 
         GreyZoneManager.Instance.DeactivateGreyZoneAuthority();
     }
-
-    public static void GuardianAll()
-    {
-        if (!Variables.IsMaster()) return;
-
-        int Players = 0;
-        GorillaGuardianZoneManager.zoneManagers[0].SetGuardian(PhotonNetwork.PlayerList[Players]);
-        Players++;
-    }
-
-    public static void DisableGuardianAll()
-    {
-        foreach (var ZoneManager in GorillaGuardianZoneManager.zoneManagers.Where(gorillaGuardianZoneManager => gorillaGuardianZoneManager.enabled && gorillaGuardianZoneManager.IsZoneValid()))
-        {
-            ZoneManager.SetGuardian(null);
-        }
-    }
 }

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ExitGames.Client.Photon;
+using Photon.Pun;
 using Undefined.Utilities;
 using UnityEngine;
 
@@ -11,51 +13,60 @@ public class Tag
 {
     public static void TagGun()
     {
+        if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
+            return;
+
         VRRig rig = GorillaTagger.Instance.offlineVRRig;
+
         GunLib.start2guns(delegate ()
         {
             rig.enabled = false;
             rig.transform.position = GunLib.LockedPlayer.transform.position + new Vector3(0f, -2f, 0f);
             GameMode.ReportTag(GunLib.LockedPlayer.Creator);
+            rig.enabled = true;
         }, true);
-        rig.enabled = true;
     }
 
     public static void TagAll()
     {
-        foreach (VRRig vrrig in VRRigCache.m_activeRigs)
+        if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
+            return;
+
+        foreach (VRRig rig in VRRigCache.m_activeRigs)
         {
-            if (vrrig != GorillaTagger.Instance.offlineVRRig)
-            {
-                if (!vrrig.mainSkin.material.name.Contains("fected") && GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
-                {
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
-                    GorillaTagger.Instance.offlineVRRig.transform.position = vrrig.transform.position;
-                    GameMode.ReportTag(vrrig.Creator);
-                }
-            }
-            else
+            if (rig == GorillaTagger.Instance.offlineVRRig)
             {
                 GorillaTagger.Instance.offlineVRRig.enabled = true;
+                continue;
             }
+
+            if (rig.mainSkin.material.name.Contains("fected"))
+                continue;
+
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+            GorillaTagger.Instance.offlineVRRig.transform.position = rig.transform.position;
+            GameMode.ReportTag(rig.Creator);
         }
     }
 
     public static void TagSelf()
     {
-        foreach (VRRig Player in VRRigCache.ActiveRigs)
+        if (GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("infected"))
+            return;
+
+        foreach (VRRig player in VRRigCache.ActiveRigs)
         {
-            if (Player != GorillaTagger.Instance.offlineVRRig)
-            {
-                if (Player.mainSkin.material.name.Contains("infected"))
-                {
-                    GorillaTagger.Instance.offlineVRRig.enabled = false;
-                    GorillaTagger.Instance.offlineVRRig.transform.position = Player.leftHandTransform.position;
-                    GameMode.ReportTag(Player.Creator);
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
-                    break;
-                }
-            }
+            if (player == GorillaTagger.Instance.offlineVRRig)
+                continue;
+
+            if (!player.mainSkin.material.name.Contains("infected"))
+                continue;
+
+            GorillaTagger.Instance.offlineVRRig.enabled = false;
+            GorillaTagger.Instance.offlineVRRig.transform.position = player.leftHandTransform.position;
+            GameMode.ReportTag(player.Creator);
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+            break;
         }
     }
 
@@ -78,5 +89,15 @@ public class Tag
     public static void DisableTagFix()
     {
         GorillaTagger.Instance.maxTagDistance = 1.2f;
+    }
+    
+    public static void NoTagOnJoin()
+    {
+        PlayerPrefs.SetString("tutorial", "nope");
+        PlayerPrefs.SetString("didTutorial", "nope");
+        Hashtable hash = new Hashtable();
+        hash.Add("didTutorial", false);
+        PhotonNetwork.LocalPlayer.SetCustomProperties(hash, null, null);
+        PlayerPrefs.Save();
     }
 }
