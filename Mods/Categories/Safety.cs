@@ -1,6 +1,11 @@
-﻿using GorillaNetworking;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using GorillaNetworking;
 using Photon.Voice.Unity;
 using System.Linq;
+using HarmonyLib;
+using Photon.Pun;
+using Undefined.Utilities;
 using UnityEngine;
 
 namespace Undefined.Mods.Categories;
@@ -31,48 +36,51 @@ public class Safety
             }
         }
     }
-    static float ProximityThreshold = 0.35f, lastVol, startSilenceTime = -1f;
-    private static bool reloaded;
-    public static void BypassAutomod()
+
+    public static void RestartGame()
     {
-        GorillaTagger.moderationMutedTime = -1f;
+        Process.Start("steam://rungameid/1533390");
+        Application.Quit();
+    }
 
-        if (GorillaComputer.instance.autoMuteType != "OFF")
+    private static string[] badcosmetic = new string[]
+    {
+        "LBAAk", "LBAAD", "LMAPY"
+    };
+
+    public static void AntiModeration()
+    {
+        foreach (VRRig rigs in VRRigCache.ActiveRigs)
         {
-            GorillaComputer.instance.autoMuteType = "OFF";
-            PlayerPrefs.SetInt("autoMute", 0);
-            PlayerPrefs.Save();
-        }
-
-        Recorder mic = GorillaTagger.Instance.myRecorder;
-        if (mic == null)
-            return;
-
-        float volume = 0f;
-        GorillaSpeakerLoudness recorder = VRRig.LocalRig.GetComponent<GorillaSpeakerLoudness>();
-        if (recorder != null)
-            volume = recorder.Loudness;
-
-        if (volume == 0f)
-        {
-            if (lastVol != 0f)
+            var cosmetic = Traverse.Create(rigs).Field<HashSet<string>>("_playerOwnedCosmetics").Value;
+            foreach (var verybadcosmetic in cosmetic)
             {
-                startSilenceTime = Time.time;
-                reloaded = false;
-            }
-
-            if (startSilenceTime > 0f && !reloaded && Time.time - startSilenceTime >= 0.5f)
-            {
-                mic.RestartRecording(true);
-                reloaded = true;
+                if (cosmetic.Contains(verybadcosmetic))
+                {
+                    if (!PhotonNetwork.CurrentRoom.CustomProperties.ToString().Contains("MODDED"))
+                    {
+                        NetworkSystem.Instance.ReturnToSinglePlayer();
+                        Variables.RPCProtection();
+                        NotificationLib.SendNotification(NotificationLib.NotificationType.Room, "Kicked Due to Moderation in room");
+                    }
+                }
             }
         }
-        else
-        {
-            startSilenceTime = -1f;
-            reloaded = false;
-        }
-
-        lastVol = volume;
+    }
+    
+    public static void NoFingerMovement()
+    {
+        ControllerInputPoller.instance.leftControllerGripFloat = 0f;
+        ControllerInputPoller.instance.rightControllerGripFloat = 0f;
+        ControllerInputPoller.instance.leftControllerIndexFloat = 0f;
+        ControllerInputPoller.instance.rightControllerIndexFloat = 0f;
+        ControllerInputPoller.instance.leftControllerPrimaryButton = false;
+        ControllerInputPoller.instance.leftControllerSecondaryButton = false;
+        ControllerInputPoller.instance.rightControllerPrimaryButton = false;
+        ControllerInputPoller.instance.rightControllerSecondaryButton = false;
+        ControllerInputPoller.instance.leftControllerPrimaryButtonTouch = false;
+        ControllerInputPoller.instance.leftControllerSecondaryButtonTouch = false;
+        ControllerInputPoller.instance.rightControllerPrimaryButtonTouch = false;
+        ControllerInputPoller.instance.rightControllerSecondaryButtonTouch = false;
     }
 }

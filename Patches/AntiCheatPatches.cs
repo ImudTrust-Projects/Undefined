@@ -1,14 +1,39 @@
 using HarmonyLib;
+using Photon.Pun;
+using Undefined.Utilities;
 using UnityEngine;
 
 namespace Undefined.Patches;
 
 public class AntiCheatPatches
 {
-    [HarmonyPatch(typeof(MonkeAgent), "SendReport")]
+    
+    [HarmonyPatch(typeof(MonkeAgent), nameof(MonkeAgent.SendReport))]
     public class SendReportPatch
     {
-        private static bool Prefix(string susReason, string susId, string susNick) => false;
+        private static bool Prefix(string susReason, string susId, string susNick)
+        {
+            if (susReason.ToLower() == "empty rig")
+                return false;
+
+            if (Variables.NotifySelf && susId == PhotonNetwork.LocalPlayer.UserId)
+            {
+                NotificationLib.SendNotification(
+                    NotificationLib.NotificationType.AntiCheat,
+                    $"You were reported for {(Variables.HideReason ? "hidden reason" : susReason)}."
+                );
+            }
+
+            if (Variables.NotifyOthers && susId != PhotonNetwork.LocalPlayer.UserId)
+            {
+                NotificationLib.SendNotification(
+                    NotificationLib.NotificationType.AntiCheat,
+                    $"{susNick} was reported for {(Variables.HideReason ? "hidden reason" : susReason)}."
+                );
+            }
+
+            return false;
+        }
     }
 
     [HarmonyPatch(typeof(MonkeAgent), "CloseInvalidRoom")]

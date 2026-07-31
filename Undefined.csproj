@@ -1,8 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <LangVersion>latest</LangVersion>
-	  <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>Undefined</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,6 +25,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Embedded\icon.png" />
     <EmbeddedResource Include="Resources\Embedded\minecraftfont" />
+    <None Remove="Resources\Assets\gorillatv" />
+    <EmbeddedResource Include="Resources\Assets\gorillatv" />
   </ItemGroup>
 
   <!-- AssemblyPublicizer usage inspired from GorillaShirts -->
@@ -30,6 +38,10 @@
     <PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <PublicizerClearCacheOnClean>true</PublicizerClearCacheOnClean>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp" Publicize="true">
@@ -119,7 +131,7 @@
     <Reference Include="KID">
       <HintPath>$(GameAssemblyPath)\KID.dll</HintPath>
     </Reference>
-    <Reference Include="LIV.LCK">
+    <Reference Include="LIV.LCK" Publicize="true">
       <HintPath>$(GameAssemblyPath)\LIV.LCK.dll</HintPath>
     </Reference>
     <Reference Include="LIV.LCK_GorillaTag">
@@ -566,7 +578,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\Assets\" />
     <Folder Include="Resources\Sounds\" />
   </ItemGroup>
 </Project>

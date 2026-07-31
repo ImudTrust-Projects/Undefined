@@ -7,7 +7,10 @@ using Photon.Realtime;
 using POpusCodec.Enums;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using GorillaLocomotion;
+using HarmonyLib;
 using Undefined.Utilities;
 using UnityEngine;
 using static Undefined.Utilities.GunLib;
@@ -18,89 +21,148 @@ namespace Undefined.Mods.Categories;
 
 public class Overpowered
 {
-    public static HitTargetNetworkState[] tagetcache;
-
-    public static void SpazTargets()
-    {
-        if (tagetcache == null)
-        {
-            tagetcache = Resources.FindObjectsOfTypeAll<HitTargetNetworkState>();
-        }
-        if (PhotonNetwork.IsMasterClient)
-        {
-            foreach (HitTargetNetworkState item in tagetcache)
-            {
-                item.hitCooldownTime = 0;
-                item.TargetHit(Vector3.zero, Vector3.zero);
-            }
-        }
-    }
-
-    public static void BreakTargets()
-    {
-        if (tagetcache == null)
-        {
-            tagetcache = Resources.FindObjectsOfTypeAll<HitTargetNetworkState>();
-        }
-        if (PhotonNetwork.IsMasterClient)
-        {
-            foreach (HitTargetNetworkState item in tagetcache)
-            {
-                PhotonNetwork.Destroy(item.GetView);
-            }
-        }
-    }
-
-    public static void UntagSelf()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            GorillaTagManager gorillaTagManager = (GorillaTagManager)GorillaGameManager.instance;
-            gorillaTagManager.currentInfected.Remove(PhotonNetwork.LocalPlayer);
-        }
-    }
-
-    public static void UntagAll()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            foreach (Player player in PhotonNetwork.PlayerList)
-            {
-                GorillaTagManager gorillaTagManager = (GorillaTagManager)GorillaGameManager.instance;
-                gorillaTagManager.currentInfected.Remove(player);
-            }
-        }
-    }
-
-    public static void ForceTagLag()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            GorillaTagManager gorillaTagManager = (GorillaTagManager)GorillaGameManager.instance;
-            gorillaTagManager.tagCoolDown = 200000;
-        }
-    }
-
-    public static void NoTagCooldown()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            GorillaTagManager gorillaTagManager = (GorillaTagManager)GorillaGameManager.instance;
-            gorillaTagManager.tagCoolDown = 0;
-        }
-    }
-
-    public static void BreakElevator()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.RemoveInstantiatedGO(GRElevatorManager._instance.gameObject, false);
-        }
-    }
-
     public static void DestroyAll()
     {
         PhotonNetwork.OpRemoveCompleteCache();
+    }
+
+    private static float delay = 0.5f;
+
+    public static void BreakMovementAll()
+    {
+        try
+        {
+            if (!PhotonNetwork.InRoom) return;
+            float currentTime = Time.time;
+            if (currentTime > delay)
+            {
+                delay = currentTime + 0.5f;
+
+                if (!IsLocalPlayerGuardian()) return;
+                var activeRigs = VRRigCache.ActiveRigs;
+
+                foreach (VRRig vrrig in activeRigs)
+                {
+                    if (vrrig == null || vrrig.isMyPlayer) continue;
+
+                    NetworkView netView = extarstuff.GetNetViewFromVRRig(vrrig);
+                    if (netView != null)
+                    {
+                        Vector3 groundPosition = vrrig.transform.position;
+                        groundPosition.y = -10f;
+
+                        netView.SendRPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
+                        netView.SendRPC("DroppedByPlayer", RpcTarget.Others, new object[] { (groundPosition - vrrig.transform.position) * 100f });
+                    }
+                }
+            }
+        }
+        catch { }
+    }
+
+    private static float grabCooldown;
+
+    private static bool HasGrabbableHand(VRRig rig)
+    {
+        if (rig == null)
+            return false;
+
+        return rig.leftHandLink.CanBeGrabbed() || rig.rightHandLink.CanBeGrabbed();
+    }
+
+    private static void SetGrabPatch(bool state)
+    {
+        Patches.GrabPatches.GrabPatch.enabled = state;
+
+        if (!state)
+            VRRig.LocalRig.enabled = true;
+    }
+
+    private static void GrabPlayer(VRRig rig, Vector3 position)
+    {
+        if (rig == null || rig.isLocal)
+            return;
+
+        if (!HasGrabbableHand(rig))
+        {
+            SetGrabPatch(false);
+            VRRig.LocalRig.BreakHandLinks();
+            return;
+        }
+
+        SetGrabPatch(true);
+
+        VRRig.LocalRig.enabled = false;
+        VRRig.LocalRig.transform.position = position;
+
+        bool useLeftHand = rig.leftHandLink.CanBeGrabbed();
+
+        var targetHand = useLeftHand ? rig.leftHandLink : rig.rightHandLink;
+        var localHand = useLeftHand ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink;
+
+        if (targetHand.grabbedPlayer == NetworkSystem.Instance.LocalPlayer)
+            return;
+
+        if (grabCooldown <= Time.time)
+        {
+            VRRig.LocalRig.transform.position = rig.syncPos;
+            localHand.TentacleTryCreateLink(targetHand);
+        }
+
+        grabCooldown = Mathf.Max(targetHand.rejectGrabsUntilTimestamp, Time.time + 0.2f);
+    }
+
+    public static void GrabFlingGun()
+    {
+        GunLib.start2guns(() =>
+        {
+            Vector3 flingPosition = new(
+                UnityEngine.Random.value < 0.5f ? -95000f : 95000f,
+                95000f,
+                UnityEngine.Random.value < 0.5f ? -95000f : 95000f);
+
+            GrabPlayer(GunLib.LockedPlayer, flingPosition);
+        }, true);
+
+        bool isHoldingInput =
+            InputHandler.Instance.RightGrip.IsPressed ||
+            InputHandler.Instance.LeftGrip.IsPressed ||
+            InputHandler.Instance.RightTrigger.IsPressed ||
+            InputHandler.Instance.LeftTrigger.IsPressed;
+
+        if (isHoldingInput || !Patches.GrabPatches.GrabPatch.enabled)
+            return;
+
+        VRRig.LocalRig.BreakHandLinks();
+        SetGrabPatch(false);
+    }
+
+    public static void GrabFlingAll()
+    {
+        foreach (var rig in VRRigCache.ActiveRigs)
+        {
+            if (rig == null || rig.isMyPlayer || rig.isOfflineVRRig || !HasGrabbableHand(rig))
+                continue;
+
+            Vector3 flingPosition = new(
+                UnityEngine.Random.value < 0.5f ? -95000f : 95000f,
+                95000f,
+                UnityEngine.Random.value < 0.5f ? -95000f : 95000f);
+
+            GrabPlayer(rig, flingPosition);
+        }
+
+        bool isHoldingInput =
+            InputHandler.Instance.RightGrip.IsPressed ||
+            InputHandler.Instance.LeftGrip.IsPressed ||
+            InputHandler.Instance.RightTrigger.IsPressed ||
+            InputHandler.Instance.LeftTrigger.IsPressed;
+
+        if (isHoldingInput || !Patches.GrabPatches.GrabPatch.enabled)
+            return;
+
+        VRRig.LocalRig.BreakHandLinks();
+        SetGrabPatch(false);
     }
 
     public static float hoverboarddelay = 0f;
@@ -270,6 +332,44 @@ public class Overpowered
 
             LagDelay = Time.time + 2.2f;
         }
+    }
+
+    public static void Flinggunv2()
+    {
+        GunLib.start2guns(delegate ()
+        {
+            NetPlayer slapper = NetworkSystem.Instance.LocalPlayer;
+            NetPlayer target = GunLib.LockedPlayer.Creator;
+
+            RigContainer targetRig;
+            if (!VRRigCache.Instance.TryGetVrrig(target, out targetRig))
+                return;
+            Vector3 handVelocity = GTPlayer.Instance.GetHandVelocityTracker(false).GetAverageVelocity(true);
+            if (handVelocity.magnitude < 6f)
+            {
+                handVelocity = new Vector3(
+                    Random.Range(-10f, 10f),
+                    Random.Range(5f, 15f),
+                    Random.Range(10f, 20f)
+                );
+            }
+
+            Vector3 clampedVelocity = Vector3.ClampMagnitude(handVelocity, 20f);
+            Vector3 launchVelocity = clampedVelocity * 1f;
+
+            Vector3 groundNormal;
+            if (targetRig.Rig.IsOnGround(1.2f, 0.4f, out groundNormal))
+            {
+                launchVelocity += groundNormal * 3f * Mathf.Clamp01(1f - Vector3.Dot(groundNormal, launchVelocity.normalized));
+            }
+
+            GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC(
+                "GuardianLaunchPlayer",
+                target,
+                launchVelocity
+            );
+
+        }, true);
     }
 
     public static bool IsLocalPlayerGuardian() =>

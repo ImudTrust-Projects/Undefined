@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Undefined.Mods;
 using Undefined.Mods.Categories;
 using Undefined.Utilities;
 using UnityEngine;
@@ -21,7 +22,9 @@ namespace Undefined.Menu;
 
 public class Main : MonoBehaviour
 {
-    public static int activeCategory
+    private static Category categoryIndex;
+
+    public static Category activeCategory
     {
         get => categoryIndex;
         set
@@ -310,7 +313,11 @@ public class Main : MonoBehaviour
             discTextTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
-        ButtonInfo[] pageButtons = buttons[activeCategory].Skip(activePage * buttonsPerPage).Take(buttonsPerPage).ToArray();
+        ButtonInfo[] pageButtons = buttons[(int)activeCategory]
+            .Skip(activePage * buttonsPerPage)
+            .Take(buttonsPerPage)
+            .ToArray();
+
         for (int i = 0; i < pageButtons.Length; i++)
         {
             BuildButton(i * 0.1f, pageButtons[i]);
@@ -373,7 +380,7 @@ public class Main : MonoBehaviour
 
     public static void RebuildMenu()
     {
-        if (activeCategory == 3)
+        if (activeCategory == Category.EnabledMods)
         {
             EnabledMods.UpdateCategory();
         }
@@ -494,19 +501,23 @@ public class Main : MonoBehaviour
 
     public static void ChangePage(bool next)
     {
-        int totalPages = (buttons[activeCategory].Length + buttonsPerPage - 1) / buttonsPerPage;
-        if (totalPages <= 1) return;
+        int totalPages = (buttons[(int)activeCategory].Length + buttonsPerPage - 1) / buttonsPerPage;
+        if (totalPages <= 1)
+            return;
 
         if (next)
         {
             activePage++;
-            if (activePage >= totalPages) activePage = 0;
+            if (activePage >= totalPages)
+                activePage = 0;
         }
         else
         {
             activePage--;
-            if (activePage < 0) activePage = totalPages - 1;
+            if (activePage < 0)
+                activePage = totalPages - 1;
         }
+
         RebuildMenu();
     }
 

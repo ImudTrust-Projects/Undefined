@@ -204,6 +204,56 @@ public class Movement
         lastLeftHeld = false;
         lastRightHeld = false;
     }
+    
+    public static float jspeed = 7.5f;
+    public static float jmulti = 1.1f;
+    
+    public static readonly float[] SpeedBoostAmounts = { 2f, 7.5f, 8f, 9f, 200f };
+    public static readonly float[] SpeedBoostMultipliers = { 0.5f, 1.1f, 1.5f, 2f, 10f };
+    public static readonly List<string> SpeedBoostNames = new()
+    {
+        "Slow",
+        "Normal",
+        "Middle",
+        "Fast",
+        "Ultra Fast"
+    };
+
+    public static int speedBoostMode;
+
+    public static void SetSpeedBoost(string mode)
+    {
+        speedBoostMode = SpeedBoostNames.IndexOf(mode);
+
+        if (speedBoostMode < 0)
+            speedBoostMode = 0;
+
+        jspeed = SpeedBoostAmounts[speedBoostMode];
+        jmulti = SpeedBoostMultipliers[speedBoostMode];
+
+        NotificationLib.SendNotification(
+            NotificationLib.NotificationType.Info,
+            $"Speed: {SpeedBoostNames[speedBoostMode]}"
+        );
+    }
+
+    public static bool speedBoostEnabled;
+
+    public static void SpeedBoost()
+    {
+        speedBoostEnabled = !speedBoostEnabled;
+
+        if (speedBoostEnabled)
+        {
+            GTPlayer.Instance.maxJumpSpeed = jspeed;
+            GTPlayer.Instance.jumpMultiplier = jmulti;
+        }
+        else
+        {
+            GTPlayer.Instance.maxJumpSpeed = 6.5f;
+            GTPlayer.Instance.jumpMultiplier = 1f;
+        }
+    }
 
     public static void Fly()
     {
@@ -212,6 +262,16 @@ public class Movement
             GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * (Time.deltaTime * FlySpeed);
             GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
         }
+    }
+    public static void NoClipFly()
+    {
+        if (InputHandler.Instance.RightPrimary.IsPressed)
+        {
+            Noclipistuff(true);
+            GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * (Time.deltaTime * FlySpeed);
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+        Noclipistuff(false);
     }
 
     public static void TPSTUMP()
@@ -468,34 +528,6 @@ public class Movement
         velocity *= FlySpeed;
         GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.Lerp(GorillaTagger.Instance.rigidbody.linearVelocity, velocity, 0.12875f);
     }
-
-    public static void SpiderCrawl() =>
-            GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0);
-    
-    public static void UpwardsBody() =>
-        GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-180, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.z);
-    
-    public static void SetBodyPatch(bool enabled, int mode = 0)
-    {
-        TorsoPatch.enabled = enabled;
-        TorsoPatch.mode = mode;
-
-        if (!enabled && recBodyRotary != null)
-            Object.Destroy(recBodyRotary);
-    }
-
-    
-    public static GameObject recBodyRotary;
-    public static void RecRoomBody()
-    {
-        SetBodyPatch(true, 3);
-
-        if (recBodyRotary == null)
-            recBodyRotary = new GameObject("recBodyRotary");
-
-        recBodyRotary.transform.rotation = Quaternion.Lerp(recBodyRotary.transform.rotation, Quaternion.Euler(0f, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0f), Time.deltaTime * 6.5f);
-    }
-
 
     private static bool wasLeftTouching;
     private static bool wasRightTouching;

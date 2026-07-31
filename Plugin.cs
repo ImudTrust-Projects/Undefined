@@ -4,6 +4,8 @@ using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
+using System.Linq;
+using System.Reflection;
 using Undefined.Menu;
 using Undefined.Mods.Categories;
 using Undefined.Utilities;
@@ -30,6 +32,33 @@ public class Plugin : BaseUnityPlugin
     private Version latestVersion;
     private Version minimumVersion;
 
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class PatchOnAwake : Attribute { }
+    
+    private void PatchAwakePatches()
+    {
+        Type[] types;
+
+        try
+        {
+            types = Assembly.GetExecutingAssembly().GetTypes();
+        }
+        catch (ReflectionTypeLoadException e)
+        {
+            types = e.Types.Where(t => t != null).ToArray();
+        }
+
+        foreach (var type in types)
+        {
+            if (type == null || !type.IsClass)
+                continue;
+
+            if (type.GetCustomAttribute<PatchOnAwake>() == null)
+                continue;
+
+            harmony.CreateClassProcessor(type).Patch();
+        }
+    }
 
     private void Awake()
     {
@@ -49,7 +78,9 @@ public class Plugin : BaseUnityPlugin
         AudioHandler.LoadSounds();
 
         harmony = new Harmony(Constants.PluginGUID);
+        
         harmony.PatchAll();
+        PatchAwakePatches();
 
         ComponentHolder.AddComponent<Main>();
         ComponentHolder.AddComponent<NotificationLib>();

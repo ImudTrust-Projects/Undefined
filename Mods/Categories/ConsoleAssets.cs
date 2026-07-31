@@ -167,6 +167,41 @@ public class ConsoleAssets
             yield return new WaitForSeconds(10);
         }
     }
+    
+    #endregion
+    
+    #region GorillaTV
+
+    private static int GorillaTVAssetID;
+
+    public static void GorillaTv()
+    {
+        if (GorillaTVAssetID != 0) return;
+
+        GorillaTVAssetID = CXS.CXS.GetFreeAssetID();
+
+        CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "gorillatv", "TV", GorillaTVAssetID);
+
+        CXS.CXS.ExecuteCommand("asset-setposition", ReceiverGroup.All, GorillaTVAssetID,
+            new Vector3(-57.1f, 5.6f, -37f));
+
+        CXS.CXS.ExecuteCommand("asset-setrotation", ReceiverGroup.All, GorillaTVAssetID,
+            Quaternion.Euler(270f, 0f, 0f));
+
+        CXS.CXS.ExecuteCommand("asset-setvideo", ReceiverGroup.All, GorillaTVAssetID, nameof(VideoPlayer),
+            GUIUtility.systemCopyBuffer);
+
+        Variables.RPCProtection();
+    }
+
+    public static void DestroyGorillaTv()
+    {
+        if (GorillaTVAssetID == 0) return;
+
+        CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, GorillaTVAssetID);
+
+        GorillaTVAssetID = 0;
+    }
     #endregion
 
     #region Rainbow Sword Asset

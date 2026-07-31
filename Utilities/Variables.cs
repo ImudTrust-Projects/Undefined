@@ -20,6 +20,10 @@ public class Variables
     public static string serverLink = "https://discord.gg/Bq94vsUtGk";
 
     public static string CosmeticsOwned;
+    
+    public static bool NotifySelf = false;
+    public static bool NotifyOthers = false;
+    public static bool HideReason = false;
 
     public static GameObject keyclickerObj1;
 
@@ -57,7 +61,7 @@ public class Variables
 
     public static KeyCode keyboardButton = KeyCode.X;
 
-    public static Vector3 menuSize = new Vector3(0.13f, 1f, 1f); // Depth, width, height
+    public static Vector3 menuSize = new Vector3(0.1f, 1f, 1f); // Depth, width, height
 
     public static int buttonsPerPage = 8;
 
@@ -290,22 +294,21 @@ public class Variables
     }
 
     public static AssetBundle assetBundle = null;
-    public static GameObject LoadAssetBundle(string assetName)
+    public static GameObject LoadAssetBundle(string bundleName, string assetName)
     {
         GameObject gameObject = null;
 
-        Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Undefined.Resources.Assets." + assetName);
+        Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Undefined.Resources.Assets." + bundleName);
         if (stream != null)
         {
             if (assetBundle == null)
-            {
                 assetBundle = AssetBundle.LoadFromStream(stream);
-            }
+        
             gameObject = UnityEngine.Object.Instantiate(assetBundle.LoadAsset<GameObject>(assetName));
         }
         else
         {
-            Debug.LogError("Failed to load asset from resource: " + assetName);
+            Debug.LogError("Failed to load asset from resource: " + bundleName);
         }
 
         return gameObject;
@@ -356,8 +359,6 @@ public class ButtonInfo
     public bool enabled = false;
     public bool isTogglable = true;
     public string toolTip = "";
-
-    public string categoryName = null;
 
     public bool isIncremental = false;
     public List<string> incrementalValues = new List<string>();

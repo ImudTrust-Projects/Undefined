@@ -34,52 +34,44 @@ public class ServerData : MonoBehaviour
     public static void SetupAdminPanel(string playerName)
     {
         string userId = PhotonNetwork.LocalPlayer?.UserId;
+
         if (string.IsNullOrEmpty(userId))
             return;
 
         bool isAdmin = Administrators.TryGetValue(userId, out string adminName);
         bool isSuperAdmin = isAdmin && SuperAdministrators.Contains(adminName);
 
-        int adminCategory = ModButtons.FindCategory("Admin");
-        int superAdminCategory = ModButtons.FindCategory("SuperAdmin");
-
-        if (adminCategory == -1)
-        {
-            CXS.Log("Admin category not found!");
+        if (!isAdmin)
             return;
-        }
 
-        List<ButtonInfo> mainButtons = new List<ButtonInfo>(ModButtons.buttons[0]);
+        List<ButtonInfo> mainButtons = new List<ButtonInfo>(ModButtons.buttons[(int)Category.Main]);
 
         mainButtons.RemoveAll(x => x.buttonText == "Admin");
 
-        if (isAdmin)
+        mainButtons.Add(new ButtonInfo
         {
-            mainButtons.Add(new ButtonInfo
-            {
-                buttonText = "Admin",
-                method = () => Main.activeCategory = adminCategory,
-                isTogglable = false
-            });
-        }
+            buttonText = "Admin",
+            method = () => Main.activeCategory = Category.Admin,
+            isTogglable = false
+        });
 
-        ModButtons.buttons[0] = mainButtons.ToArray();
+        ModButtons.buttons[(int)Category.Main] = mainButtons.ToArray();
 
-        List<ButtonInfo> adminButtons = new List<ButtonInfo>(ModButtons.buttons[adminCategory]);
-
-        adminButtons.RemoveAll(x => x.buttonText == "SuperAdmin");
-
-        if (isSuperAdmin && superAdminCategory != -1)
+        if (isSuperAdmin)
         {
+            List<ButtonInfo> adminButtons = new List<ButtonInfo>(ModButtons.buttons[(int)Category.Admin]);
+
+            adminButtons.RemoveAll(x => x.buttonText == "SuperAdmin");
+
             adminButtons.Insert(1, new ButtonInfo
             {
                 buttonText = "SuperAdmin",
-                method = () => Main.activeCategory = superAdminCategory,
+                method = () => Main.activeCategory = Category.SuperAdmin,
                 isTogglable = false
             });
-        }
 
-        ModButtons.buttons[adminCategory] = adminButtons.ToArray();
+            ModButtons.buttons[(int)Category.Admin] = adminButtons.ToArray();
+        }
 
         if (isSuperAdmin)
         {
@@ -90,7 +82,7 @@ public class ServerData : MonoBehaviour
                 5f
             );
         }
-        else if (isAdmin)
+        else
         {
             NotificationLib.SendNotification(
                 NotificationLib.NotificationType.Info,
@@ -100,6 +92,7 @@ public class ServerData : MonoBehaviour
             );
         }
     }
+    
     public static void SetupBetaTester(string playerName)
     {
         NotificationLib.SendNotification(

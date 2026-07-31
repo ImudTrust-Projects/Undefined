@@ -13,6 +13,7 @@ using HarmonyLib;
 using Undefined.Patches;
 using Undefined.Utilities;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 
 namespace Undefined.Mods.Categories;
