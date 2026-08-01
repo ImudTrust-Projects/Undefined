@@ -26,7 +26,8 @@
     <EmbeddedResource Include="Resources\Embedded\icon.png" />
     <EmbeddedResource Include="Resources\Embedded\minecraftfont" />
     <None Remove="Resources\Assets\gorillatv" />
-    <EmbeddedResource Include="Resources\Assets\gorillatv" />
+    <None Remove="Resources\Assets\glockglockgun" />
+    <EmbeddedResource Include="Resources\Assets\glockglockgun" />
   </ItemGroup>
 
   <!-- AssemblyPublicizer usage inspired from GorillaShirts -->

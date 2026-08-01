@@ -62,7 +62,7 @@ public class Master
         if (!Variables.IsMaster())
             return;
 
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             if (GunLib.LockedPlayer == null)
                 return;

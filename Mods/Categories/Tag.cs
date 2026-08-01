@@ -18,7 +18,7 @@ public class Tag
 
         VRRig rig = GorillaTagger.Instance.offlineVRRig;
 
-        GunLib.start2guns(delegate ()
+        GunLib.StartGun(() =>
         {
             rig.enabled = false;
             rig.transform.position = GunLib.LockedPlayer.transform.position + new Vector3(0f, -2f, 0f);

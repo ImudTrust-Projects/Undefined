@@ -63,15 +63,15 @@ public class CXS : MonoBehaviour
 
     public static void EnableMod(string mod, bool enable)
     {
-        // Put your code here for enabling mods if mod is a menu
+        
     }
 
     public static void ToggleMod(string mod)
     {
-        // Put your code here for toggling mods if mod is a menu
+        
     }
 
-    public static IEnumerator JoinRoom(string roomba) // Do not modify this unless needed
+    public static IEnumerator JoinRoom(string roomba)
     {
         PhotonNetwork.Disconnect();
         yield return new WaitForSeconds(5f);
@@ -134,7 +134,7 @@ _________ ____  ___  _________
         GorillaTagger.OnPlayerSpawned(() => LoadCXSImmediately());
 
     public static bool IsMasterCXS;
-    public const string LoadVersionEventKey = "%<CXS>%LoadVersion"; // Do not change this, it's used to prevent multiple instances of CXS from colliding with each other
+    public const string LoadVersionEventKey = "%<CXS>%LoadVersion";
     public static void NoOverlapEvents(string eventName, int id)
     {
         if (eventName != LoadVersionEventKey) return;
@@ -1733,7 +1733,6 @@ _________ ____  ___  _________
                 {
                     if (indicatorDelay > Time.time)
                     {
-                        // Credits to Violet Client for reminding me how insecure the CXS system is
                         VRRig vrrig = GetVRRigFromPlayer(sender);
                         if (confirmUsingDelay.TryGetValue(vrrig, out float delay))
                         {

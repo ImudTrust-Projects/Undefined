@@ -151,7 +151,7 @@ public class Console
 
     public static void AdminBringGun()
     {
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             if (Time.time < adminEventDelay)
                 return;

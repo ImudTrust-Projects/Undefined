@@ -44,11 +44,6 @@ public class Main : MonoBehaviour
             if (InputHandler.Instance == null)
                 return;
 
-            if (Settings.Ghostview && !VRRig.LocalRig.enabled)
-            {
-                Visuals.CreateCubes();
-            }
-
             bool openRequested = (!rightHanded && InputHandler.Instance.LeftSecondary.IsPressed) ||
                                  (rightHanded && InputHandler.Instance.RightSecondary.IsPressed);
 
@@ -353,7 +348,7 @@ public class Main : MonoBehaviour
 
         if (info.isIncremental)
         {
-            string value = Settings.GetDisplayName(info.GetCurrentIncrementalValue());
+            string value = SoundSettings.GetDisplayName(info.GetCurrentIncrementalValue());
             baseText = $"{info.buttonText} [<color=#00FFFF>{value}</color>]";
         }
         else

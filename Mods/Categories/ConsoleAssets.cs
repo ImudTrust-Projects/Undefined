@@ -219,14 +219,12 @@ public class ConsoleAssets
             CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "rbsword", "Sword", allocatedRSwordId);
             CXS.CXS.ExecuteCommand("asset-setanchor", ReceiverGroup.All, allocatedRSwordId, 2);
 
-            // I fix this soon im lazy
+            // I finally fixed it, chat.
 
-            /*if (!Main.GetIndex("Disable Asset Music").enabled)
+            if (!ModButtons.IsEnabled("Disable Asset Music").enabled)
                 CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, allocatedRSwordId, "Sword", "Music");
             else
-                CXS.CXS.ExecuteCommand("asset-stopsound", ReceiverGroup.All, allocatedRSwordId, "Sword");*/
-
-            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, allocatedRSwordId, "Sword", "Music");
+                CXS.CXS.ExecuteCommand("asset-stopsound", ReceiverGroup.All, allocatedRSwordId, "Sword");
 
             Variables.RPCProtection();
         }

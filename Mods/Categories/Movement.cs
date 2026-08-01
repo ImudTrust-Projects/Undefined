@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using TMPro;
+using Undefined.MENUSETTINGS;
 using Undefined.Patches;
 using Undefined.Utilities;
 using UnityEngine;
@@ -37,7 +38,7 @@ public class Movement
     public static float subThingy;
     public static float subThingyZ;
 
-    public static float FlySpeed = 10f; // this is very bad, but it works for now. I will fix this later
+    public static float FlySpeed = 10f; // I will fix this in later updates i'm super lazy right now.
 
     public static int platMode = 0;
     public static int platInput = 0;
@@ -134,7 +135,7 @@ public class Movement
 
     private static void ApplyMode(Renderer renderer)
     {
-        Color platformColor = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+        Color platformColor = Settings.backgroundColor.colors[0].color;
 
         switch (platMode)
         {
@@ -367,6 +368,7 @@ public class Movement
         }
     }
 
+    // this is broken :/
     public static void AutoElevatorClimb()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -422,7 +424,7 @@ public class Movement
 
             Noclipistuff(true);
 
-            Color color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+            Color color = Settings.backgroundColor.colors[0].color;
             color = Color.Lerp(color, Color.white, 0.35f);
             color.a = 0.5f;
 
@@ -445,7 +447,7 @@ public class Movement
         }
         else
         {
-            Color color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+            Color color = Settings.backgroundColor.colors[0].color;
             color.a = 1f;
 
             checkpoint.GetComponent<Renderer>().material.color = color;
@@ -651,7 +653,7 @@ public class Movement
 
     public static void TeleportGun()
     {
-        GunLib.start2guns(delegate ()
+        GunLib.StartGun(() =>
         {
             if (!teleportGunPressed)
             {

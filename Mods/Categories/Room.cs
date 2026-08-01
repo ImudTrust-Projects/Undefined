@@ -89,7 +89,7 @@ public class Room
 
     public static void GetIdGun()
     {
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             var targetedPlayer = GunLib.LockedPlayer;
 

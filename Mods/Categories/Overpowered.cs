@@ -26,40 +26,6 @@ public class Overpowered
         PhotonNetwork.OpRemoveCompleteCache();
     }
 
-    private static float delay = 0.5f;
-
-    public static void BreakMovementAll()
-    {
-        try
-        {
-            if (!PhotonNetwork.InRoom) return;
-            float currentTime = Time.time;
-            if (currentTime > delay)
-            {
-                delay = currentTime + 0.5f;
-
-                if (!IsLocalPlayerGuardian()) return;
-                var activeRigs = VRRigCache.ActiveRigs;
-
-                foreach (VRRig vrrig in activeRigs)
-                {
-                    if (vrrig == null || vrrig.isMyPlayer) continue;
-
-                    NetworkView netView = extarstuff.GetNetViewFromVRRig(vrrig);
-                    if (netView != null)
-                    {
-                        Vector3 groundPosition = vrrig.transform.position;
-                        groundPosition.y = -10f;
-
-                        netView.SendRPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
-                        netView.SendRPC("DroppedByPlayer", RpcTarget.Others, new object[] { (groundPosition - vrrig.transform.position) * 100f });
-                    }
-                }
-            }
-        }
-        catch { }
-    }
-
     private static float grabCooldown;
 
     private static bool HasGrabbableHand(VRRig rig)
@@ -114,7 +80,7 @@ public class Overpowered
 
     public static void GrabFlingGun()
     {
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             Vector3 flingPosition = new(
                 UnityEngine.Random.value < 0.5f ? -95000f : 95000f,
@@ -243,7 +209,7 @@ public class Overpowered
 
     public static void Watergun()
     {
-        start2guns(delegate ()
+        GunLib.StartGun(() =>
         {
             if (PhotonNetwork.InRoom)
             {
@@ -258,6 +224,19 @@ public class Overpowered
             }
         }, true);
         VRRig.LocalRig.enabled = LockedPlayer == null;
+    }
+    
+    public static void ElevatorKickGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            GRElevatorManager._instance.photonView.RPC("RemoteActivateTeleport", LockedPlayer.Creator.GetPlayerRef(), new object[] { GRElevatorManager._instance.currentLocation, GRElevatorManager.ElevatorLocation.GhostReactor, GRElevatorManager.LowestActorNumberInElevator() });
+        }, true);
+    }
+
+    public static void ElevatorKickAll()
+    {
+        GRElevatorManager._instance.photonView.RPC("RemoteActivateTeleport", RpcTarget.Others, new object[] { GRElevatorManager._instance.currentLocation, GRElevatorManager.ElevatorLocation.GhostReactor, GRElevatorManager.LowestActorNumberInElevator() });
     }
 
     private static float LagDelay;
@@ -278,7 +257,7 @@ public class Overpowered
 
     public static void LagGun()
     {
-        start2guns(() =>
+        GunLib.StartGun(() =>
         {
             if (Time.time > LagDelay)
             {
@@ -333,71 +312,5 @@ public class Overpowered
 
             LagDelay = Time.time + 2.2f;
         }
-    }
-
-    public static void Flinggunv2()
-    {
-        GunLib.start2guns(delegate ()
-        {
-            NetPlayer slapper = NetworkSystem.Instance.LocalPlayer;
-            NetPlayer target = GunLib.LockedPlayer.Creator;
-
-            RigContainer targetRig;
-            if (!VRRigCache.Instance.TryGetVrrig(target, out targetRig))
-                return;
-            Vector3 handVelocity = GTPlayer.Instance.GetHandVelocityTracker(false).GetAverageVelocity(true);
-            if (handVelocity.magnitude < 6f)
-            {
-                handVelocity = new Vector3(
-                    Random.Range(-10f, 10f),
-                    Random.Range(5f, 15f),
-                    Random.Range(10f, 20f)
-                );
-            }
-
-            Vector3 clampedVelocity = Vector3.ClampMagnitude(handVelocity, 20f);
-            Vector3 launchVelocity = clampedVelocity * 1f;
-
-            Vector3 groundNormal;
-            if (targetRig.Rig.IsOnGround(1.2f, 0.4f, out groundNormal))
-            {
-                launchVelocity += groundNormal * 3f * Mathf.Clamp01(1f - Vector3.Dot(groundNormal, launchVelocity.normalized));
-            }
-
-            GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC(
-                "GuardianLaunchPlayer",
-                target,
-                launchVelocity
-            );
-
-        }, true);
-    }
-
-    public static bool IsLocalPlayerGuardian() =>
-        GorillaGuardianZoneManager.zoneManagers[0].IsPlayerGuardian(PhotonNetwork.LocalPlayer);
-
-    public static void FlingGun()
-    {
-        try
-        {
-            GunLib.start2guns(() =>
-            {
-                try
-                {
-                    if (PhotonNetwork.InRoom && GunLib.LockedPlayer != null && Overpowered.IsLocalPlayerGuardian())
-                    {
-                        NetworkView view = extarstuff.GetNetViewFromVRRig(GunLib.LockedPlayer);
-
-                        if (view != null)
-                        {
-                            view.SendRPC("GrabbedByPlayer", 1, true, false, false);
-                            view.SendRPC("DroppedByPlayer", 1, new Vector3(0f, 9998.99f, 0f));
-                        }
-                    }
-                }
-                catch { }
-            }, true);
-        }
-        catch { }
     }
 }

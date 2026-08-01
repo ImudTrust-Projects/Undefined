@@ -367,7 +367,7 @@ public class Fun
             GorillaTagger.Instance.offlineVRRig.enabled = true;
         }
     }
-    
+    // broken :(
     public static void HoldRig()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -381,12 +381,12 @@ public class Fun
             GorillaTagger.Instance.offlineVRRig.enabled = true;
         }
     }
-    
+    // I know it's broken I will fix later i'm lazy
     public static void MoveRigGun()
     {
         GorillaTagger.Instance.offlineVRRig.enabled = true;
 
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             GorillaTagger.Instance.offlineVRRig.enabled = false;
             GorillaTagger.Instance.offlineVRRig.transform.position = GunLib.GetPointerPos();
@@ -397,7 +397,7 @@ public class Fun
     
     public static void SpectateGun()
     {
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             if (GunLib.LockedPlayer == null)
                 return;

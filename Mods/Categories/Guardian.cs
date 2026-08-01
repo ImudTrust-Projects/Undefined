@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GorillaLocomotion;
 using Undefined.Utilities;
 using UnityEngine;
 using static Undefined.Utilities.GunLib;
@@ -23,6 +24,9 @@ public class Guardian
 
     private static float Delay;
 
+    public static bool IsLocalPlayerGuardian() =>
+        GorillaGuardianZoneManager.zoneManagers[0].IsPlayerGuardian(PhotonNetwork.LocalPlayer);
+    
     public static void GuardianSelf()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -163,5 +167,107 @@ public class Guardian
         {
             ZoneManager.SetGuardian(null);
         }
+    }
+    
+        private static float delay = 0.5f;
+
+    public static void GuardianBreakMovementAll()
+    {
+        try
+        {
+            if (!PhotonNetwork.InRoom) return;
+            float currentTime = Time.time;
+            if (currentTime > delay)
+            {
+                delay = currentTime + 0.5f;
+
+                if (!IsLocalPlayerGuardian()) return;
+                var activeRigs = VRRigCache.ActiveRigs;
+
+                foreach (VRRig vrrig in activeRigs)
+                {
+                    if (vrrig == null || vrrig.isMyPlayer) continue;
+
+                    NetworkView netView = extarstuff.GetNetViewFromVRRig(vrrig);
+                    if (netView != null)
+                    {
+                        Vector3 groundPosition = vrrig.transform.position;
+                        groundPosition.y = -10f;
+
+                        netView.SendRPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
+                        netView.SendRPC("DroppedByPlayer", RpcTarget.Others, new object[] { (groundPosition - vrrig.transform.position) * 100f });
+                    }
+                }
+            }
+        }
+        catch { }
+    }
+    
+    public static void GuardianBreakMovementGun()
+    {
+        try
+        {
+            GunLib.StartGun(() =>
+            {
+                try
+                {
+                    if (!PhotonNetwork.InRoom) return;
+                    if (GunLib.LockedPlayer == null) return;
+
+                    if (IsLocalPlayerGuardian())
+                    {
+                        NetworkView netView = extarstuff.GetNetViewFromVRRig(GunLib.LockedPlayer);
+                        if (netView != null)
+                        {
+                            Vector3 groundPosition = GunLib.LockedPlayer.transform.position;
+                            groundPosition.y = -10f;
+
+                            netView.SendRPC("GrabbedByPlayer", RpcTarget.Others, new object[] { true, false, false });
+                            netView.SendRPC("DroppedByPlayer", RpcTarget.Others, new object[] { (groundPosition - GunLib.LockedPlayer.transform.position) * 100f });
+                        }
+                    }
+                }
+                catch { }
+            }, true);
+        }
+        catch { }
+    }
+    
+    public static void GuardianFlingGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            NetPlayer slapper = NetworkSystem.Instance.LocalPlayer;
+            NetPlayer target = GunLib.LockedPlayer.Creator;
+
+            RigContainer targetRig;
+            if (!VRRigCache.Instance.TryGetVrrig(target, out targetRig))
+                return;
+            Vector3 handVelocity = GTPlayer.Instance.GetHandVelocityTracker(false).GetAverageVelocity(true);
+            if (handVelocity.magnitude < 6f)
+            {
+                handVelocity = new Vector3(
+                    Random.Range(-10f, 10f),
+                    Random.Range(5f, 15f),
+                    Random.Range(10f, 20f)
+                );
+            }
+
+            Vector3 clampedVelocity = Vector3.ClampMagnitude(handVelocity, 20f);
+            Vector3 launchVelocity = clampedVelocity * 1f;
+
+            Vector3 groundNormal;
+            if (targetRig.Rig.IsOnGround(1.2f, 0.4f, out groundNormal))
+            {
+                launchVelocity += groundNormal * 3f * Mathf.Clamp01(1f - Vector3.Dot(groundNormal, launchVelocity.normalized));
+            }
+
+            GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC(
+                "GuardianLaunchPlayer",
+                target,
+                launchVelocity
+            );
+
+        }, true);
     }
 }

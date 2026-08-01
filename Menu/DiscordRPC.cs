@@ -3,9 +3,8 @@ using System;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading.Tasks;
-using CXS;
-using Photon.Pun;
 using UnityEngine;
+using Photon.Pun;
 
 namespace Undefined.Menu;
 
@@ -13,18 +12,23 @@ public class DiscordPresence : MonoBehaviour
 {
     private const string ClientId = "1527431390130475129";
     private const string LargeImageKey = "undefined_logo";
-    private string Currentroom;
-    private string Playersinlobby;
 
     public static DiscordPresence Instance;
 
     private NamedPipeClientStream pipe;
     private bool connected;
-    private float retryTimer = 15f;
+
+    private float retryTimer;
+    private readonly int pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+
     private static long startTimestamp;
 
     private string details = "Undefined Menu";
-    private string state = "In room: Just joined";
+    private string state = "Loading...";
+    private string lastState = "";
+
+    public static bool DiscordRPC = true; // some people maybe wanna show that they are using the best menu ever!!
+    public bool privacyRPC = false; // some people maybe don't wanna be tracked?
 
     private void Awake()
     {
@@ -34,37 +38,67 @@ public class DiscordPresence : MonoBehaviour
 
     private void Update()
     {
-        // Logic for room stuff idk
-        Currentroom = !PhotonNetwork.InRoom ? "Not in a room😭" : PhotonNetwork.CurrentRoom.Name;
-        Playersinlobby = !PhotonNetwork.InRoom ? "0" : PhotonNetwork.CurrentRoom.PlayerCount.ToString();
-
-        string newState = "In room: " + Currentroom + " Current Players " + Playersinlobby;
-        if (newState != state)
-        {
-            state = newState;
-            if (connected)
-                SendActivity();
-        }
-
-        // Other shit
-        if (!Mods.Categories.Settings.DiscordRPC)
+        if (!DiscordRPC)
         {
             if (connected)
-            {
                 Disconnect();
-                retryTimer = 15f;
-            }
+
             return;
         }
-        if (connected)
+
+        if (!connected)
+        {
+            retryTimer += Time.deltaTime;
+
+            if (retryTimer >= 3f)
+            {
+                retryTimer = 0f;
+                TryConnect();
+            }
+
+            return;
+        }
+
+        UpdateRoomState();
+    }
+
+    private void UpdateRoomState()
+    {
+        string newState;
+
+        if (privacyRPC)
+        {
+            newState = "Using Undefined Menu";
+        }
+        else
+        {
+            string room = PhotonNetwork.InRoom
+                ? PhotonNetwork.CurrentRoom.Name
+                : "Not in a room";
+
+            string players = PhotonNetwork.InRoom
+                ? PhotonNetwork.CurrentRoom.PlayerCount.ToString()
+                : "0";
+
+            newState = $"Room: {room} | Players: {players}";
+        }
+
+        if (newState == lastState)
             return;
 
-        retryTimer += Time.deltaTime;
-        if (retryTimer >= 15f)
-        {
-            retryTimer = 0f;
-            TryConnect();
-        }
+        lastState = newState;
+        state = newState;
+
+        SendActivity();
+    }
+
+    public void SetPrivacyRPC(bool enabled)
+    {
+        privacyRPC = enabled;
+        lastState = "";
+
+        if (connected)
+            UpdateRoomState();
     }
 
     public void SetPresence(string newDetails, string newState)
@@ -80,54 +114,76 @@ public class DiscordPresence : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
+            NamedPipeClientStream client = null;
+
             try
             {
-                var client = new NamedPipeClientStream(".", $"discord-ipc-{i}", PipeDirection.InOut, PipeOptions.Asynchronous);
-                client.Connect(500);
+                client = new NamedPipeClientStream(
+                    ".",
+                    $"discord-ipc-{i}",
+                    PipeDirection.InOut,
+                    PipeOptions.Asynchronous
+                );
+
+                client.Connect(100);
 
                 pipe = client;
 
-                WriteFrame(0, new JObject { ["v"] = 1, ["client_id"] = ClientId }.ToString());
+                WriteFrame(0, new JObject
+                {
+                    ["v"] = 1,
+                    ["client_id"] = ClientId
+                }.ToString());
 
                 connected = true;
+
                 Task.Run(ReadLoop);
-                Invoke(nameof(SendActivity), 1f);
+
+                SendActivity();
 
                 Debug.Log($"[Undefined] Discord RPC connected on discord-ipc-{i}");
+
                 return;
             }
             catch
             {
-                // pipe not available try the next one
+                client?.Dispose();
             }
         }
     }
 
     private void SendActivity()
     {
-        if (!connected)
+        if (!connected || pipe == null)
             return;
 
         try
         {
-            JObject payload = new JObject
+            JObject payload = new()
             {
                 ["cmd"] = "SET_ACTIVITY",
                 ["args"] = new JObject
                 {
-                    ["pid"] = System.Diagnostics.Process.GetCurrentProcess().Id,
+                    ["pid"] = pid,
+
                     ["activity"] = new JObject
                     {
                         ["details"] = details,
                         ["state"] = state,
-                        ["timestamps"] = new JObject { ["start"] = startTimestamp },
+
+                        ["timestamps"] = new JObject
+                        {
+                            ["start"] = startTimestamp
+                        },
+
                         ["assets"] = new JObject
                         {
                             ["large_image"] = LargeImageKey,
-                            ["large_text"] = "Undefined"
+                            ["large_text"] = "Undefined Menu"
                         }
                     }
                 },
+
                 ["nonce"] = Guid.NewGuid().ToString()
             };
 
@@ -141,15 +197,19 @@ public class DiscordPresence : MonoBehaviour
 
     private void WriteFrame(int opcode, string json)
     {
+        if (pipe == null || !pipe.IsConnected)
+            return;
+
         byte[] data = Encoding.UTF8.GetBytes(json);
-        byte[] frame = new byte[8 + data.Length];
+
+        byte[] frame = new byte[data.Length + 8];
 
         BitConverter.GetBytes(opcode).CopyTo(frame, 0);
         BitConverter.GetBytes(data.Length).CopyTo(frame, 4);
-        data.CopyTo(frame, 8);
+
+        Buffer.BlockCopy(data, 0, frame, 8, data.Length);
 
         pipe.Write(frame, 0, frame.Length);
-        pipe.Flush();
     }
 
     private void ReadLoop()
@@ -166,7 +226,6 @@ public class DiscordPresence : MonoBehaviour
         }
         catch
         {
-            // Discord closed the pipe
         }
 
         Disconnect();
@@ -175,7 +234,15 @@ public class DiscordPresence : MonoBehaviour
     private void Disconnect()
     {
         connected = false;
-        try { pipe?.Dispose(); } catch { }
+
+        try
+        {
+            pipe?.Dispose();
+        }
+        catch
+        {
+        }
+
         pipe = null;
     }
 

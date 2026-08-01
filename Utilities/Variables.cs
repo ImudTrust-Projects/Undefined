@@ -294,24 +294,91 @@ public class Variables
     }
 
     public static AssetBundle assetBundle = null;
-    public static GameObject LoadAssetBundle(string bundleName, string assetName)
+
+    public static GameObject LoadAssetBundle(
+        string bundleName,
+        string assetName,
+        int anchor = -1)
     {
         GameObject gameObject = null;
 
-        Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Undefined.Resources.Assets." + bundleName);
+        Stream stream =
+            Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream(
+                    "Undefined.Resources.Assets." + bundleName
+                );
+
+
         if (stream != null)
         {
             if (assetBundle == null)
                 assetBundle = AssetBundle.LoadFromStream(stream);
-        
-            gameObject = UnityEngine.Object.Instantiate(assetBundle.LoadAsset<GameObject>(assetName));
+
+
+            GameObject prefab =
+                assetBundle.LoadAsset<GameObject>(assetName);
+
+
+            if (prefab == null)
+            {
+                Debug.LogError(
+                    "Failed to find asset: " + assetName
+                );
+
+                return null;
+            }
+
+
+            gameObject =
+                UnityEngine.Object.Instantiate(prefab);
+
+
+
+            if (anchor >= 0)
+            {
+                Transform anchorTransform =
+                    GetAnchor(anchor);
+
+
+                if (anchorTransform != null)
+                {
+                    gameObject.transform.SetParent(
+                        anchorTransform,
+                        false
+                    );
+                }
+            }
         }
         else
         {
-            Debug.LogError("Failed to load asset from resource: " + bundleName);
+            Debug.LogError(
+                "Failed to load asset from resource: " + bundleName
+            );
         }
 
+
         return gameObject;
+    }
+    
+    private static Transform GetAnchor(int anchor)
+    {
+        switch (anchor)
+        {
+            case 0:
+                return GorillaTagger.Instance.leftHandTransform;
+
+            case 1:
+                return GorillaTagger.Instance.leftHandTransform;
+
+            case 2:
+                return GorillaTagger.Instance.rightHandTransform;
+
+            case 3:
+                return GorillaTagger.Instance.headCollider.transform;
+
+            default:
+                return null;
+        }
     }
 
     public static string ToTitleCase(string text) =>
