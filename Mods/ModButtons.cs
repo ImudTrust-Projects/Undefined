@@ -212,8 +212,8 @@ public class ModButtons
             new ButtonInfo { buttonText = "Lock Room", method = () => Master.LockRoom(), toolTip = "Lockss the room so no one can join."},
             new ButtonInfo { buttonText = "Unlock Room", method = () => Master.UnlockRoom(), toolTip = "Unlocks the room so people can join."},
             new ButtonInfo { buttonText = "Spaz Room", method = () => Master.SpazRoom(), toolTip = "Spaz the room."},
-            new ButtonInfo { buttonText = "Spaz Room", method = () => Master.ViberateGun()},
-            new ButtonInfo { buttonText = "Spaz Room", method = () => Master.ViberateAll()},
+            new ButtonInfo { buttonText = "Viberate Gun", method = () => Master.ViberateGun()},
+            new ButtonInfo { buttonText = "Viberate All", method = () => Master.ViberateAll()},
         },
 
         new ButtonInfo[] { // Overpowered Mods [14]
