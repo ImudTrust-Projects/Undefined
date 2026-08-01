@@ -15,6 +15,7 @@ using Undefined.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace Undefined.Mods.Categories;
 
@@ -285,4 +286,145 @@ public class Fun
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
     }
 
+    
+    public static void SpazHead()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x += Random.Range(1f, 360f);
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y += Random.Range(1f, 360f);
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z += Random.Range(1f, 360f);
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x = 0f;
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y = 0f;
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 0f;
+        }
+    }
+    
+    public static void SpinHeadX()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x += Random.Range(1f, 360f);
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x = 0f;
+        }
+    }
+
+    public static void SpinHeadY()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y += Random.Range(1f, 360f);
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y = 0f;
+        }
+    }
+
+    public static void SpinHeadZ()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z += Random.Range(1f, 360f);
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 0f;
+        }
+    }
+    
+    public static void HelicopterRig()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = false;
+
+            GorillaTagger.Instance.offlineVRRig.transform.position += new Vector3(0f, 0.05f, 0f);
+
+
+            GorillaTagger.Instance.offlineVRRig.transform.rotation = Quaternion.Euler(GorillaTagger.Instance.offlineVRRig.transform.rotation.eulerAngles + new Vector3(0f, 10f, 0f));
+
+
+            GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform.rotation = GorillaTagger.Instance.offlineVRRig.transform.rotation;
+
+            GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.transform.position = GorillaTagger.Instance.offlineVRRig.transform.position + GorillaTagger.Instance.offlineVRRig.transform.right * -1f;
+            GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.transform.position = GorillaTagger.Instance.offlineVRRig.transform.position + GorillaTagger.Instance.offlineVRRig.transform.right * 1f;
+
+            GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.transform.rotation = GorillaTagger.Instance.offlineVRRig.transform.rotation;
+            GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.transform.rotation = GorillaTagger.Instance.offlineVRRig.transform.rotation;
+
+            GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.transform.rotation *= Quaternion.Euler(GorillaTagger.Instance.offlineVRRig.leftHand.trackingRotationOffset);
+            GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.transform.rotation *= Quaternion.Euler(GorillaTagger.Instance.offlineVRRig.rightHand.trackingRotationOffset);
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+        }
+    }
+    
+    public static void HoldRig()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed)
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = false;
+            GorillaTagger.Instance.offlineVRRig.transform.position =
+                GorillaTagger.Instance.offlineVRRig.rightHandTransform.position;
+        }
+        else
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+        }
+    }
+    
+    public static void MoveRigGun()
+    {
+        GorillaTagger.Instance.offlineVRRig.enabled = true;
+
+        GunLib.start2guns(() =>
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = false;
+            GorillaTagger.Instance.offlineVRRig.transform.position = GunLib.GetPointerPos();
+        }, false);
+    }
+    
+    public static GameObject UCam;
+    
+    public static void SpectateGun()
+    {
+        GunLib.start2guns(() =>
+        {
+            if (GunLib.LockedPlayer == null)
+                return;
+
+            if (UCam == null)
+            {
+                UCam = new GameObject("Freecam boiiiiiiiiiiiiiiiiii");
+
+                var c = UCam.AddComponent<Camera>();
+                c.fieldOfView = 120;
+                c.depth = 4;
+                c.nearClipPlane = 0.1f;
+                c.cameraType = CameraType.Game;
+
+                UCam.transform.position = GorillaTagger.Instance.offlineVRRig.headConstraint.transform.position;
+
+                Object.DontDestroyOnLoad(UCam);
+            }
+
+            UCam.transform.rotation = GunLib.LockedPlayer.head.rigTarget.rotation;
+            UCam.transform.position = GunLib.LockedPlayer.head.rigTarget.position;
+        }, true);
+
+        if (GunLib.LockedPlayer == null && UCam != null)
+        {
+            Object.Destroy(UCam);
+            UCam = null;
+        }
+    }
 }

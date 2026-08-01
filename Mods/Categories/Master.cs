@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ExitGames.Client.Photon;
 using Photon.Realtime;
 using Undefined.Utilities;
 using UnityEngine;
@@ -54,6 +55,50 @@ public class Master
                 item.TargetHit(Vector3.zero, Vector3.zero);
             }
         }
+    }
+    
+    public static void ViberateGun()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        GunLib.start2guns(() =>
+        {
+            if (GunLib.LockedPlayer == null)
+                return;
+
+            PhotonNetwork.RaiseEvent(3,
+                new object[]
+                {
+                    PhotonNetwork.ServerTimestamp,
+                    (byte)2,
+                    new object[] { 1 }
+                },
+                new RaiseEventOptions
+                {
+                    TargetActors = new[] { GunLib.LockedPlayer.Creator.ActorNumber }
+                },
+                SendOptions.SendUnreliable);
+        }, true);
+    }
+    
+    public static void ViberateAll()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        PhotonNetwork.RaiseEvent(3,
+            new object[]
+            {
+                PhotonNetwork.ServerTimestamp,
+                (byte)2,
+                new object[] { 1 }
+            },
+            new RaiseEventOptions
+            {
+                Receivers = ReceiverGroup.All
+            },
+            SendOptions.SendUnreliable);
     }
 
     public static void BreakTargets()

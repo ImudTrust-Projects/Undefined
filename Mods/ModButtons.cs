@@ -123,8 +123,16 @@ public class ModButtons
             new ButtonInfo { buttonText = "Fast Hoverboard", method = () => Fun.FastHoverboard(), disableMethod = () => Fun.FixHoverboard(), toolTip = "Makes your hoverboard Fast"},
             new ButtonInfo { buttonText = "Slow Hoverboard", method = () => Fun.SlowHoverboard(), disableMethod = () => Fun.FixHoverboard(), toolTip = "Makes your hoverboard Fast"},
             new ButtonInfo { buttonText = "Hover Board Minigun", method = () => HoverboardMinigun(), toolTip = "Spams hoverboards out of your hand"},
-            new ButtonInfo { buttonText = "Unlock Fan Club", method = () => Fun.UnlockFanClub(), toolTip = "Unlocks fan club aka VIM."},
-            new ButtonInfo { buttonText = "Unlock Lemming", method = () => Fun.UnlockLemming()},
+            //new ButtonInfo { buttonText = "Unlock Fan Club", method = () => Fun.UnlockFanClub(), toolTip = "Unlocks fan club aka VIM."},
+            //new ButtonInfo { buttonText = "Unlock Lemming", method = () => Fun.UnlockLemming()},
+            new ButtonInfo { buttonText = "Spaz Head", method = () => Fun.SpazHead()},
+            new ButtonInfo { buttonText = "Spin Head X", method = () => Fun.SpinHeadX()},
+            new ButtonInfo { buttonText = "Spin Head Y", method = () => Fun.SpinHeadY()},
+            new ButtonInfo { buttonText = "Spin Head Z", method = () => Fun.SpinHeadZ()},
+            new ButtonInfo { buttonText = "Hold Rig", method = () => Fun.HoldRig()},
+            new ButtonInfo { buttonText = "Helicopter Rig", method = () => Fun.HelicopterRig()},
+            new ButtonInfo { buttonText = "Rig Gun", method = () => Fun.MoveRigGun()},
+            new ButtonInfo { buttonText = "Spectate Gun", method = () => Fun.SpectateGun()},
         },
 
         new ButtonInfo[] { // Visual Mods [7]
@@ -204,6 +212,8 @@ public class ModButtons
             new ButtonInfo { buttonText = "Lock Room", method = () => Master.LockRoom(), toolTip = "Lockss the room so no one can join."},
             new ButtonInfo { buttonText = "Unlock Room", method = () => Master.UnlockRoom(), toolTip = "Unlocks the room so people can join."},
             new ButtonInfo { buttonText = "Spaz Room", method = () => Master.SpazRoom(), toolTip = "Spaz the room."},
+            new ButtonInfo { buttonText = "Spaz Room", method = () => Master.ViberateGun()},
+            new ButtonInfo { buttonText = "Spaz Room", method = () => Master.ViberateAll()},
         },
 
         new ButtonInfo[] { // Overpowered Mods [14]

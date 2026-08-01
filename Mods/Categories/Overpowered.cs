@@ -164,6 +164,7 @@ public class Overpowered
         VRRig.LocalRig.BreakHandLinks();
         SetGrabPatch(false);
     }
+    
 
     public static float hoverboarddelay = 0f;
 
