@@ -5,6 +5,7 @@ using Photon.Voice.Unity;
 using System.Linq;
 using HarmonyLib;
 using Photon.Pun;
+using Photon.Realtime;
 using Undefined.Utilities;
 using UnityEngine;
 
@@ -33,6 +34,35 @@ public class Safety
 
                 if (!(Time.time > delay)) return;
                 delay = Time.time + 1f;
+            }
+        }
+    }
+
+    private static float antiReportFlingDelay;
+
+    public static void AntiReportSnowballfling()
+    {
+        if (!NetworkSystem.Instance.InRoom) return;
+
+        foreach (GorillaPlayerScoreboardLine line in GorillaScoreboardTotalUpdater.allScoreboardLines)
+        {
+            if (line.linePlayer != NetworkSystem.Instance.LocalPlayer) continue;
+
+            Transform report = line.reportButton.gameObject.transform;
+
+            foreach (VRRig vrrig in VRRigCache.ActiveRigs.Where(v =>
+                         !v.isLocal &&
+                         (Vector3.Distance(v.rightHandTransform.position, report.position) < 0.35f ||
+                          Vector3.Distance(v.leftHandTransform.position, report.position) < 0.35f)))
+            {
+                if (Time.time < antiReportFlingDelay) return;
+
+                Player target = RigManager.PlayerFromRig(vrrig);
+                if (target == null) return;
+
+                Overpowered.SnowballFlingTarget(target);
+
+                antiReportFlingDelay = Time.time + 0.1f;
             }
         }
     }

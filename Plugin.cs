@@ -64,7 +64,7 @@ public class Plugin : BaseUnityPlugin
     {
         Instance = this;
 
-        ComponentHolder = new GameObject("Undefined");
+        ComponentHolder = new GameObject(Constants.PluginName);
         DontDestroyOnLoad(ComponentHolder);
 
         GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
@@ -83,6 +83,8 @@ public class Plugin : BaseUnityPlugin
         PatchAwakePatches();
 
         ComponentHolder.AddComponent<Main>();
+        ComponentHolder.AddComponent<BoardManager>();
+        ComponentHolder.AddComponent<CoroutineManager>();
         ComponentHolder.AddComponent<NotificationLib>();
         ComponentHolder.AddComponent<RoomNotifications>();
         ComponentHolder.AddComponent<DiscordPresence>();

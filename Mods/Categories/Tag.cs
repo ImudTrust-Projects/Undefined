@@ -13,8 +13,8 @@ public class Tag
 {
     public static void TagGun()
     {
-        if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
-            return;
+        /*if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
+            return;*/
 
         VRRig rig = GorillaTagger.Instance.offlineVRRig;
 

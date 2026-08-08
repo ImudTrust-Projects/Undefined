@@ -11,7 +11,20 @@ namespace Undefined.Utilities;
 
 public class RigManager
 {
-
+    
+    public static Player PlayerFromRig(VRRig rig)
+    {
+        if (rig == null) return null;
+        try
+        {
+            Player p = GetPlayerFromVRRig(rig);
+            if (p != null) return p;
+        }
+        catch { }
+        try { return rig.Creator?.GetPlayerRef(); } catch { }
+        return null;
+    }
+    
     public static VRRig GetVRRigFromNetPlayer(NetPlayer netPlayer)
     {
         if (netPlayer == null)
@@ -121,6 +134,8 @@ public class RigManager
 
 public static class extarstuff
 {
+    public static VRRig GetRigFromPlayer(Player p) => RigManager.GetVRRigFromPlayer(p);
+    
     public static PhotonView GetViewFromRig(VRRig rig) =>
             rig2view(rig);
 

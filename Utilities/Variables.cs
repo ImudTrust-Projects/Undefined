@@ -214,6 +214,23 @@ public class Variables
             7
         };
 
+    public static Vector3 HeadPosition(VRRig rig)
+    {
+        try
+        {
+            if (rig.headMesh != null)
+                return rig.headMesh.transform.position;
+        }
+        catch { }
+        return rig.transform.position;
+    }
+
+    public static Vector3 RandomJitter()
+    {
+        Vector3 o = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0f, UnityEngine.Random.Range(-1f, 1f));
+        return (o.sqrMagnitude < 0.01f ? Vector3.forward : o).normalized / 1.7f;
+    }
+
 
     // gun lib stuff
 

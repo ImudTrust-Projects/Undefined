@@ -16,6 +16,7 @@ public enum Category
     SoundSpamMods,
     GuardianMods,
     MasterMods,
+    SoundBoard,
     OverpoweredMods,
     NetworkedMods,
     DiscordRPC,

@@ -285,6 +285,18 @@ public class Fun
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
     }
+    
+    public static void SetName(string name)
+    {
+        var computer = GorillaComputer.instance;
+        if (computer == null) return;
+        computer.currentName = name;
+        computer.savedName = name;
+        NetworkSystem.Instance.SetMyNickName(name);
+        PlayerPrefs.SetString("playerName", name);
+        PlayerPrefs.Save();
+        VRRig.LocalRig.SetNameTagText(name);
+    }
 
     
     public static void SpazHead()
@@ -367,21 +379,20 @@ public class Fun
             GorillaTagger.Instance.offlineVRRig.enabled = true;
         }
     }
-    // broken :(
-    public static void HoldRig()
+    
+    public static void GrabRig()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
         {
-            GorillaTagger.Instance.offlineVRRig.enabled = false;
-            GorillaTagger.Instance.offlineVRRig.transform.position =
-                GorillaTagger.Instance.offlineVRRig.rightHandTransform.position;
+            VRRig.LocalRig.enabled = false;
+            VRRig.LocalRig.transform.position = VRRig.LocalRig.rightHandTransform.position;
         }
-        else
+        else if (!InputHandler.Instance.RightGrip.IsPressed)
         {
-            GorillaTagger.Instance.offlineVRRig.enabled = true;
+            VRRig.LocalRig.enabled = true;
         }
     }
-    // I know it's broken I will fix later i'm lazy
+    
     public static void MoveRigGun()
     {
         GorillaTagger.Instance.offlineVRRig.enabled = true;
@@ -389,7 +400,7 @@ public class Fun
         GunLib.StartGun(() =>
         {
             GorillaTagger.Instance.offlineVRRig.enabled = false;
-            GorillaTagger.Instance.offlineVRRig.transform.position = GunLib.GetPointerPos();
+            GorillaTagger.Instance.offlineVRRig.transform.position = GunLib.GetPointerPos() + Vector3.up * 1f;
         }, false);
     }
     
@@ -413,12 +424,23 @@ public class Fun
                 c.cameraType = CameraType.Game;
 
                 UCam.transform.position = GorillaTagger.Instance.offlineVRRig.headConstraint.transform.position;
+                UCam.transform.rotation = GorillaTagger.Instance.offlineVRRig.headConstraint.transform.rotation;
 
                 Object.DontDestroyOnLoad(UCam);
             }
 
-            UCam.transform.rotation = GunLib.LockedPlayer.head.rigTarget.rotation;
-            UCam.transform.position = GunLib.LockedPlayer.head.rigTarget.position;
+            float lerpSpeed = 12f;
+
+            UCam.transform.position = Vector3.Lerp(
+                UCam.transform.position,
+                GunLib.LockedPlayer.head.rigTarget.position,
+                lerpSpeed * Time.deltaTime);
+
+            UCam.transform.rotation = Quaternion.Slerp(
+                UCam.transform.rotation,
+                GunLib.LockedPlayer.head.rigTarget.rotation,
+                lerpSpeed * Time.deltaTime);
+
         }, true);
 
         if (GunLib.LockedPlayer == null && UCam != null)

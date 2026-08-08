@@ -264,6 +264,13 @@ public class Movement
             GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
         }
     }
+    
+    public static void SlingshotFly()
+    {
+        if (InputHandler.Instance.RightPrimary.IsPressed)
+            GorillaTagger.Instance.rigidbody.linearVelocity += GTPlayer.Instance.headCollider.transform.forward * (Time.deltaTime * (FlySpeed * 2));
+    }
+    
     public static void NoClipFly()
     {
         if (InputHandler.Instance.RightPrimary.IsPressed)
