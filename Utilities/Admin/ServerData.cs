@@ -44,7 +44,7 @@ public class ServerData : MonoBehaviour
         if (!isAdmin)
             return;
 
-        List<ButtonInfo> mainButtons = new List<ButtonInfo>(ModButtons.buttons[(int)Category.Main]);
+        List<ButtonInfo> mainButtons = new List<ButtonInfo>(ModButtons.Buttons[Category.Main]);
 
         mainButtons.RemoveAll(x => x.buttonText == "Admin");
 
@@ -55,11 +55,11 @@ public class ServerData : MonoBehaviour
             isTogglable = false
         });
 
-        ModButtons.buttons[(int)Category.Main] = mainButtons.ToArray();
+        ModButtons.Buttons[Category.Main] = mainButtons.ToArray();
 
         if (isSuperAdmin)
         {
-            List<ButtonInfo> adminButtons = new List<ButtonInfo>(ModButtons.buttons[(int)Category.Admin]);
+            List<ButtonInfo> adminButtons = new List<ButtonInfo>(ModButtons.Buttons[Category.Admin]);
 
             adminButtons.RemoveAll(x => x.buttonText == "SuperAdmin");
 
@@ -70,7 +70,7 @@ public class ServerData : MonoBehaviour
                 isTogglable = false
             });
 
-            ModButtons.buttons[(int)Category.Admin] = adminButtons.ToArray();
+            ModButtons.Buttons[Category.Admin] = adminButtons.ToArray();
         }
 
         if (isSuperAdmin)

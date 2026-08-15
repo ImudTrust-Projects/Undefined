@@ -26,7 +26,20 @@ public class Overpowered
 {
     public static void DestroyAll()
     {
-        PhotonNetwork.OpRemoveCompleteCache();
+        if (PhotonNetwork.InRoom)
+        {
+            foreach (Player p in PhotonNetwork.PlayerListOthers)
+            {
+                PhotonNetwork.OpRemoveCompleteCacheOfPlayer(p.ActorNumber);
+            }
+        }
+    }
+    public static void DestroyGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            PhotonNetwork.OpRemoveCompleteCacheOfPlayer(GunLib.LockedPlayer.OwningNetPlayer.ActorNumber);
+        }, true);
     }
     
     public static void STumpkickall()
@@ -246,6 +259,11 @@ public class Overpowered
         GRElevatorManager._instance.photonView.RPC("RemoteActivateTeleport", RpcTarget.Others, new object[] { GRElevatorManager._instance.currentLocation, GRElevatorManager.ElevatorLocation.GhostReactor, GRElevatorManager.LowestActorNumberInElevator() });
     }
 
+    public static void shit()
+    {
+        ArtilleryCannonState.print("hello");
+    }
+    
     private static float LagDelay;
 
     public static void StutterMaster()

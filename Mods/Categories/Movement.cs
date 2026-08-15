@@ -238,7 +238,7 @@ public class Movement
         );
     }
 
-    public static bool speedBoostEnabled;
+    private static bool speedBoostEnabled;
 
     public static void SpeedBoost()
     {
@@ -270,16 +270,32 @@ public class Movement
         if (InputHandler.Instance.RightPrimary.IsPressed)
             GorillaTagger.Instance.rigidbody.linearVelocity += GTPlayer.Instance.headCollider.transform.forward * (Time.deltaTime * (FlySpeed * 2));
     }
+    public static void TriggerFly()
+    {
+        if (InputHandler.Instance.RightTrigger.IsPressed)
+        {
+            GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * (Time.deltaTime * FlySpeed);
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+            
+    }
+    
+    public static void HandFly()
+    {
+        if (InputHandler.Instance.RightPrimary.IsPressed)
+        {
+            GTPlayer.Instance.transform.position += Variables.TrueRightHand().forward * (Time.deltaTime * FlySpeed);
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+    }
     
     public static void NoClipFly()
     {
         if (InputHandler.Instance.RightPrimary.IsPressed)
         {
-            Noclipistuff(true);
             GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * (Time.deltaTime * FlySpeed);
             GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
         }
-        Noclipistuff(false);
     }
 
     public static void TPSTUMP()
@@ -492,7 +508,7 @@ public class Movement
                 GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.67f, ForceMode.Acceleration); // omg 67
                 break;
             case Gravitytypes.Zero:
-                GTPlayer.Instance.bodyCollider.attachedRigidbody.AddForce(Vector3.up * 9.81f, ForceMode.Acceleration); // trying a new zero grav since the old one was weird.
+                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration); // trying a new zero grav since the old one was weird.
                 break;
             case Gravitytypes.Reverse:
                 GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * 3f, ForceMode.Acceleration);

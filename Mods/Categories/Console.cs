@@ -195,7 +195,7 @@ public class Console
             {
                 Physics.Raycast(startPos + dir / 3f, dir, out RaycastHit Ray, 512f, Variables.NoInvisLayerMask());
                 VRRig gunTarget = Ray.collider.GetComponentInParent<VRRig>();
-                if (gunTarget && !gunTarget.isLocal)
+                if (gunTarget && !gunTarget.isOfflineVRRig)
                     CXS.CXS.ExecuteCommand("silkick", ReceiverGroup.All,
                             gunTarget.Creator.UserId);
             }

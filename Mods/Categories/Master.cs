@@ -162,6 +162,13 @@ public class Master
             PhotonNetwork.RemoveInstantiatedGO(GRElevatorManager._instance.gameObject, false);
         }
     }
+    public static void shidiik()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.RemoveInstantiatedGO(GameEntityManager.activeManager.gameObject, false);
+        }
+    }
     
     public static void UnlockRoom()
     {
@@ -193,6 +200,106 @@ public class Master
             PhotonNetwork.CurrentRoom.IsOpen = (i % 2 == 0);
         }
         GorillaScoreboardTotalUpdater.instance.UpdateActiveScoreboards();
+    }
+    
+    
+    
+    private static void AddInfected(NetPlayer plr)
+    {
+        if (!PhotonNetwork.InRoom || GorillaGameManager.instance == null || plr == null)
+            return;
+
+        var tagManager = GorillaGameManager.instance as GorillaTagManager;
+        if (tagManager == null)
+            return;
+
+        if (tagManager.isCurrentlyTag)
+        {
+            tagManager.ChangeCurrentIt(plr, true);
+        }
+        else if (tagManager.currentInfected != null && !tagManager.currentInfected.Contains(plr))
+        {
+            tagManager.AddInfectedPlayer(plr, true);
+        }
+    }
+
+    private static void RemoveInfected(NetPlayer plr)
+    {
+        if (!PhotonNetwork.InRoom || GorillaGameManager.instance == null || plr == null)
+        {
+            return;
+        }
+
+        if (GorillaGameManager.instance is GorillaTagManager tagManager)
+        {
+            if (tagManager.isCurrentlyTag)
+            {
+                if (tagManager.currentIt == plr)
+                {
+                    tagManager.currentIt = null;
+                }
+            }
+            else
+            {
+                tagManager.currentInfected?.Remove(plr);
+            }
+        }
+    }
+    public static void MatPlayer(NetPlayer netPlayer)
+    {
+        if (netPlayer == null || !Variables.IsMaster())
+            return;
+
+        if (GorillaGameManager.instance is not GorillaTagManager tagManager)
+        {
+            AddInfected(netPlayer);
+            return;
+        }
+
+        if (tagManager.isCurrentlyTag)
+        {
+            if (tagManager.currentIt == netPlayer)
+                RemoveInfected(netPlayer);
+            else
+                AddInfected(netPlayer);
+
+            return;
+        }
+
+        if (tagManager.currentInfected != null && tagManager.currentInfected.Contains(netPlayer))
+        {
+            RemoveInfected(netPlayer);
+            return;
+        }
+
+        AddInfected(netPlayer);
+    }
+
+    private static float delay;
+    public static void MatGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
+            {
+                delay = Time.time + 0.1f;
+                MatPlayer(GunLib.LockedPlayer.Creator);
+            }
+        }, true);
+    }
+    
+    public static void MatAll()
+    {
+        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
+        {
+            delay = Time.time + 0.1f;
+
+            foreach (var rig in VRRigCache.ActiveRigs)
+            {
+                if (rig != null)
+                    MatPlayer(rig.Creator);
+            }
+        }
     }
     
 }

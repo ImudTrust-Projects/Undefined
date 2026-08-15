@@ -21,6 +21,6 @@ public static class EnabledMods
         foreach (ButtonInfo mod in ModButtons.GetActiveMods())
             newCategory.Add(mod);
 
-        ModButtons.buttons[(int)Category.EnabledMods] = newCategory.ToArray(); // not hardcoded anymore?
+        ModButtons.Buttons[Category.EnabledMods] = newCategory.ToArray(); // not hardcoded anymore?
     }
 }

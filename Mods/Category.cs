@@ -21,5 +21,5 @@ public enum Category
     NetworkedMods,
     DiscordRPC,
     Admin,
-    SuperAdmin
+    SuperAdmin,
 }

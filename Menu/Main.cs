@@ -17,6 +17,7 @@ using UnityEngine.XR;
 using static Undefined.MENUSETTINGS.Settings;
 using static Undefined.Mods.ModButtons;
 using static Undefined.Utilities.Variables;
+using Object = UnityEngine.Object;
 
 namespace Undefined.Menu;
 
@@ -35,7 +36,7 @@ public class Main : MonoBehaviour
     }
     private static bool prevLeftTrigger;
     private static bool prevRightTrigger;
-    private static readonly Dictionary<string, (int Cat, int Idx)> searchCache = new Dictionary<string, (int Cat, int Idx)>();
+    private static readonly Dictionary<string, (Category Cat, int Idx)> searchCache = new Dictionary<string, (Category Cat, int Idx)>();
 
     private void Update()
     {
@@ -43,6 +44,8 @@ public class Main : MonoBehaviour
         {
             if (InputHandler.Instance == null)
                 return;
+
+            //Overseer();
 
             bool openRequested = (!rightHanded && InputHandler.Instance.LeftSecondary.IsPressed) ||
                                  (rightHanded && InputHandler.Instance.RightSecondary.IsPressed);
@@ -114,7 +117,7 @@ public class Main : MonoBehaviour
                 fpsLabel.text = "FPS: " + Mathf.Ceil(1f / Time.unscaledDeltaTime);
             }
 
-            var activeMods = buttons.SelectMany(x => x).Where(b => b.enabled && b.method != null);
+            var activeMods = ModButtons.Buttons.Values.SelectMany(x => x).Where(b => b.enabled && b.method != null);
             foreach (var mod in activeMods)
             {
                 try
@@ -308,7 +311,7 @@ public class Main : MonoBehaviour
             discTextTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
-        ButtonInfo[] pageButtons = buttons[(int)activeCategory]
+        ButtonInfo[] pageButtons = Buttons[activeCategory]
             .Skip(activePage * buttonsPerPage)
             .Take(buttonsPerPage)
             .ToArray();
@@ -496,7 +499,7 @@ public class Main : MonoBehaviour
 
     public static void ChangePage(bool next)
     {
-        int totalPages = (buttons[(int)activeCategory].Length + buttonsPerPage - 1) / buttonsPerPage;
+        int totalPages = (Buttons[activeCategory].Length + buttonsPerPage - 1) / buttonsPerPage;
         if (totalPages <= 1)
             return;
 
@@ -571,9 +574,9 @@ public class Main : MonoBehaviour
         {
             try
             {
-                if (buttons[entry.Cat][entry.Idx].buttonText == text)
+                if (Buttons[entry.Cat][entry.Idx].buttonText == text)
                 {
-                    return buttons[entry.Cat][entry.Idx];
+                    return Buttons[entry.Cat][entry.Idx];
                 }
             }
             catch
@@ -582,11 +585,14 @@ public class Main : MonoBehaviour
             }
         }
 
-        for (int cat = 0; cat < buttons.Length; cat++)
+        foreach (var kvp in Buttons)
         {
-            for (int idx = 0; idx < buttons[cat].Length; idx++)
+            var cat = kvp.Key;
+            var categoryButtons = kvp.Value;
+
+            for (int idx = 0; idx < categoryButtons.Length; idx++)
             {
-                if (buttons[cat][idx].buttonText == text)
+                if (categoryButtons[idx].buttonText == text)
                 {
                     try
                     {
@@ -599,7 +605,7 @@ public class Main : MonoBehaviour
                             searchCache.Remove(text);
                         }
                     }
-                    return buttons[cat][idx];
+                    return categoryButtons[idx];
                 }
             }
         }
@@ -656,6 +662,57 @@ public class Main : MonoBehaviour
             rot * Vector3.forward,
             rot * Vector3.right
         );
+    }
+
+    static Material mat = null;
+    static bool mat1;
+    public static VRRig ghostRig;
+
+    public static void Overseer()
+    {
+        if (Variables.Overseer)
+        {
+            if (mat == null)
+                mat = new Material(Shader.Find("GUI/Text Shader")) { color = new Color32(255, 255, 255, 90) };
+
+            if (ghostRig == null)
+            {
+                ghostRig = Object.Instantiate<VRRig>(
+                    GorillaTagger.Instance.offlineVRRig,
+                    GorillaLocomotion.GTPlayer.Instance.transform.position,
+                    GorillaLocomotion.GTPlayer.Instance.transform.rotation
+                );
+                ghostRig.enabled = false;
+                ghostRig.transform.position = Vector3.zero;
+
+                ghostRig.transform.Find("VR Constraints/LeftArm/Left Arm IK/SlideAudio").gameObject.SetActive(false);
+                ghostRig.transform.Find("VR Constraints/RightArm/Right Arm IK/SlideAudio").gameObject.SetActive(false);
+            }
+
+            if (!GorillaTagger.Instance.offlineVRRig.enabled)
+            {
+                mat1 = false;
+                ghostRig.enabled = true;
+                ghostRig.rightHandTransform.position = GorillaLocomotion.GTPlayer.Instance.RightHand.controllerTransform.position;
+                ghostRig.leftHandTransform.position = GorillaLocomotion.GTPlayer.Instance.LeftHand.controllerTransform.position;
+                ghostRig.mainSkin.material = mat;
+            }
+            else
+            {
+                if (!mat1)
+                {
+                    ghostRig.enabled = false;
+                    ghostRig.mainSkin.material = null;
+                    ghostRig.transform.position = Vector3.zero;
+                    mat1 = true;
+                }
+            }
+        }
+        else if (ghostRig != null)
+        {
+            Destroy(ghostRig);
+            ghostRig = null;
+        }
     }
 
     public static void ApplyScale(GameObject obj, Vector3 targetScale)

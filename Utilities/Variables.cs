@@ -110,19 +110,22 @@ public class Variables
     {
         return (Color32)(new Color32((byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), byte.MaxValue));
     }
+    
+    public static bool Overseer = true;
 
-    public static bool IsMaster()
+    public static bool IsMaster(bool notify = true)
     {
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
-        {
             return true;
-        }
 
-        NotificationLib.SendNotification(
-            NotificationLib.NotificationType.Error,
-            "You are not the master client!",
-            3f
-        );
+        if (notify)
+        {
+            NotificationLib.SendNotification(
+                NotificationLib.NotificationType.Error,
+                "You are not the master client!",
+                3f
+            );
+        }
 
         return false;
     }

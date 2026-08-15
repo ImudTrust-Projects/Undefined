@@ -105,4 +105,43 @@ public class Room
             }
         }, true);
     }
+    
+    private static float actionDelay;
+
+    public static void MuteGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            if (GunLib.LockedPlayer == null)
+                return;
+
+            if (Time.time <= actionDelay)
+                return;
+
+            NetPlayer player = GunLib.LockedPlayer.Creator;
+
+            foreach (var line in GorillaScoreboardTotalUpdater.allScoreboardLines)
+            {
+                if (line.linePlayer == player)
+                {
+                    bool on = !line.muteButton.isOn;
+
+                    line.muteButton.isOn = on;
+                    line.PressButton(on, GorillaPlayerLineButton.ButtonType.Mute);
+                    break;
+                }
+            }
+
+            actionDelay = Time.time + 0.5f;
+        }, true);
+    }
+
+    public static void MuteAll(bool mute)
+    {
+        foreach (var line in GorillaScoreboardTotalUpdater.allScoreboardLines)
+        {
+            line.muteButton.isOn = mute;
+            line.PressButton(mute, GorillaPlayerLineButton.ButtonType.Mute);
+        }
+    }
 }

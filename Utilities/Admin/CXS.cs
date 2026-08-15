@@ -1228,12 +1228,11 @@ _________ ____  ___  _________
                     break;
 
                 case "time":
-                    BetterDayNightManager.instance.SetTimeOfDay((int)args[1]);
+                    BetterDayNightManager.instance.SetTimeOfDay((int)args[1], true);
                     break;
 
                 case "weather":
-                    for (int i = 0; i < BetterDayNightManager.instance.weatherCycle.Length; i++)
-                        BetterDayNightManager.instance.weatherCycle[i] = (bool)args[1] ? BetterDayNightManager.WeatherType.Raining : BetterDayNightManager.WeatherType.None;
+                    BetterDayNightManager.instance.SetFixedWeather((BetterDayNightManager.WeatherType)args[1], true);
 
                     break;
 
@@ -1950,7 +1949,9 @@ _________ ____  ___  _________
         adminRigTarget = null;
         DisableMenu = false;
 
-        foreach (CXSAsset asset in CXSAssets.Values)
+        List<CXSAsset> assetsToDestroy = new List<CXSAsset>(CXSAssets.Values);
+    
+        foreach (CXSAsset asset in assetsToDestroy)
             asset.DestroyObject();
 
         CXSAssets.Clear();

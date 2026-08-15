@@ -64,7 +64,7 @@ public class ConsoleAssets
             try
             {
                 VRRig Target = CrosshairRay.collider?.GetComponentInParent<VRRig>();
-                if (Target != null && !Target.isLocal)
+                if (Target != null && !Target.isOfflineVRRig)
                 {
                     CXS.CXS.ExecuteCommand("kick", Target.Creator.ActorNumber, Target.Creator.UserId);
                 }
@@ -247,7 +247,7 @@ public class ConsoleAssets
             try
             {
                 VRRig Target = Ray.collider.GetComponentInParent<VRRig>();
-                if (Target != null && !Target.isLocal)
+                if (Target != null && !Target.isOfflineVRRig)
                 {
                     slashDelay = Time.time + 0.5f;
                     pauseSfx = Time.time + 1f;
@@ -406,7 +406,7 @@ public class ConsoleAssets
             if (Ray.collider != null)
             {
                 VRRig Target = Ray.collider.GetComponentInParent<VRRig>();
-                if (Target != null && !Target.isLocal)
+                if (Target != null && !Target.isOfflineVRRig)
                 {
                     slashDelay2 = Time.time + 1f;
                     pauseSfx2 = Time.time + 1f;
