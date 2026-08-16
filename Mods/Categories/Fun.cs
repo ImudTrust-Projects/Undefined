@@ -51,11 +51,31 @@ public class Fun
         }
     }
 
+    [Utilities.Tooltip("Sets your quest score.")]
     public static void SetQuestScore(int score)
     {
         VRRig.LocalRig.SetQuestScore(score);
     }
 
+    [Utilities.Tooltip("Sets your quest score to 67.")]
+    public static void SetQuestScore67()
+    {
+        SetQuestScore(67);
+    }
+
+    [Utilities.Tooltip("Sets your quest score to 420.")]
+    public static void SetQuestScore420()
+    {
+        SetQuestScore(420);
+    }
+
+    [Utilities.Tooltip("Sets your quest score to the maximum value.")]
+    public static void SetQuestScoreMax()
+    {
+        SetQuestScore(999999999);
+    }
+
+    [Utilities.Tooltip("Gives you a Bracelet.")]
     public static void Get_Bracelet(bool Enable, bool isleft)
     {
         if (Enable)
@@ -69,11 +89,25 @@ public class Fun
         }
     }
 
+    [Utilities.Tooltip("Gives you a Bracelet.")]
+    public static void EnableBracelet()
+    {
+        Get_Bracelet(true, true);
+    }
+
+    [Utilities.Tooltip("Removes the Bracelet.")]
+    public static void DisableBracelet()
+    {
+        Get_Bracelet(false, true);
+    }
+
+    [Utilities.Tooltip("Unlocks Fan Club subscription.")]
     public static void UnlockFanClub()
     {
         SubscriptionPatches.enabled = !SubscriptionPatches.enabled;
     }
     
+    [Utilities.Tooltip("Unlocks Lemming cosmetic.")]
     public static void UnlockLemming()
     {
         foreach (ScavengerTarget scavengerManager in UnityEngine.Object.FindObjectsOfType(typeof(ScavengerTarget)))
@@ -95,6 +129,7 @@ public class Fun
         BindingFlags.Instance | BindingFlags.NonPublic
     );
 
+    [Utilities.Tooltip("Gives you a yellow Name.")]
     public static void YellowName()
     {
         bool enabled = !(bool)GoldNameTag.GetValue(VRRig.LocalRig);
@@ -105,14 +140,14 @@ public class Fun
             ? SubscriptionManager.SUBSCRIBER_NAME_COLOR
             : Color.white;
     }
-
+    [Utilities.Tooltip("Gives You Fake body Tracking.")]
     public static void FakeBodyTracking()
     {
         GorillaTagger.Instance.offlineVRRig.transform.rotation = Camera.main.transform.rotation;
         GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.position = Variables.playerInstance.LeftHand.handFollower.transform.position;
         GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.position = Variables.playerInstance.RightHand.handFollower.transform.position;
     }
-
+    [Utilities.Tooltip("Makes you RGB in stump.")]
     public static void RGBMonke()
     {
         float time = Time.time * 1.8f;
@@ -121,7 +156,7 @@ public class Fun
         var B = Mathf.Sin(time + 4f * Mathf.PI / 3f) * 0.5f + 0.5f;
         GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[] { R, G, B });
     }
-    
+    [Utilities.Tooltip("Makes the HoverBoard Rainbow.")]
     public static void RainbowHoverboard()
     {
         if (VRRig.LocalRig.hoverboardVisual != null && VRRig.LocalRig.hoverboardVisual.IsHeld)
@@ -134,7 +169,7 @@ public class Fun
 
     private static float flashDelay;
     private static Color strobeColor;
-
+    [Utilities.Tooltip("Makes the hoverboard Strobe.")]
     public static void StrobeHoverboard()
     {
         if (VRRig.LocalRig.hoverboardVisual != null && VRRig.LocalRig.hoverboardVisual.IsHeld)
@@ -157,7 +192,7 @@ public class Fun
             );
         }
     }
-    
+    [Utilities.Tooltip("Makes the hoverboard Fast.")]
     public static void FastHoverboard()
     {
         Traverse FastHoverBoard = Traverse.Create(GorillaLocomotion.GTPlayer.Instance);
@@ -166,7 +201,7 @@ public class Fun
         FastHoverBoard.Field("hoverboardPaddleBoostMax").SetValue(999f);
         FastHoverBoard.Field("hoverTiltAdjustsForwardFactor").SetValue(1f);
     }
-
+    [Utilities.Tooltip("Makes the hoverboard Slow.")]
     public static void SlowHoverboard()
     {
         Traverse SlowHoverBoard = Traverse.Create(GorillaLocomotion.GTPlayer.Instance);
@@ -275,6 +310,7 @@ public class Fun
             { "Atlas", "Atlas" }
         };
     
+    [Utilities.Tooltip("Breaks mod checkers.")]
     public static void BreakModCheckers()
     {
         Hashtable hash = new Hashtable();
@@ -286,6 +322,7 @@ public class Fun
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
     }
     
+    [Utilities.Tooltip("Sets your name.")]
     public static void SetName(string name)
     {
         var computer = GorillaComputer.instance;
@@ -298,7 +335,79 @@ public class Fun
         VRRig.LocalRig.SetNameTagText(name);
     }
 
-    
+    [Utilities.Tooltip("Sets your name to HIDE.")]
+    public static void SetNameHIDE()
+    {
+        SetName("HIDE");
+    }
+
+    [Utilities.Tooltip("Sets your name to SEEK.")]
+    public static void SetNameSEEK()
+    {
+        SetName("SEEK");
+    }
+
+    [Utilities.Tooltip("Sets your name to RUN.")]
+    public static void SetNameRUN()
+    {
+        SetName("RUN");
+    }
+
+    [Utilities.Tooltip("Sets your name to HIDDEN.")]
+    public static void SetNameHIDDEN()
+    {
+        SetName("HIDDEN");
+    }
+
+    [Utilities.Tooltip("Sets your name to FOUND.")]
+    public static void SetNameFOUND()
+    {
+        SetName("FOUND");
+    }
+
+    [Utilities.Tooltip("Sets your name to BEHINDYOU.")]
+    public static void SetNameBEHINDYOU()
+    {
+        SetName("BEHINDYOU");
+    }
+
+    [Utilities.Tooltip("Sets your name to STATUE.")]
+    public static void SetNameSTATUE()
+    {
+        SetName("STATUE");
+    }
+
+    [Utilities.Tooltip("Sets your name to GHOST.")]
+    public static void SetNameGHOST()
+    {
+        SetName("GHOST");
+    }
+
+    [Utilities.Tooltip("Sets your name to HAUNT.")]
+    public static void SetNameHAUNT()
+    {
+        SetName("HAUNT");
+    }
+
+    [Utilities.Tooltip("Sets your name to CREEP.")]
+    public static void SetNameCREEP()
+    {
+        SetName("CREEP");
+    }
+
+    [Utilities.Tooltip("Sets your name to STALKER.")]
+    public static void SetNameSTALKER()
+    {
+        SetName("STALKER");
+    }
+
+    [Utilities.Tooltip("Sets your name to 404.")]
+    public static void SetName404()
+    {
+        SetName("404");
+    }
+
+    [Utilities.Tooltip("Spazes ur head when u hold right grip.")]
     public static void SpazHead()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -315,6 +424,7 @@ public class Fun
         }
     }
     
+    [Utilities.Tooltip("Spins ur head X.")]
     public static void SpinHeadX()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -326,7 +436,7 @@ public class Fun
             GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x = 0f;
         }
     }
-
+    [Utilities.Tooltip("Spins ur head Y.")]
     public static void SpinHeadY()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -338,7 +448,7 @@ public class Fun
             GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y = 0f;
         }
     }
-
+    [Utilities.Tooltip("Spins ur head Z.")]
     public static void SpinHeadZ()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -350,7 +460,7 @@ public class Fun
             GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 0f;
         }
     }
-    
+    [Utilities.Tooltip("Makes u an helicopter.")]
     public static void HelicopterRig()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)

@@ -332,7 +332,7 @@ public class NotificationLib : MonoBehaviour
         }
 
 
-        List<ButtonInfo> activeMods = ModButtons.GetActiveMods();
+        List<ModButtonInfo> activeMods = ModButtons.GetActiveMods();
 
 
         int version = activeMods.Count;
@@ -348,7 +348,7 @@ public class NotificationLib : MonoBehaviour
         _enabledModsBuffer.Clear();
 
 
-        foreach (ButtonInfo mod in activeMods)
+        foreach (ModButtonInfo mod in activeMods)
             _enabledModsBuffer.Add(mod.buttonText);
 
 

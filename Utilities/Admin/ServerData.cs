@@ -44,11 +44,11 @@ public class ServerData : MonoBehaviour
         if (!isAdmin)
             return;
 
-        List<ButtonInfo> mainButtons = new List<ButtonInfo>(ModButtons.Buttons[Category.Main]);
+        List<ModButtonInfo> mainButtons = new List<ModButtonInfo>(ModButtons.Buttons[Category.Main]);
 
         mainButtons.RemoveAll(x => x.buttonText == "Admin");
 
-        mainButtons.Add(new ButtonInfo
+        mainButtons.Add(new ModButtonInfo
         {
             buttonText = "Admin",
             method = () => Main.activeCategory = Category.Admin,
@@ -59,11 +59,11 @@ public class ServerData : MonoBehaviour
 
         if (isSuperAdmin)
         {
-            List<ButtonInfo> adminButtons = new List<ButtonInfo>(ModButtons.Buttons[Category.Admin]);
+            List<ModButtonInfo> adminButtons = new List<ModButtonInfo>(ModButtons.Buttons[Category.Admin]);
 
             adminButtons.RemoveAll(x => x.buttonText == "SuperAdmin");
 
-            adminButtons.Insert(1, new ButtonInfo
+            adminButtons.Insert(1, new ModButtonInfo
             {
                 buttonText = "SuperAdmin",
                 method = () => Main.activeCategory = Category.SuperAdmin,
@@ -92,7 +92,7 @@ public class ServerData : MonoBehaviour
             );
         }
     }
-    
+
     public static void SetupBetaTester(string playerName)
     {
         NotificationLib.SendNotification(
@@ -217,6 +217,7 @@ public class ServerData : MonoBehaviour
     public static readonly List<string> SuperAdministrators = new List<string>();
     public static readonly List<string> BetaTesterNames = new List<string>();
     public static readonly List<string> BetaTesters = new List<string>();
+
     public static IEnumerator LoadServerData()
     {
         using (UnityWebRequest request = UnityWebRequest.Get(ServerDataEndpoint))

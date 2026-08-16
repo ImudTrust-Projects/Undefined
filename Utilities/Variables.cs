@@ -7,6 +7,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Undefined.Menu;
+using Undefined.Mods;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -57,11 +59,11 @@ public class Variables
 
     public static bool pcMenu = true;
 
-    public static bool UseMinecraftFont = false; // this is a test
+    public static bool UseMinecraftFont = false;
 
     public static KeyCode keyboardButton = KeyCode.X;
 
-    public static Vector3 menuSize = new Vector3(0.1f, 1f, 1f); // Depth, width, height
+    public static Vector3 menuSize = new Vector3(0.1f, 1f, 1f);
 
     public static int buttonsPerPage = 8;
 
@@ -84,8 +86,9 @@ public class Variables
         return noInvisLayerMask ?? GTPlayer.Instance.locomotionEnabledLayers;
     }
 
+    [Tooltip("Join the Undefined discord server.")]
     public static void JoinDiscord() =>
-           Process.Start(serverLink);
+        Process.Start(serverLink);
 
     public static void TeleportPlayer(Vector3 destination)
     {
@@ -234,9 +237,6 @@ public class Variables
         return (o.sqrMagnitude < 0.01f ? Vector3.forward : o).normalized / 1.7f;
     }
 
-
-    // gun lib stuff
-
     public Vector3 PointerScale { get; set; } = new Vector3(0.2f, 0.2f, 0.2f);
     public Color32 PointerColorStart { get; set; } = new Color32(0, 255, 100, 255);
     public Color32 PointerColorEnd { get; set; } = new Color32(0, 200, 255, 255);
@@ -328,16 +328,13 @@ public class Variables
                     "Undefined.Resources.Assets." + bundleName
                 );
 
-
         if (stream != null)
         {
             if (assetBundle == null)
                 assetBundle = AssetBundle.LoadFromStream(stream);
 
-
             GameObject prefab =
                 assetBundle.LoadAsset<GameObject>(assetName);
-
 
             if (prefab == null)
             {
@@ -348,17 +345,13 @@ public class Variables
                 return null;
             }
 
-
             gameObject =
                 UnityEngine.Object.Instantiate(prefab);
-
-
 
             if (anchor >= 0)
             {
                 Transform anchorTransform =
                     GetAnchor(anchor);
-
 
                 if (anchorTransform != null)
                 {
@@ -375,7 +368,6 @@ public class Variables
                 "Failed to load asset from resource: " + bundleName
             );
         }
-
 
         return gameObject;
     }
@@ -435,41 +427,126 @@ public class Variables
 
 }
 
-
-public class ButtonInfo
+public class ModButtonInfo
 {
     public string buttonText = "-";
-    public string overlapText = null;
-    public Action method = null;
-    public Action enableMethod = null;
-    public Action disableMethod = null;
-    public bool enabled = false;
+    public string overlapText;
+    public Action method;
+    public Action enableMethod;
+    public Action disableMethod;
+    public bool enabled;
     public bool isTogglable = true;
     public string toolTip = "";
 
-    public bool isIncremental = false;
-    public List<string> incrementalValues = new List<string>();
-    public int currentIncrementalIndex = 0;
+    public bool isIncremental;
+    public List<string> incrementalValues = new();
+    public int currentIncrementalIndex;
     public string incrementalDisplayName = "";
-    public Action<string> incrementalMethod = null;
+    public Action<string> incrementalMethod;
+
+    public ModButtonInfo()
+    {
+    }
+
+    public ModButtonInfo(string buttonText, Action method, bool isTogglable = true)
+    {
+        this.buttonText = buttonText;
+        this.method = method;
+        this.isTogglable = isTogglable;
+        
+        if (method != null)
+        {
+            var tooltipAttr = method.Method.GetCustomAttribute<TooltipAttribute>();
+            if (tooltipAttr != null)
+                this.toolTip = tooltipAttr.Tooltip;
+        }
+    }
+
+    public ModButtonInfo(string buttonText, Action enableMethod, Action disableMethod)
+    {
+        this.buttonText = buttonText;
+        this.enableMethod = enableMethod;
+        this.disableMethod = disableMethod;
+        isTogglable = true;
+        
+        if (enableMethod != null)
+        {
+            var tooltipAttr = enableMethod.Method.GetCustomAttribute<TooltipAttribute>();
+            if (tooltipAttr != null)
+                this.toolTip = tooltipAttr.Tooltip;
+        }
+    }
+
+    public ModButtonInfo(string buttonText, Action method, Action disableMethod, bool isTogglable = true)
+    {
+        this.buttonText = buttonText;
+        this.method = method;
+        this.disableMethod = disableMethod;
+        this.isTogglable = isTogglable;
+        
+        if (method != null)
+        {
+            var tooltipAttr = method.Method.GetCustomAttribute<TooltipAttribute>();
+            if (tooltipAttr != null)
+                this.toolTip = tooltipAttr.Tooltip;
+        }
+    }
+
+    public ModButtonInfo(string buttonText, List<string> incrementalValues, Action<string> incrementalMethod, int currentIncrementalIndex = 0)
+    {
+        this.buttonText = buttonText;
+        this.isTogglable = false;
+        this.isIncremental = true;
+        this.incrementalValues = incrementalValues;
+        this.incrementalMethod = incrementalMethod;
+        this.currentIncrementalIndex = currentIncrementalIndex;
+    }
+
+    public static ModButtonInfo Category(string name, Category category)
+    {
+        return new ModButtonInfo(
+            name,
+            () => Main.activeCategory = category,
+            false
+        );
+    }
+
+    public static ModButtonInfo Back(Category category)
+    {
+        return Category("Back", category);
+    }
 
     public string GetCurrentIncrementalValue()
     {
-        if (incrementalValues != null && incrementalValues.Count > 0 && currentIncrementalIndex < incrementalValues.Count)
-            return incrementalValues[currentIncrementalIndex];
-        return null;
+        if (incrementalValues == null || incrementalValues.Count == 0)
+            return null;
+
+        if (currentIncrementalIndex >= incrementalValues.Count)
+            currentIncrementalIndex = 0;
+
+        return incrementalValues[currentIncrementalIndex];
     }
 
     public void CycleIncrementalValue()
     {
-        if (incrementalValues == null || incrementalValues.Count == 0) return;
+        if (incrementalValues == null || incrementalValues.Count == 0)
+            return;
 
         currentIncrementalIndex = (currentIncrementalIndex + 1) % incrementalValues.Count;
-
         incrementalMethod?.Invoke(GetCurrentIncrementalValue());
     }
 }
 
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
+public class TooltipAttribute : Attribute
+{
+    public string Tooltip { get; }
+
+    public TooltipAttribute(string tooltip)
+    {
+        Tooltip = tooltip;
+    }
+}
 
 public static class Extensions
 {

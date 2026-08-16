@@ -4,7 +4,7 @@ public class Constants
 {
     public const string PluginGUID = "com.imudtrust.gorillatag.undefined";
     public const string PluginName = "Undefined";
-    public const string PluginVersion = "1.0.2";
+    public const string PluginVersion = "1.0.3";
 
     public const bool BetaBuild = false;
 

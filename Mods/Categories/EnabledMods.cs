@@ -8,9 +8,9 @@ public static class EnabledMods
 {
     public static void UpdateCategory()
     {
-        List<ButtonInfo> newCategory = new List<ButtonInfo>
+        List<ModButtonInfo> newCategory = new List<ModButtonInfo>
         {
-            new ButtonInfo
+            new ModButtonInfo
             {
                 buttonText = "Return to Main",
                 method = () => Main.activeCategory = Category.Main,
@@ -18,9 +18,9 @@ public static class EnabledMods
             }
         };
 
-        foreach (ButtonInfo mod in ModButtons.GetActiveMods())
+        foreach (ModButtonInfo mod in ModButtons.GetActiveMods())
             newCategory.Add(mod);
 
-        ModButtons.Buttons[Category.EnabledMods] = newCategory.ToArray(); // not hardcoded anymore?
+        ModButtons.Buttons[Category.EnabledMods] = newCategory.ToArray();
     }
 }

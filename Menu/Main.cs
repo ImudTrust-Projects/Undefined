@@ -45,8 +45,6 @@ public class Main : MonoBehaviour
             if (InputHandler.Instance == null)
                 return;
 
-            //Overseer();
-
             bool openRequested = (!rightHanded && InputHandler.Instance.LeftSecondary.IsPressed) ||
                                  (rightHanded && InputHandler.Instance.RightSecondary.IsPressed);
 
@@ -311,7 +309,7 @@ public class Main : MonoBehaviour
             discTextTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
-        ButtonInfo[] pageButtons = Buttons[activeCategory]
+        ModButtonInfo[] pageButtons = Buttons[activeCategory]
             .Skip(activePage * buttonsPerPage)
             .Take(buttonsPerPage)
             .ToArray();
@@ -322,7 +320,7 @@ public class Main : MonoBehaviour
         }
     }
 
-    public static void BuildButton(float offset, ButtonInfo info)
+    public static void BuildButton(float offset, ModButtonInfo info)
     {
         GameObject btnObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
         if (!UnityInput.Current.GetKey(keyboardButton))
@@ -385,6 +383,8 @@ public class Main : MonoBehaviour
 
         if (activeMenu != null)
         {
+            searchCache.Clear();
+
             Destroy(activeMenu);
             activeMenu = null;
             BuildMenu();
@@ -521,7 +521,7 @@ public class Main : MonoBehaviour
 
     public static void ProcessClick(string text)
     {
-        ButtonInfo target = FindButton(text);
+        ModButtonInfo target = FindButton(text);
         if (target != null)
         {
             if (target.isIncremental)
@@ -539,34 +539,43 @@ public class Main : MonoBehaviour
                 if (target.enabled)
                 {
                     target.enableMethod?.Invoke();
-                    NotificationLib.SendNotification(
-                        NotificationLib.NotificationType.Enabled, target.toolTip);
+                    
+                    if (!string.IsNullOrEmpty(target.toolTip))
+                    {
+                        NotificationLib.SendNotification(
+                            NotificationLib.NotificationType.Enabled,
+                            target.toolTip
+                        );
+                    }
                 }
                 else
                 {
                     target.disableMethod?.Invoke();
-                    NotificationLib.SendNotification(
-                        NotificationLib.NotificationType.Disabled,
-                        target.toolTip);
+                    
+                    if (!string.IsNullOrEmpty(target.toolTip))
+                    {
+                        NotificationLib.SendNotification(
+                            NotificationLib.NotificationType.Disabled,
+                            target.toolTip
+                        );
+                    }
                 }
             }
             else
             {
                 target.method?.Invoke();
-                NotificationLib.SendNotification(
-                    NotificationLib.NotificationType.Info,
-                    target.toolTip);
             }
         }
         else
         {
             Debug.LogError($"{text} does not exist");
         }
+
         RebuildMenu();
         SettingsSaver.Save();
     }
 
-    public static ButtonInfo FindButton(string text)
+    public static ModButtonInfo FindButton(string text)
     {
         if (text == null) return null;
 

@@ -71,22 +71,22 @@ public class SoundBoard : MonoBehaviour
     {
         try
         {
-            List<ButtonInfo> buttons = new List<ButtonInfo>
+            List<ModButtonInfo> buttons = new List<ModButtonInfo>
             {
-                new ButtonInfo
+                new ModButtonInfo
                 {
                     buttonText = "Return to Main",
                     method = () => Main.activeCategory = Category.Main,
                     isTogglable = false
                 },
-                
-                new ButtonInfo
+
+                new ModButtonInfo
                 {
                     buttonText = "Stop All Sounds",
                     method = StopAll,
                     isTogglable = false
                 },
-                new ButtonInfo
+                new ModButtonInfo
                 {
                     buttonText = "Only Play Audio In Mic",
                     enableMethod = () => { HearSelf = false; },
@@ -94,7 +94,7 @@ public class SoundBoard : MonoBehaviour
                     isTogglable = true,
                     enabled = !HearSelf
                 },
-                new ButtonInfo
+                new ModButtonInfo
                 {
                     buttonText = "Loop Audio",
                     enableMethod = () => { LoopAudio = true; },
@@ -102,19 +102,19 @@ public class SoundBoard : MonoBehaviour
                     isTogglable = true,
                     enabled = LoopAudio
                 },
-                new ButtonInfo
+                new ModButtonInfo
                 {
                     buttonText = "Open Sound Folder",
                     method = OpenFolder,
                     isTogglable = false
                 },
-                new ButtonInfo
+                new ModButtonInfo
                 {
                     buttonText = "Reload Sounds",
                     method = ReloadSounds,
                     isTogglable = false
                 },
-                new ButtonInfo
+                new ModButtonInfo
                 {
                     buttonText = "Stop Current Sound",
                     method = Stop,
@@ -126,7 +126,7 @@ public class SoundBoard : MonoBehaviour
 
             if (soundFiles.Any())
             {
-                buttons.Add(new ButtonInfo
+                buttons.Add(new ModButtonInfo
                 {
                     buttonText = "↓ Sounds ↓",
                     method = null,
@@ -134,8 +134,8 @@ public class SoundBoard : MonoBehaviour
                 });
             }
 
-            List<ButtonInfo> soundButtons = soundFiles
-                .Select(file => new ButtonInfo
+            List<ModButtonInfo> soundButtons = soundFiles
+                .Select(file => new ModButtonInfo
                 {
                     buttonText = Path.GetFileNameWithoutExtension(file).Replace("_", " "),
                     method = () => PlayFile(file),
