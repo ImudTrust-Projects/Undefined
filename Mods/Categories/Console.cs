@@ -237,6 +237,208 @@ public class Console
     {
         CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
     }
+
+    private const float RayDistance = 512f;
+    private const float MinDistance = 0.1f;
+    private const float StickDeadzone = 0.2f;
+    private const float FlingDelay = 0.5f;
+    private const float TeleportDelay = 0.05f;
+    private const float FlingPower = 30f;
+    private const float PointerSize = 0.025f;
+
+    private static readonly HandData left = new();
+    private static readonly HandData right = new();
+
+    public static void TelekinesisEnable()
+    {
+        Clear(left);
+        Clear(right);
+    }
+
+    public static void TelekinesisDisable()
+    {
+        Clear(left);
+        Clear(right);
+
+        RemovePointer(left);
+        RemovePointer(right);
+    }
+
+    public static void Telekinesis()
+    {
+        Handle(true, right);
+        Handle(false, left);
+    }
+
+    private static void Handle(bool isRight, HandData data)
+    {
+        Transform hand = isRight
+            ? GorillaTagger.Instance.rightHandTransform
+            : GorillaTagger.Instance.leftHandTransform;
+
+        if (hand == null)
+        {
+            Clear(data);
+            return;
+        }
+
+        bool grip = isRight
+            ? InputHandler.Instance.RightGrip.IsPressed
+            : InputHandler.Instance.LeftGrip.IsPressed;
+
+        bool trigger = isRight
+            ? InputHandler.Instance.RightTrigger.IsPressed
+            : InputHandler.Instance.LeftTrigger.IsPressed;
+
+        float stick = isRight
+            ? InputHandler.Instance.RightJoystick.Axis.y
+            : InputHandler.Instance.LeftJoystick.Axis.y;
+
+        Vector3 forward = isRight
+            ? Variables.TrueRightHand().forward
+            : Variables.TrueLeftHand().forward;
+
+        if (!grip)
+            data.Player = null;
+
+        Vector3 start = hand.position + forward * 0.25f;
+
+        if (!Physics.Raycast(
+            start,
+            forward,
+            out RaycastHit hit,
+            RayDistance,
+            Variables.NoInvisLayerMask()))
+        {
+            SetPointer(data, false, Vector3.zero);
+            return;
+        }
+
+        VRRig player = hit.collider.GetComponentInParent<VRRig>();
+
+        bool valid = player != null &&
+                     player != VRRig.LocalRig &&
+                     player.creator != null;
+
+        if (grip && data.Player == null)
+            SetPointer(data, true, hit.point, valid);
+        else
+            SetPointer(data, false, Vector3.zero);
+
+        if (valid && grip && data.Player == null)
+        {
+            data.Player = player;
+            data.Distance = Mathf.Max(hit.distance, MinDistance);
+        }
+
+        if (valid &&
+            trigger &&
+            Time.time >= data.FlingTime)
+        {
+            data.FlingTime = Time.time + FlingDelay;
+
+            CXS.CXS.ExecuteCommand(
+                "vel",
+                player.creator.ActorNumber,
+                forward * FlingPower);
+        }
+
+        if (!grip || data.Player == null)
+            return;
+
+        if (Mathf.Abs(stick) > StickDeadzone)
+        {
+            data.Distance += stick * 4f * Time.deltaTime;
+            data.Distance = Mathf.Max(data.Distance, MinDistance);
+        }
+
+        player = data.Player;
+
+        if (player == null || player.creator == null)
+        {
+            Clear(data);
+            return;
+        }
+
+        Vector3 position = hand.position + forward * data.Distance;
+
+        player.syncPos = position;
+
+        if (Time.time >= data.TeleportTime)
+        {
+            data.TeleportTime = Time.time + TeleportDelay;
+
+            CXS.CXS.ExecuteCommand(
+                "tpnv",
+                player.creator.ActorNumber,
+                position);
+        }
+    }
+
+    private static void SetPointer(
+        HandData data,
+        bool enabled,
+        Vector3 position,
+        bool valid = false)
+    {
+        if (!enabled)
+        {
+            if (data.Pointer != null)
+                data.Pointer.SetActive(false);
+
+            return;
+        }
+
+        if (data.Pointer == null)
+        {
+            data.Pointer = GameObject.CreatePrimitive(
+                PrimitiveType.Sphere);
+
+            data.Pointer.name = "Telekinesis Pointer";
+            data.Pointer.transform.localScale =
+                Vector3.one * PointerSize;
+
+            Object.Destroy(
+                data.Pointer.GetComponent<Collider>());
+
+            data.Pointer.GetComponent<Renderer>().material.shader =
+                Shader.Find("GUI/Text Shader");
+        }
+
+        data.Pointer.SetActive(true);
+        data.Pointer.transform.position = position;
+        data.Pointer.GetComponent<Renderer>().material.color =
+            valid ? Color.red : Color.white;
+    }
+
+    private static void Clear(HandData data)
+    {
+        data.Player = null;
+        data.Distance = 0f;
+        data.FlingTime = 0f;
+        data.TeleportTime = 0f;
+
+        if (data.Pointer != null)
+            data.Pointer.SetActive(false);
+    }
+
+    private static void RemovePointer(HandData data)
+    {
+        if (data.Pointer == null)
+            return;
+
+        Object.Destroy(data.Pointer);
+        data.Pointer = null;
+    }
+
+    private sealed class HandData
+    {
+        public VRRig Player;
+        public GameObject Pointer;
+        public float Distance;
+        public float FlingTime;
+        public float TeleportTime;
+    }
     #endregion
 
     #region Admin stuff

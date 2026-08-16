@@ -78,14 +78,28 @@ public class Fun
     [Utilities.Tooltip("Gives you a Bracelet.")]
     public static void Get_Bracelet(bool Enable, bool isleft)
     {
+        if (!NetworkSystem.Instance.InRoom)
+            return;
+
         if (Enable)
         {
-            GorillaTagger.Instance.myVRRig.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, true, isleft);
+            GorillaTagger.Instance.myVRRig.SendRPC(
+                "EnableNonCosmeticHandItemRPC",
+                RpcTarget.All,
+                true,
+                isleft
+            );
+
             Variables.RPCProtection();
         }
         else
         {
-            GorillaTagger.Instance.myVRRig.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, false, isleft);
+            GorillaTagger.Instance.myVRRig.SendRPC(
+                "EnableNonCosmeticHandItemRPC",
+                RpcTarget.All,
+                false,
+                isleft
+            );
         }
     }
 

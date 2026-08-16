@@ -539,7 +539,7 @@ public class Main : MonoBehaviour
                 if (target.enabled)
                 {
                     target.enableMethod?.Invoke();
-                    
+
                     if (!string.IsNullOrEmpty(target.toolTip))
                     {
                         NotificationLib.SendNotification(
@@ -551,7 +551,7 @@ public class Main : MonoBehaviour
                 else
                 {
                     target.disableMethod?.Invoke();
-                    
+
                     if (!string.IsNullOrEmpty(target.toolTip))
                     {
                         NotificationLib.SendNotification(
@@ -577,47 +577,18 @@ public class Main : MonoBehaviour
 
     public static ModButtonInfo FindButton(string text)
     {
-        if (text == null) return null;
+        if (text == null)
+            return null;
 
-        if (searchCache.TryGetValue(text, out var entry))
+        if (Buttons.TryGetValue(activeCategory, out var categoryButtons))
         {
-            try
+            foreach (var button in categoryButtons)
             {
-                if (Buttons[entry.Cat][entry.Idx].buttonText == text)
-                {
-                    return Buttons[entry.Cat][entry.Idx];
-                }
-            }
-            catch
-            {
-                searchCache.Remove(text);
+                if (button != null && button.buttonText == text)
+                    return button;
             }
         }
 
-        foreach (var kvp in Buttons)
-        {
-            var cat = kvp.Key;
-            var categoryButtons = kvp.Value;
-
-            for (int idx = 0; idx < categoryButtons.Length; idx++)
-            {
-                if (categoryButtons[idx].buttonText == text)
-                {
-                    try
-                    {
-                        searchCache[text] = (cat, idx);
-                    }
-                    catch
-                    {
-                        if (searchCache.ContainsKey(text))
-                        {
-                            searchCache.Remove(text);
-                        }
-                    }
-                    return categoryButtons[idx];
-                }
-            }
-        }
         return null;
     }
 

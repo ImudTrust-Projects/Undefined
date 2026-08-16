@@ -73,53 +73,13 @@ public class SoundBoard : MonoBehaviour
         {
             List<ModButtonInfo> buttons = new List<ModButtonInfo>
             {
-                new ModButtonInfo
-                {
-                    buttonText = "Return to Main",
-                    method = () => Main.activeCategory = Category.Main,
-                    isTogglable = false
-                },
-
-                new ModButtonInfo
-                {
-                    buttonText = "Stop All Sounds",
-                    method = StopAll,
-                    isTogglable = false
-                },
-                new ModButtonInfo
-                {
-                    buttonText = "Only Play Audio In Mic",
-                    enableMethod = () => { HearSelf = false; },
-                    disableMethod = () => { HearSelf = true; },
-                    isTogglable = true,
-                    enabled = !HearSelf
-                },
-                new ModButtonInfo
-                {
-                    buttonText = "Loop Audio",
-                    enableMethod = () => { LoopAudio = true; },
-                    disableMethod = () => { LoopAudio = false; },
-                    isTogglable = true,
-                    enabled = LoopAudio
-                },
-                new ModButtonInfo
-                {
-                    buttonText = "Open Sound Folder",
-                    method = OpenFolder,
-                    isTogglable = false
-                },
-                new ModButtonInfo
-                {
-                    buttonText = "Reload Sounds",
-                    method = ReloadSounds,
-                    isTogglable = false
-                },
-                new ModButtonInfo
-                {
-                    buttonText = "Stop Current Sound",
-                    method = Stop,
-                    isTogglable = false
-                }
+                ModButtonInfo.Back(Category.Main),
+                new ModButtonInfo("Stop All Sounds", StopAll, false),
+                new ModButtonInfo("Only Play Audio In Mic", () => { HearSelf = false; }, () => { HearSelf = true; }) { enabled = !HearSelf },
+                new ModButtonInfo("Loop Audio", () => { LoopAudio = true; }, () => { LoopAudio = false; }) { enabled = LoopAudio },
+                new ModButtonInfo("Open Sound Folder", OpenFolder, false),
+                new ModButtonInfo("Reload Sounds", ReloadSounds, false),
+                new ModButtonInfo("Stop Current Sound", Stop, false)
             };
 
             List<string> soundFiles = GetSoundFiles().ToList();
@@ -145,8 +105,6 @@ public class SoundBoard : MonoBehaviour
 
             buttons.AddRange(soundButtons);
             ModButtons.Buttons[Category.SoundBoard] = buttons.ToArray();
-
-            Debug.Log($"Undefined Soundboard: Loaded {soundButtons.Count} sounds from {SoundFolder}");
         }
         catch (Exception ex)
         {
@@ -255,6 +213,7 @@ public class SoundBoard : MonoBehaviour
                 yield break;
             }
 
+            clip.LoadAudioData();
             audioClipCache[path] = clip;
         }
 
@@ -360,8 +319,6 @@ public class SoundBoard : MonoBehaviour
                 Destroy(clip);
         }
         audioClipCache.Clear();
-
-        Debug.Log("Undefined Soundboard: All sounds stopped and cache cleared");
     }
 
     public static void ReloadSounds()
@@ -375,8 +332,6 @@ public class SoundBoard : MonoBehaviour
 
         Stop();
         LoadSounds();
-
-        Debug.Log("Undefined Soundboard: Sounds reloaded successfully");
     }
 
     public static void ClearCache()
@@ -387,7 +342,6 @@ public class SoundBoard : MonoBehaviour
                 Destroy(clip);
         }
         audioClipCache.Clear();
-        Debug.Log("Undefined Soundboard: Audio cache cleared");
     }
 
     private static void OpenFolder()

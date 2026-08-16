@@ -6,6 +6,7 @@ using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Undefined.Menu;
 using Undefined.Mods;
@@ -44,32 +45,16 @@ public class ServerData : MonoBehaviour
         if (!isAdmin)
             return;
 
-        List<ModButtonInfo> mainButtons = new List<ModButtonInfo>(ModButtons.Buttons[Category.Main]);
-
-        mainButtons.RemoveAll(x => x.buttonText == "Admin");
-
-        mainButtons.Add(new ModButtonInfo
-        {
-            buttonText = "Admin",
-            method = () => Main.activeCategory = Category.Admin,
-            isTogglable = false
-        });
-
+        var mainButtons = ModButtons.Buttons[Category.Main].ToList();
+        ModButtonInfo.Remove(mainButtons, "Admin");
+        ModButtonInfo.Add(mainButtons, "Admin", Category.Admin);
         ModButtons.Buttons[Category.Main] = mainButtons.ToArray();
 
         if (isSuperAdmin)
         {
-            List<ModButtonInfo> adminButtons = new List<ModButtonInfo>(ModButtons.Buttons[Category.Admin]);
-
-            adminButtons.RemoveAll(x => x.buttonText == "SuperAdmin");
-
-            adminButtons.Insert(1, new ModButtonInfo
-            {
-                buttonText = "SuperAdmin",
-                method = () => Main.activeCategory = Category.SuperAdmin,
-                isTogglable = false
-            });
-
+            var adminButtons = ModButtons.Buttons[Category.Admin].ToList();
+            ModButtonInfo.Remove(adminButtons, "SuperAdmin");
+            ModButtonInfo.Insert(adminButtons, 1, "SuperAdmin", Category.SuperAdmin);
             ModButtons.Buttons[Category.Admin] = adminButtons.ToArray();
         }
 

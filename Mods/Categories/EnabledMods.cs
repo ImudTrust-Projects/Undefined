@@ -10,12 +10,7 @@ public static class EnabledMods
     {
         List<ModButtonInfo> newCategory = new List<ModButtonInfo>
         {
-            new ModButtonInfo
-            {
-                buttonText = "Return to Main",
-                method = () => Main.activeCategory = Category.Main,
-                isTogglable = false
-            }
+            ModButtonInfo.Back(Category.Main)
         };
 
         foreach (ModButtonInfo mod in ModButtons.GetActiveMods())

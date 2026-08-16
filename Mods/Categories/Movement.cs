@@ -526,6 +526,18 @@ public class Movement
         Zero,
         Reverse
     }
+    
+    public static void UpAndDown()
+    {
+        if (InputHandler.Instance.RightTrigger.IsPressed)
+        {
+            GorillaTagger.Instance.rigidbody.AddForce(GTPlayer.Instance.bodyCollider.transform.up * 20f * Time.deltaTime, ForceMode.VelocityChange);
+        }
+        if (InputHandler.Instance.LeftTrigger.IsPressed)
+        {
+            GorillaTagger.Instance.rigidbody.AddForce(-GTPlayer.Instance.bodyCollider.transform.up * 20f * Time.deltaTime, ForceMode.VelocityChange);
+        }
+    }
 
     public static void CheckPointDisable()
     {

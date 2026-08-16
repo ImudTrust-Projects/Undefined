@@ -11,7 +11,7 @@ public enum Category
     FunMods,
     VisualMods,
     SafetyMods,
-    TagMods,
+    AdvantagesMods,
     MapLoader,
     SoundSpamMods,
     GuardianMods,

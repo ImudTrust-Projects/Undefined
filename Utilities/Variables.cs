@@ -22,7 +22,7 @@ public class Variables
     public static string serverLink = "https://discord.gg/Bq94vsUtGk";
 
     public static string CosmeticsOwned;
-    
+
     public static bool NotifySelf = false;
     public static bool NotifyOthers = false;
     public static bool HideReason = false;
@@ -72,6 +72,7 @@ public class Variables
     private static int? noInvisLayerMask;
 
     public static GTPlayer playerInstance;
+
     public static int NoInvisLayerMask()
     {
         noInvisLayerMask ??= ~(
@@ -113,7 +114,7 @@ public class Variables
     {
         return (Color32)(new Color32((byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), byte.MaxValue));
     }
-    
+
     public static bool Overseer = true;
 
     public static bool IsMaster(bool notify = true)
@@ -179,46 +180,46 @@ public class Variables
     }
 
     public static int[] bones = new int[]
-        {
-            4,
-            3,
-            5,
-            4,
-            19,
-            18,
-            20,
-            19,
-            3,
-            18,
-            21,
-            20,
-            22,
-            21,
-            25,
-            21,
-            29,
-            21,
-            31,
-            29,
-            27,
-            25,
-            24,
-            22,
-            6,
-            5,
-            7,
-            6,
-            10,
-            6,
-            14,
-            6,
-            16,
-            14,
-            12,
-            10,
-            9,
-            7
-        };
+    {
+        4,
+        3,
+        5,
+        4,
+        19,
+        18,
+        20,
+        19,
+        3,
+        18,
+        21,
+        20,
+        22,
+        21,
+        25,
+        21,
+        29,
+        21,
+        31,
+        29,
+        27,
+        25,
+        24,
+        22,
+        6,
+        5,
+        7,
+        6,
+        10,
+        6,
+        14,
+        6,
+        16,
+        14,
+        12,
+        10,
+        9,
+        7
+    };
 
     public static Vector3 HeadPosition(VRRig rig)
     {
@@ -371,7 +372,7 @@ public class Variables
 
         return gameObject;
     }
-    
+
     private static Transform GetAnchor(int anchor)
     {
         switch (anchor)
@@ -394,9 +395,10 @@ public class Variables
     }
 
     public static string ToTitleCase(string text) =>
-    CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+        CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
 
     private static readonly Dictionary<string, GameObject> objectPool = new Dictionary<string, GameObject>();
+
     public static GameObject GetObject(string find)
     {
         if (objectPool.TryGetValue(find, out GameObject go))
@@ -424,7 +426,6 @@ public class Variables
 
         return tgo;
     }
-
 }
 
 public class ModButtonInfo
@@ -453,7 +454,7 @@ public class ModButtonInfo
         this.buttonText = buttonText;
         this.method = method;
         this.isTogglable = isTogglable;
-        
+
         if (method != null)
         {
             var tooltipAttr = method.Method.GetCustomAttribute<TooltipAttribute>();
@@ -467,8 +468,8 @@ public class ModButtonInfo
         this.buttonText = buttonText;
         this.enableMethod = enableMethod;
         this.disableMethod = disableMethod;
-        isTogglable = true;
-        
+        this.isTogglable = true;
+
         if (enableMethod != null)
         {
             var tooltipAttr = enableMethod.Method.GetCustomAttribute<TooltipAttribute>();
@@ -477,16 +478,17 @@ public class ModButtonInfo
         }
     }
 
-    public ModButtonInfo(string buttonText, Action method, Action disableMethod, bool isTogglable = true)
+    public ModButtonInfo(string buttonText, Action enableMethod, Action disableMethod, Action method, bool isTogglable = true)
     {
         this.buttonText = buttonText;
-        this.method = method;
+        this.enableMethod = enableMethod;
         this.disableMethod = disableMethod;
+        this.method = method;
         this.isTogglable = isTogglable;
-        
-        if (method != null)
+
+        if (enableMethod != null)
         {
-            var tooltipAttr = method.Method.GetCustomAttribute<TooltipAttribute>();
+            var tooltipAttr = enableMethod.Method.GetCustomAttribute<TooltipAttribute>();
             if (tooltipAttr != null)
                 this.toolTip = tooltipAttr.Tooltip;
         }
@@ -502,6 +504,16 @@ public class ModButtonInfo
         this.currentIncrementalIndex = currentIncrementalIndex;
     }
 
+    public static ModButtonInfo Run(string buttonText, Action method, Action disableMethod)
+    {
+        return new ModButtonInfo
+        {
+            buttonText = buttonText,
+            method = method,
+            disableMethod = disableMethod
+        };
+    }
+
     public static ModButtonInfo Category(string name, Category category)
     {
         return new ModButtonInfo(
@@ -513,7 +525,12 @@ public class ModButtonInfo
 
     public static ModButtonInfo Back(Category category)
     {
-        return Category("Back", category);
+        return new ModButtonInfo
+        {
+            buttonText = "Back",
+            method = () => Main.activeCategory = category,
+            isTogglable = false
+        };
     }
 
     public string GetCurrentIncrementalValue()
@@ -534,6 +551,36 @@ public class ModButtonInfo
 
         currentIncrementalIndex = (currentIncrementalIndex + 1) % incrementalValues.Count;
         incrementalMethod?.Invoke(GetCurrentIncrementalValue());
+    }
+
+    public static List<ModButtonInfo> Add(List<ModButtonInfo> list, string name, Category category)
+    {
+        list.Add(Category(name, category));
+        return list;
+    }
+
+    public static List<ModButtonInfo> Add(List<ModButtonInfo> list, ModButtonInfo button)
+    {
+        list.Add(button);
+        return list;
+    }
+
+    public static List<ModButtonInfo> Remove(List<ModButtonInfo> list, string buttonText)
+    {
+        list.RemoveAll(x => x.buttonText == buttonText);
+        return list;
+    }
+
+    public static List<ModButtonInfo> RemoveAll(List<ModButtonInfo> list, Predicate<ModButtonInfo> match)
+    {
+        list.RemoveAll(match);
+        return list;
+    }
+
+    public static List<ModButtonInfo> Insert(List<ModButtonInfo> list, int index, string name, Category category)
+    {
+        list.Insert(index, Category(name, category));
+        return list;
     }
 }
 

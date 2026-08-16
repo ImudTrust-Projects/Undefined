@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Undefined.Mods.Categories;
 
-public class Tag
+public class Advantages
 {
     public static void TagGun()
     {
@@ -99,5 +99,40 @@ public class Tag
         hash.Add("didTutorial", false);
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash, null, null);
         PlayerPrefs.Save();
+    }
+    
+    private static int oldFPS;
+
+    public static void FPS(bool enable, int fps = 0)
+    {
+        if (enable)
+        {
+            oldFPS = Application.targetFrameRate;
+            Application.targetFrameRate = fps;
+        }
+        else
+        {
+            Application.targetFrameRate = oldFPS;
+        }
+    }
+
+    private static int oldFPSs;
+    private static int oldVSync;
+
+    public static void UnlockFps(bool enable)
+    {
+        if (enable)
+        {
+            oldFPSs = Application.targetFrameRate;
+            oldVSync = QualitySettings.vSyncCount;
+
+            Application.targetFrameRate = int.MaxValue;
+            QualitySettings.vSyncCount = 0;
+        }
+        else
+        {
+            Application.targetFrameRate = oldFPSs;
+            QualitySettings.vSyncCount = oldVSync;
+        }
     }
 }
