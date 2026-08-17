@@ -331,7 +331,7 @@ public class Movement
         if (Invis_Toggled)
         {
             VRRig.LocalRig.enabled = false;
-            VRRig.LocalRig.transform.position = new Vector3(0f, -100f, 0f);
+            Variables.bypasstp(new Vector3(0f, -100f, 0f), true);
         }
         else
         {

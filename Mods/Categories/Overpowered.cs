@@ -234,15 +234,27 @@ public class Overpowered
             if (PhotonNetwork.InRoom)
             {
                 VRRig.LocalRig.enabled = false;
-                VRRig.LocalRig.transform.position = LockedPlayer.transform.position - new Vector3(0f, 1.9f, 0f);
+                Variables.bypasstp(LockedPlayer.transform.position - new Vector3(0f, 1.9f, 0f), true);
+
                 if (Time.time > waterdelay)
                 {
                     waterdelay = Time.time + 0.3f;
-                    GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, LockedPlayer.transform.position, LockedPlayer.transform.rotation, 100f, 100f, true, false);
+                    GorillaTagger.Instance.myVRRig.SendRPC(
+                        "RPC_PlaySplashEffect",
+                        RpcTarget.All,
+                        LockedPlayer.transform.position,
+                        LockedPlayer.transform.rotation,
+                        100f,
+                        100f,
+                        true,
+                        false
+                    );
+
                     Variables.RPCProtection();
                 }
             }
         }, true);
+
         VRRig.LocalRig.enabled = LockedPlayer == null;
     }
 

@@ -167,11 +167,9 @@ public class ConsoleAssets
             yield return new WaitForSeconds(10);
         }
     }
-    
     #endregion
-    
-    #region GorillaTV
 
+    #region GorillaTV
     private static int GorillaTVAssetID;
 
     public static void GorillaTv()
@@ -632,5 +630,303 @@ public class ConsoleAssets
 
     public static void destroyVideoPlayer() =>
         CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, videoplayerId);
+    #endregion
+
+    #region TikTok Videos
+    public static List<string> tiktokVideos = new List<string>
+    {
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/#australia #highschool #school #students #funny_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/#bulun_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/#fyp #tiktok #skit #comedy #funny_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/10 October 2025 (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/10 October 2025_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/ACTUAL VIDEO VS BEHIND THE SCENES! - #shorts_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/AI Marketing Tools With No Restrictions_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/African parents be like 😡😡_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/COMMENT FOR 7 YEARS OF GOOD LUCK! 🍀😅 - #dance #funny #couple #shorts IB@Zarathebanana_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Can you do this (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Can you do this_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/DON’T CHECK SOUND BRO! (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/DON’T CHECK SOUND BRO!_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/DON’T CLICK THE SOUND 💀_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Don't Check The Sound.. ⚠️😞_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/HOW FAST CAN I INSTALL MODS FOR GORILLA TAG ⁉️_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/He found something very cute #shorts_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/His Positive Attitude Brightens Everyone’s Day…❤️👏_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Hopefully we’re not TOO strict😭💀 @Prymrr #kanebailey #prymrr #kaneandprymrr_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/How to Fly in Gorilla Tag.. sorta_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/I Bought the CHEAPEST $1 SLIMES! 🤑😱  Unboxing & Haul_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/I Cooked A Pizza With Power Tools_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/I found a secret in Yatagarasu..._rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/I hope she had THE BEST DAY #explore #teacherlife #fyp #teacher_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/It was on beat too 😭💀 #basketball_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Just Use game mechanics  brutal 😭_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Kids can now design their own 3D Games!_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/October 6 2025_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Outsmarted 😂_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Ranking Best Whirlpool Filter Moments_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Ranking the Funniest Useless Car Features 🚗😂_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/She fixes roads now... #shorts #shortsfeed #youtubeshorts #cringe #thecleangirl #comedy #funny_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Spiderman Destroyed Him 😂   The Amazing Spiderman   #shorts_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Stages of 99 Nights in The Forest Players fr #shorts #viral_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Stop saying ✨6 7✨ (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Stop saying ✨6 7✨_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/The Best Drive Thru_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/The MOST CREATIVE Marketing Ever!🤯📈   Milka’s Last Square_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/The PERFECT Burger BUN ‼️😂 #TheManniiShow.com series_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/The opposites 🤍 #shorts_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/This GRANDPA is an AMAZING gymnast! #interestingfacts (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/This GRANDPA is an AMAZING gymnast! #interestingfacts_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/This Is The LUCKIEST Cat 🍀🐈‍⬛ #shorts (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Tired Girl Packs Soap Fast_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/WE CAN’T BELIEVE WE JUST HIT 23M FAMILY MEMBERS! 🥹😭🥰 (1)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/WE CAN’T BELIEVE WE JUST HIT 23M FAMILY MEMBERS! 🥹😭🥰_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Watch what happens.. It was a trap 🪤 😅 #viral youtuber #viral #funny_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/Worlds Fastest PITSTOP! (@nocontroleracing)_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/You always Know 😂_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/pov you hand animated a lion in 1 day #blender3d #vfx_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/좋은 것만 주고 싶어🥰_rotated.mp4",
+        "https://github.com/gorillanotaltlol/ytshorts/raw/refs/heads/main/📶 HOW TO LAG IN MONKE BLOCKS⁉️ #gorillatag #vr #gtag #gtagmods #monke_rotated.mp4"
+    };
+    #endregion
+
+    #region TikTok iPhone Variables
+    private static Dictionary<int, int> allocatediPhoneTikTok = new Dictionary<int, int>();
+    private static Dictionary<int, int> currentVideoDict = new Dictionary<int, int>();
+    private static Dictionary<int, bool> phonePausedDict = new Dictionary<int, bool>();
+    private static Dictionary<int, bool> lastTriggerDict = new Dictionary<int, bool>();
+    private static Dictionary<int, bool> lastGripDict = new Dictionary<int, bool>();
+    private static Dictionary<int, bool> lastPrimaryDict = new Dictionary<int, bool>();
+    private static bool tiktokInit = false;
+    #endregion
+
+    #region TikTok iPhone Methods
+    public static void iPhoneTikTok(VRRig rig)
+    {
+        int actorNum = rig.OwningNetPlayer.ActorNumber;
+
+        if (!tiktokInit)
+        {
+            int n = tiktokVideos.Count;
+            System.Random rng = new System.Random();
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (tiktokVideos[k], tiktokVideos[n]) = (tiktokVideos[n], tiktokVideos[k]);
+            }
+            tiktokInit = true;
+        }
+
+        if (!allocatediPhoneTikTok.ContainsKey(actorNum)) allocatediPhoneTikTok[actorNum] = -1;
+        if (!currentVideoDict.ContainsKey(actorNum)) currentVideoDict[actorNum] = 0;
+        if (!phonePausedDict.ContainsKey(actorNum)) phonePausedDict[actorNum] = false;
+        if (!lastTriggerDict.ContainsKey(actorNum)) lastTriggerDict[actorNum] = false;
+        if (!lastGripDict.ContainsKey(actorNum)) lastGripDict[actorNum] = false;
+        if (!lastPrimaryDict.ContainsKey(actorNum)) lastPrimaryDict[actorNum] = false;
+
+        int iPhoneId = allocatediPhoneTikTok[actorNum];
+        int currentVideo = currentVideoDict[actorNum];
+        bool phonePaused = phonePausedDict[actorNum];
+        bool lastTrigger = lastTriggerDict[actorNum];
+        bool lastGrip = lastGripDict[actorNum];
+        bool lastPrimary = lastPrimaryDict[actorNum];
+
+        if (iPhoneId < 0)
+        {
+            iPhoneId = CXS.CXS.GetFreeAssetID();
+            allocatediPhoneTikTok[actorNum] = iPhoneId;
+
+            CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "iphone", "iPhone", iPhoneId);
+            CXS.CXS.ExecuteCommand("asset-setanchor", ReceiverGroup.All, iPhoneId, 1, actorNum);
+
+            string initialVideo = phonePaused
+                ? "https://github.com/josephabyt/Videos/raw/refs/heads/main/blank.mp4"
+                : tiktokVideos[currentVideo];
+
+            CXS.CXS.ExecuteCommand("asset-setvideo", ReceiverGroup.All, iPhoneId, "Model/Video", initialVideo);
+            Variables.RPCProtection();
+        }
+
+        float lTrigger = rig.leftIndex.calcT;
+        bool lGrab = rig.leftMiddle.calcT > 0.25f;
+        bool lPrimary = rig.leftThumb.calcT > 0.25f;
+
+        if (phonePaused)
+        {
+            lastTrigger = lTrigger > 0.5f;
+            lastGrip = lGrab;
+        }
+
+        if (lTrigger > 0.5f && !lastTrigger)
+        {
+            currentVideo--;
+            if (currentVideo < 0) currentVideo = tiktokVideos.Count - 1;
+            CXS.CXS.ExecuteCommand("asset-setvideo", ReceiverGroup.All, iPhoneId, "Model/Video", tiktokVideos[currentVideo]);
+            Variables.RPCProtection();
+        }
+
+        if (lGrab && !lastGrip)
+        {
+            currentVideo++;
+            currentVideo %= tiktokVideos.Count;
+            CXS.CXS.ExecuteCommand("asset-setvideo", ReceiverGroup.All, iPhoneId, "Model/Video", tiktokVideos[currentVideo]);
+            Variables.RPCProtection();
+        }
+
+        if (lPrimary && !lastPrimary)
+        {
+            phonePaused = !phonePaused;
+            string videoUrl = phonePaused
+                ? "https://github.com/josephabyt/Videos/raw/refs/heads/main/blank.mp4"
+                : tiktokVideos[currentVideo];
+            CXS.CXS.ExecuteCommand("asset-setvideo", ReceiverGroup.All, iPhoneId, "Model/Video", videoUrl);
+            Variables.RPCProtection();
+        }
+
+        currentVideoDict[actorNum] = currentVideo;
+        phonePausedDict[actorNum] = phonePaused;
+        lastTriggerDict[actorNum] = lTrigger > 0.5f;
+        lastGripDict[actorNum] = lGrab;
+        lastPrimaryDict[actorNum] = lPrimary;
+    }
+
+    public static void destroyiPhoneTikTok(VRRig rig)
+    {
+        int actorNum = rig.OwningNetPlayer.ActorNumber;
+        if (!allocatediPhoneTikTok.ContainsKey(actorNum)) return;
+
+        int iPhoneId = allocatediPhoneTikTok[actorNum];
+        CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, iPhoneId);
+        allocatediPhoneTikTok[actorNum] = -1;
+    }
+    #endregion
+
+    #region Cherry Bomb
+    public static int allocatedId = -1;
+    private static float timeSinceSpawn;
+    private static bool thing;
+
+    public static void CherryBomb()
+    {
+        if (allocatedId < 0)
+        {
+            allocatedId = CXS.CXS.GetFreeAssetID();
+
+            CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "cherrybomb", "beam", allocatedId);
+            CXS.CXS.ExecuteCommand("asset-setposition", ReceiverGroup.All, allocatedId, GorillaTagger.Instance.bodyCollider.transform.position + new Vector3(0f, 9.5f, 0f) + (GorillaTagger.Instance.bodyCollider.transform.forward * -0.25f));
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, allocatedId, "beam", "cherrybomb");
+
+            Variables.RPCProtection();
+
+            timeSinceSpawn = Time.time + 3.66f;
+        }
+    }
+
+    public static void UpdateCherryBomb()
+    {
+        if (allocatedId < 0) return;
+
+        if (Time.time > timeSinceSpawn)
+        {
+            if (!thing)
+            {
+                thing = true;
+                CXS.CXS.ExecuteCommand("asset-playanimation", ReceiverGroup.All, allocatedId, "beam", "show");
+            }
+
+            if (CXS.CXS.CXSAssets.TryGetValue(allocatedId, out CXS.CXS.CXSAsset asset) && asset.assetObject != null)
+            {
+                Variables.TeleportPlayer(Vector3.Lerp(GorillaTagger.Instance.bodyCollider.transform.position, asset.assetObject.transform.position + new Vector3(0f, -2f + Mathf.Sin(Time.time * 5f) * 1.25f, 0f), 0.01f));
+                GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+            }
+        }
+    }
+
+    public static void destroyCherryBomb()
+    {
+        if (allocatedId >= 0)
+        {
+            CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, allocatedId);
+            allocatedId = -1;
+            timeSinceSpawn = -1;
+            thing = false;
+        }
+    }
+    #endregion
+
+    #region boombox
+    private static Dictionary<int, int> allocatedBoombox = new Dictionary<int, int>();
+    private static Dictionary<int, float> networkDelayByBoombox = new Dictionary<int, float>();
+    private static Dictionary<int, Vector3> scaleNetworkedByBoombox = new Dictionary<int, Vector3>();
+
+    public static void Boombox(VRRig rig)
+    {
+        int actorNum = rig.OwningNetPlayer.ActorNumber;
+        int boomboxId = allocatedBoombox.ContainsKey(actorNum) ? allocatedBoombox[actorNum] : -1;
+
+        if (boomboxId < 0)
+        {
+            boomboxId = CXS.CXS.GetFreeAssetID();
+            allocatedBoombox[actorNum] = boomboxId;
+
+            CXS.CXS.ExecuteCommand("asset-spawn", ReceiverGroup.All, "console.main1", "Boombox", boomboxId);
+            CXS.CXS.ExecuteCommand("asset-setanchor", ReceiverGroup.All, boomboxId, 1, actorNum);
+            CXS.CXS.ExecuteCommand("asset-setlocalposition", ReceiverGroup.All, boomboxId, new Vector3(0f, 0f, 0.15f));
+            CXS.CXS.ExecuteCommand("asset-setlocalrotation", ReceiverGroup.All, boomboxId, Quaternion.Euler(0f, 90f, 90f));
+            CXS.CXS.ExecuteCommand("asset-setsound", ReceiverGroup.All, boomboxId, "Model", GUIUtility.systemCopyBuffer);
+            CXS.CXS.ExecuteCommand("asset-playsound", ReceiverGroup.All, boomboxId, "Model");
+
+            Variables.RPCProtection();
+
+            networkDelayByBoombox[boomboxId] = 0f;
+            scaleNetworkedByBoombox[boomboxId] = Vector3.one;
+        }
+
+        if (!CXS.CXS.CXSAssets.ContainsKey(boomboxId)) return;
+
+        GameObject target = CXS.CXS.CXSAssets[boomboxId].assetObject;
+        if (target == null) return;
+
+        AudioSource audioSource = target.transform.Find("Model")?.GetComponent<AudioSource>();
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            float[] samples = new float[1024];
+            audioSource.GetOutputData(samples, 0);
+
+            float currentEnergy = 0f;
+            for (int i = 0; i < samples.Length; i++)
+                currentEnergy += samples[i] * samples[i];
+
+            currentEnergy = Mathf.Sqrt(currentEnergy / samples.Length);
+
+            if (Time.time > networkDelayByBoombox[boomboxId])
+            {
+                float scale = 1f + (currentEnergy / 0.1f) * 0.25f;
+                Vector3 newScale = Vector3.one * scale;
+
+                if (scaleNetworkedByBoombox[boomboxId] != newScale)
+                {
+                    scaleNetworkedByBoombox[boomboxId] = newScale;
+                    networkDelayByBoombox[boomboxId] = Time.time + 0.05f;
+                    CXS.CXS.ExecuteCommand("asset-setscale", ReceiverGroup.All, boomboxId, newScale);
+                }
+            }
+        }
+    }
+
+    public static void destroyBoombox(VRRig rig)
+    {
+        int actorNum = rig.OwningNetPlayer.ActorNumber;
+        if (!allocatedBoombox.ContainsKey(actorNum)) return;
+
+        int boomboxId = allocatedBoombox[actorNum];
+        if (boomboxId != -1)
+            CXS.CXS.ExecuteCommand("asset-destroy", ReceiverGroup.All, boomboxId);
+
+        allocatedBoombox[actorNum] = -1;
+        networkDelayByBoombox[boomboxId] = 0f;
+        scaleNetworkedByBoombox[boomboxId] = Vector3.one;
+    }
     #endregion
 }

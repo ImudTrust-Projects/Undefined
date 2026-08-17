@@ -105,7 +105,7 @@ public class Plugin : BaseUnityPlugin
         allsoundsids = GTPlayer.Instance.materialData.Count;
         SoundMods.PopulateSoundOptions();
 
-        if (ComponentHolder.GetComponent<InputHandler>() == null)
+        if (ComponentHolder != null && ComponentHolder.GetComponent<InputHandler>() == null)
             ComponentHolder.AddComponent<InputHandler>();
 
         SettingsSaver.Load();

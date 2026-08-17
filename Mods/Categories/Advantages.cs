@@ -13,17 +13,14 @@ public class Advantages
 {
     public static void TagGun()
     {
-        /*if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
-            return;*/
-
-        VRRig rig = GorillaTagger.Instance.offlineVRRig;
-
         GunLib.StartGun(() =>
         {
-            rig.enabled = false;
-            rig.transform.position = GunLib.LockedPlayer.transform.position + new Vector3(0f, -2f, 0f);
+            Variables.bypasstp(
+                GunLib.LockedPlayer.transform.position + new Vector3(0f, -2f, 0f),
+                true
+            );
+
             GameMode.ReportTag(GunLib.LockedPlayer.Creator);
-            rig.enabled = true;
         }, true);
     }
 
@@ -43,8 +40,7 @@ public class Advantages
             if (rig.mainSkin.material.name.Contains("fected"))
                 continue;
 
-            GorillaTagger.Instance.offlineVRRig.enabled = true;
-            GorillaTagger.Instance.offlineVRRig.transform.position = rig.transform.position;
+            Variables.bypasstp(rig.transform.position, true);
             GameMode.ReportTag(rig.Creator);
         }
     }
@@ -62,10 +58,8 @@ public class Advantages
             if (!player.mainSkin.material.name.Contains("infected"))
                 continue;
 
-            GorillaTagger.Instance.offlineVRRig.enabled = false;
-            GorillaTagger.Instance.offlineVRRig.transform.position = player.leftHandTransform.position;
+            Variables.bypasstp(player.leftHandTransform.position, true);
             GameMode.ReportTag(player.Creator);
-            GorillaTagger.Instance.offlineVRRig.enabled = true;
             break;
         }
     }

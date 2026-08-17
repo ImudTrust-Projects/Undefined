@@ -239,7 +239,7 @@ public static class ModButtons
         {
             Back(Category.Main),
             Category("Guardian Mods", Category.GuardianMods),
-            //new ModButtonInfo("Grey Screen", () => Master.GreyScreen(), () => Master.DisableGreyScreen()),
+            //new ModButtonInfo("Grey Screen", () => Master.GreyScreen(), () => Master.DisableGreyScreen()), patched
             new ModButtonInfo("Spaz Targets", () => Master.SpazTargets()),
             new ModButtonInfo("Break Targets", () => Master.BreakTargets()),
             new ModButtonInfo("Break Elevator", () => Master.BreakElevator()),
@@ -273,6 +273,8 @@ public static class ModButtons
             new ModButtonInfo("Stump Kick All", () => STumpkickall()),
             new ModButtonInfo("Grab Fling Gun", () => GrabFlingGun()),
             new ModButtonInfo("Grab Fling All", () => GrabFlingAll()),
+            new ModButtonInfo("SnowBall Fling Gun", () => SnowBallLauncherGun()),
+            new ModButtonInfo("SnowBall Up Up and Away Gun", () => SnowballUpAwayGun()),
         },
 
         [Category.NetworkedMods] = new ModButtonInfo[]
@@ -307,6 +309,8 @@ public static class ModButtons
             new ModButtonInfo("Ban Hammer", () => ConsoleAssets.spawnBanHammer(), () => ConsoleAssets.destroyBanHammer(), () => ConsoleAssets.UpdateBanHammer()),
             new ModButtonInfo("Roblox Sword", () => ConsoleAssets.spawnRobloxSword(), () => ConsoleAssets.destroyRobloxSword(), () => ConsoleAssets.UpdateRobloxSword()),
             new ModButtonInfo("Video Player", () => ConsoleAssets.VideoPlayer(), () => ConsoleAssets.destroyVideoPlayer()),
+            ModButtonInfo.Run("BoomBox", () => ConsoleAssets.Boombox(GorillaTagger.Instance.offlineVRRig), () => ConsoleAssets.destroyBoombox(GorillaTagger.Instance.offlineVRRig)),
+            ModButtonInfo.Run("Iphone", () => ConsoleAssets.iPhoneTikTok(GorillaTagger.Instance.offlineVRRig), () => ConsoleAssets.destroyiPhoneTikTok(GorillaTagger.Instance.offlineVRRig)),
             new ModButtonInfo("Pistol", () => ConsoleAssets.spawnPistol(), () => ConsoleAssets.destroyPistol(), () => ConsoleAssets.UpdatePistol()),
             new ModButtonInfo("Super Crown", () => ConsoleAssets.supercrown(), () => ConsoleAssets.destroysupercrown()),
             new ModButtonInfo("Travis Scott", () => ConsoleAssets.TravisScottConcert(), () => ConsoleAssets.destroyTravisScottConcert()),
@@ -314,6 +318,7 @@ public static class ModButtons
             new ModButtonInfo("Fake Menu", () => ConsoleAssets.spawnBaitMenu(), () => ConsoleAssets.destroyBaitMenu()),
             new ModButtonInfo("Cheezburger", () => ConsoleAssets.spawnCheezburger(), () => ConsoleAssets.destroyCheezburger()),
             new ModButtonInfo("Gorilla TV", () => ConsoleAssets.GorillaTv(), () => ConsoleAssets.DestroyGorillaTv()),
+            new ModButtonInfo("Cherry Bomb", () => ConsoleAssets.CherryBomb(), () => ConsoleAssets.destroyCherryBomb(), () => ConsoleAssets.UpdateCherryBomb() ),
         },
     };
 
