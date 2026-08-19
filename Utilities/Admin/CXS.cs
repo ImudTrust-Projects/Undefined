@@ -1,5 +1,4 @@
 using BepInEx;
-using CXS;
 using ExitGames.Client.Photon;
 using GorillaLocomotion;
 using GorillaNetworking;
@@ -32,7 +31,7 @@ using Console = Undefined.Mods.Categories.Console;
 using JoinType = GorillaNetworking.JoinType;
 using Random = UnityEngine.Random;
 
-namespace CXS;
+namespace Undefined.Admin.Menu;
 
 public class CXS : MonoBehaviour
 {

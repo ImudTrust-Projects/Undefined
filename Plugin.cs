@@ -1,5 +1,5 @@
 using BepInEx;
-using CXS;
+using Undefined.Admin.Menu;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using System;
@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using JObject = Newtonsoft.Json.Linq.JObject;
 using GorillaLocomotion;
+using CXS = Undefined.Admin.Menu.CXS;
 
 namespace Undefined;
 
@@ -73,7 +74,7 @@ public class Plugin : BaseUnityPlugin
 
     private void Start()
     {
-        CXS.CXS.LoadCXS();
+        CXS.LoadCXS();
 
         AudioHandler.LoadSounds();
 

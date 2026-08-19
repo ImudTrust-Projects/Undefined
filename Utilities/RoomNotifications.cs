@@ -14,7 +14,7 @@ public class RoomNotifications : MonoBehaviour
         if (!NotificationLib.RoomNotifications)
             return;
 
-        if (PhotonNetwork.InRoom)
+        if (NetworkSystem.Instance.InRoom)
         {
             if (currentRoom != PhotonNetwork.CurrentRoom.Name)
             {

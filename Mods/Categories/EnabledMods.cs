@@ -13,8 +13,16 @@ public static class EnabledMods
             ModButtonInfo.Back(Category.Main)
         };
 
+        HashSet<string> addedMods = new HashSet<string>();
+
         foreach (ModButtonInfo mod in ModButtons.GetActiveMods())
-            newCategory.Add(mod);
+        {
+            if (!addedMods.Contains(mod.buttonText))
+            {
+                addedMods.Add(mod.buttonText);
+                newCategory.Add(mod);
+            }
+        }
 
         ModButtons.Buttons[Category.EnabledMods] = newCategory.ToArray();
     }

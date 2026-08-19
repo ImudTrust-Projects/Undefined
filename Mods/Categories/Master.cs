@@ -172,7 +172,7 @@ public class Master
     
     public static void UnlockRoom()
     {
-        if (!PhotonNetwork.InRoom || !Variables.IsMaster())
+        if (!NetworkSystem.Instance.InRoom || !Variables.IsMaster())
             return;
 
         PhotonNetwork.CurrentRoom.IsVisible = true;
@@ -182,7 +182,7 @@ public class Master
 
     public static void LockRoom()
     {
-        if (!PhotonNetwork.InRoom || !Variables.IsMaster())
+        if (!NetworkSystem.Instance.InRoom || !Variables.IsMaster())
             return;
         
         PhotonNetwork.CurrentRoom.IsVisible = false;
@@ -191,7 +191,7 @@ public class Master
     }
     public static void SpazRoom()
     {
-        if (!PhotonNetwork.InRoom || !Variables.IsMaster())
+        if (!NetworkSystem.Instance.InRoom || !Variables.IsMaster())
             return;
         
         for (int i = 0; i < 100; i++)
@@ -206,7 +206,7 @@ public class Master
     
     private static void AddInfected(NetPlayer plr)
     {
-        if (!PhotonNetwork.InRoom || GorillaGameManager.instance == null || plr == null)
+        if (!NetworkSystem.Instance.InRoom || GorillaGameManager.instance == null || plr == null)
             return;
 
         var tagManager = GorillaGameManager.instance as GorillaTagManager;
@@ -225,7 +225,7 @@ public class Master
 
     private static void RemoveInfected(NetPlayer plr)
     {
-        if (!PhotonNetwork.InRoom || GorillaGameManager.instance == null || plr == null)
+        if (!NetworkSystem.Instance.InRoom || GorillaGameManager.instance == null || plr == null)
         {
             return;
         }
@@ -280,7 +280,7 @@ public class Master
     {
         GunLib.StartGun(() =>
         {
-            if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
+            if (NetworkSystem.Instance.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
             {
                 delay = Time.time + 0.1f;
                 MatPlayer(GunLib.LockedPlayer.Creator);
@@ -290,7 +290,7 @@ public class Master
     
     public static void MatAll()
     {
-        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
+        if (NetworkSystem.Instance.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
         {
             delay = Time.time + 0.1f;
 

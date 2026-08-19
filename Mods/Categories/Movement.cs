@@ -265,6 +265,15 @@ public class Movement
         }
     }
     
+    public static void CarMonkeyandfly(float speed, bool fly)
+    {
+        if (InputHandler.Instance.RightSecondary.IsPressed)
+        {
+            GorillaLocomotion.GTPlayer.Instance.transform.position += GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime * speed;
+            if (fly) GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        }
+    }
+    
     public static void SlingshotFly()
     {
         if (InputHandler.Instance.RightPrimary.IsPressed)
@@ -338,6 +347,28 @@ public class Movement
             VRRig.LocalRig.enabled = true;
         }
     }
+    
+    public static void StickyHands()
+    {
+        bool leftGrip = InputHandler.Instance.LeftGrip.IsPressed;
+        bool rightGrip = InputHandler.Instance.RightGrip.IsPressed;
+
+        if (leftGrip || rightGrip)
+        {
+            bool leftTouching = Physics.Raycast(GorillaTagger.Instance.leftHandTransform.position, -GorillaTagger.Instance.leftHandTransform.up, 0.25f, GunLib.BypassLayers);
+            bool rightTouching = Physics.Raycast(GorillaTagger.Instance.rightHandTransform.position, -GorillaTagger.Instance.rightHandTransform.up, 0.25f, GunLib.BypassLayers);
+
+            if ((leftGrip && leftTouching) || (rightGrip && rightTouching))
+            {
+                GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+                GorillaTagger.Instance.rigidbody.useGravity = false;
+                return;
+            }
+        }
+        GorillaTagger.Instance.rigidbody.useGravity = true;
+    }
+
+    public static void ResetStickyHands() => GorillaTagger.Instance.rigidbody.useGravity = true;
 
     public static void NoClip()
     {
@@ -591,9 +622,6 @@ public class Movement
         wasLeftTouching = leftTouching;
         wasRightTouching = rightTouching;
     }
-
-    public static void NoTagFreeze() =>
-        GTPlayer.Instance.disableMovement = false;
 
     public static void WASDFly()
     {

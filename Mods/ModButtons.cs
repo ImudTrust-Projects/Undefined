@@ -115,7 +115,6 @@ public static class ModButtons
             new ModButtonInfo("Auto Funny Run", () => Movement.AutoFunnyRun()),
             new ModButtonInfo("Walk on Water", () => Movement.WalkOnWater()),
             new ModButtonInfo("Auto Elevator Climb", () => Movement.AutoElevatorClimb()),
-            new ModButtonInfo("No Tag Freeze", () => Movement.NoTagFreeze()),
             new ModButtonInfo("Pbbv Walk", () => Movement.PbbvWalk(), () => Movement.PbbvWalkDisable()),
         },
 
@@ -194,6 +193,7 @@ public static class ModButtons
             new ModButtonInfo("90 fps", () => Advantages.FPS(true, 90),() => Advantages.FPS(false) ),
             new ModButtonInfo("120 fps", () => Advantages.FPS(true, 120),() => Advantages.FPS(false) ),
             new ModButtonInfo("Unlock fps", () => Advantages.UnlockFps(true),() => Advantages.UnlockFps(false) ),
+            new ModButtonInfo("No Tag Freeze", () => Advantages.NoTagFreeze()),
         },
 
         [Category.MapLoader] = new ModButtonInfo[]

@@ -134,6 +134,10 @@ public class RigManager
 
 public static class extarstuff
 {
+    
+    public static VRRig VRRig(this NetPlayer self) =>
+        GetVRRigFromPlayer(self);
+    
     public static VRRig GetRigFromPlayer(Player p) => RigManager.GetVRRigFromPlayer(p);
     
     public static PhotonView GetViewFromRig(VRRig rig) =>
@@ -165,7 +169,7 @@ public static class extarstuff
     {
         List<NetPlayer> infected = new List<NetPlayer>();
 
-        if (!PhotonNetwork.InRoom || GorillaGameManager.instance == null)
+        if (!NetworkSystem.Instance.InRoom || GorillaGameManager.instance == null)
             return infected;
 
         switch (GorillaGameManager.instance.GameType())

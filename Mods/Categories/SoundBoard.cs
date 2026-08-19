@@ -225,7 +225,7 @@ public class SoundBoard : MonoBehaviour
     {
         if (clip == null) return;
 
-        if (PhotonNetwork.InRoom)
+        if (NetworkSystem.Instance.InRoom)
         {
             if (HearSelf)
                 PlayLocal(clip);
@@ -289,7 +289,7 @@ public class SoundBoard : MonoBehaviour
             currentCoroutine = null;
         }
 
-        if (PhotonNetwork.InRoom)
+        if (NetworkSystem.Instance.InRoom)
         {
             try
             {

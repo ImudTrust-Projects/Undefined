@@ -27,7 +27,7 @@ public class SoundMods
 
     public static void Sound(int soundid)
     {
-        if (PhotonNetwork.InRoom)
+        if (NetworkSystem.Instance.InRoom)
         {
             if (InputHandler.Instance.RightGrip.IsPressed)
             {

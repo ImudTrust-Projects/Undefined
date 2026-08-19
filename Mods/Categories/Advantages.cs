@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ExitGames.Client.Photon;
+using GorillaLocomotion;
 using Photon.Pun;
 using Undefined.Utilities;
 using UnityEngine;
@@ -15,6 +16,12 @@ public class Advantages
     {
         GunLib.StartGun(() =>
         {
+            if (GunLib.LockedPlayer == null)
+                return;
+
+            if (!VRRig.LocalRig.IsTagged() || GunLib.LockedPlayer.IsTagged())
+                return;
+
             Variables.bypasstp(
                 GunLib.LockedPlayer.transform.position + new Vector3(0f, -2f, 0f),
                 true
@@ -26,9 +33,6 @@ public class Advantages
 
     public static void TagAll()
     {
-        if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
-            return;
-
         foreach (VRRig rig in VRRigCache.m_activeRigs)
         {
             if (rig == GorillaTagger.Instance.offlineVRRig)
@@ -129,4 +133,7 @@ public class Advantages
             QualitySettings.vSyncCount = oldVSync;
         }
     }
+    
+    public static void NoTagFreeze() =>
+        GTPlayer.Instance.disableMovement = false;
 }

@@ -120,7 +120,7 @@ public class Variables
 
     public static bool IsMaster(bool notify = true)
     {
-        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+        if (NetworkSystem.Instance.InRoom && PhotonNetwork.IsMasterClient)
             return true;
 
         if (notify)
@@ -137,7 +137,7 @@ public class Variables
 
     public static void RPCProtection()
     {
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
             return;
 
         try

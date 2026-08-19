@@ -3,6 +3,7 @@ using System;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading.Tasks;
+using Constants;
 using UnityEngine;
 using Photon.Pun;
 
@@ -72,11 +73,11 @@ public class DiscordPresence : MonoBehaviour
         }
         else
         {
-            string room = PhotonNetwork.InRoom
+            string room = NetworkSystem.Instance.InRoom
                 ? PhotonNetwork.CurrentRoom.Name
                 : "Not in a room";
 
-            string players = PhotonNetwork.InRoom
+            string players = NetworkSystem.Instance.InRoom
                 ? PhotonNetwork.CurrentRoom.PlayerCount.ToString()
                 : "0";
 

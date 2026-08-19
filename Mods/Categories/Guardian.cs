@@ -175,7 +175,7 @@ public class Guardian
     {
         try
         {
-            if (!PhotonNetwork.InRoom) return;
+            if (!NetworkSystem.Instance.InRoom) return;
             float currentTime = Time.time;
             if (currentTime > delay)
             {
@@ -211,7 +211,7 @@ public class Guardian
             {
                 try
                 {
-                    if (!PhotonNetwork.InRoom) return;
+                    if (!NetworkSystem.Instance.InRoom) return;
                     if (GunLib.LockedPlayer == null) return;
 
                     if (IsLocalPlayerGuardian())

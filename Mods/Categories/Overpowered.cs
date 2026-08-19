@@ -26,7 +26,7 @@ public class Overpowered
 {
     public static void DestroyAll()
     {
-        if (PhotonNetwork.InRoom)
+        if (NetworkSystem.Instance.InRoom)
         {
             foreach (Player p in PhotonNetwork.PlayerListOthers)
             {
@@ -193,7 +193,7 @@ public class Overpowered
 
         waterdelay = Time.time + 0.1f;
 
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
             return;
 
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -231,7 +231,7 @@ public class Overpowered
     {
         GunLib.StartGun(() =>
         {
-            if (PhotonNetwork.InRoom)
+            if (NetworkSystem.Instance.InRoom)
             {
                 VRRig.LocalRig.enabled = false;
                 Variables.bypasstp(LockedPlayer.transform.position - new Vector3(0f, 1.9f, 0f), true);
@@ -456,7 +456,7 @@ public class Overpowered
         bool target = false, int[] targets = null,
         bool disable = false, bool toofar = false)
     {
-        if (disable || !PhotonNetwork.InRoom) return;
+        if (disable || !NetworkSystem.Instance.InRoom) return;
         if (target && (targets == null || targets.Length == 0)) return;
 
         try
