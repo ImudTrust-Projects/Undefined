@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Undefined.Menu;
 using Undefined.Utilities;
 
 namespace Undefined.Mods.Categories;
@@ -7,16 +8,22 @@ public static class EnabledMods
 {
     public static void UpdateCategory()
     {
-        List<ButtonInfo> newCategory = new List<ButtonInfo>
+        List<ModButtonInfo> newCategory = new List<ModButtonInfo>
         {
-            new ButtonInfo { buttonText = "Return to Main", method = () => Menu.Main.activeCategory = 0, isTogglable = false }
+            ModButtonInfo.Back(Category.Main)
         };
 
-        foreach (var mod in ModButtons.GetActiveMods())
+        HashSet<string> addedMods = new HashSet<string>();
+
+        foreach (ModButtonInfo mod in ModButtons.GetActiveMods())
         {
-            newCategory.Add(mod);
+            if (!addedMods.Contains(mod.buttonText))
+            {
+                addedMods.Add(mod.buttonText);
+                newCategory.Add(mod);
+            }
         }
 
-        ModButtons.buttons[3] = newCategory.ToArray(); // hard coded??
+        ModButtons.Buttons[Category.EnabledMods] = newCategory.ToArray();
     }
 }

@@ -5,10 +5,9 @@ using UnityEngine;
 
 namespace Undefined.Mods.Categories;
 
-public class Settings
+public class SoundSettings
 {
     public static string currentButtonSound = "click3";
-    public static bool DiscordRPC = false;
     public static string currentMenuOpenSound = "Open";
     public static string currentMenuCloseSound = "Close";
 
@@ -130,6 +129,4 @@ public class Settings
         PlayerPrefs.SetString("NotificationSound", currentNotificationSound);
         PlayerPrefs.Save();
     }
-
-    public static bool Ghostview;
 }

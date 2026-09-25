@@ -1,4 +1,4 @@
-﻿using CXS;
+﻿using Undefined.Admin.Menu;
 using ExitGames.Client.Photon;
 using GorillaLocomotion;
 using GorillaNetworking;
@@ -17,6 +17,7 @@ using UnityEngine;
 using static Bindings;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
+using CXS = Undefined.Admin.Menu.CXS;
 
 namespace Undefined.Mods.Categories;
 
@@ -27,16 +28,16 @@ public class Console
 
     public static void EnableNoAdminIndicator()
     {
-        CXS.CXS.ExecuteCommand("nocone", ReceiverGroup.Others, true);
+        CXS.ExecuteCommand("nocone", ReceiverGroup.Others, true);
 
-        CXS.CXS.excludedCones.Add(PhotonNetwork.LocalPlayer);
+        CXS.excludedCones.Add(PhotonNetwork.LocalPlayer);
 
         lastPlayerCount = -1;
     }
 
     public static void DisableNoAdminIndicator()
     {
-        CXS.CXS.ExecuteCommand("nocone", ReceiverGroup.All, false);
+        CXS.ExecuteCommand("nocone", ReceiverGroup.All, false);
     }
 
     public static void UpdateNoAdminIndicator()
@@ -44,7 +45,7 @@ public class Console
         if (PhotonNetwork.PlayerList.Length == lastPlayerCount)
             return;
 
-        CXS.CXS.ExecuteCommand("nocone", ReceiverGroup.All, true);
+        CXS.ExecuteCommand("nocone", ReceiverGroup.All, true);
         lastPlayerCount = PhotonNetwork.PlayerList.Length;
     }
     #endregion
@@ -54,7 +55,7 @@ public class Console
     {
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
 
-        CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+        CXS.ExecuteCommand("isusing", ReceiverGroup.All);
     }
 
     public static void AdminNotificatorDisable()
@@ -66,11 +67,11 @@ public class Console
     {
         if (data.Code == 255)
         {
-            CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+            CXS.ExecuteCommand("isusing", ReceiverGroup.All);
             return;
         }
 
-        if (data.Code != CXS.CXS.CXSByte)
+        if (data.Code != CXS.CXSByte)
             return;
 
         if (data.CustomData is not object[] args)
@@ -110,7 +111,7 @@ public class Console
                 {
                     Vector3 vel = rightHand ? GTPlayer.Instance.RightHand.velocityTracker.GetAverageVelocity(true, 0) : GTPlayer.Instance.LeftHand.velocityTracker.GetAverageVelocity(true, 0);
 
-                    CXS.CXS.ExecuteCommand("vel", RigManager.GetPlayerFromVRRig(rig).ActorNumber, vel);
+                    CXS.ExecuteCommand("vel", RigManager.GetPlayerFromVRRig(rig).ActorNumber, vel);
                     aaaaa = Time.time + 0.1f;
                 }
             }
@@ -126,7 +127,7 @@ public class Console
             beamDelay = Time.time + 0.05f;
             float h = Time.frameCount / 180f % 1f;
             Color color = Color.HSVToRGB(h, 1f, 1f);
-            CXS.CXS.ExecuteCommand("lr", ReceiverGroup.All, color.r, color.g, color.b, color.a, 0.5f, GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 0.5f, 0f), GorillaTagger.Instance.headCollider.transform.position + new Vector3(Mathf.Cos((float)Time.frameCount / 30) * 100f, 0.5f, Mathf.Sin((float)Time.frameCount / 30) * 100f), 0.1f);
+            CXS.ExecuteCommand("lr", ReceiverGroup.All, color.r, color.g, color.b, color.a, 0.5f, GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 0.5f, 0f), GorillaTagger.Instance.headCollider.transform.position + new Vector3(Mathf.Cos((float)Time.frameCount / 30) * 100f, 0.5f, Mathf.Sin((float)Time.frameCount / 30) * 100f), 0.1f);
         }
     }
 
@@ -145,20 +146,20 @@ public class Console
             beamDelay = Time.time + 0.5f;
             float h = Time.frameCount / 180f % 1f;
             Color.HSVToRGB(h, 1f, 1f);
-            CXS.CXS.ExecuteCommand("lr", ReceiverGroup.All, "lr", 0f, 1f, 1f, 0.3f, 0.25f, GorillaTagger.Instance.bodyCollider.transform.position, GorillaTagger.Instance.headCollider.transform.position + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * 1000f, 20f - (Time.time - startTimeTrigger));
+            CXS.ExecuteCommand("lr", ReceiverGroup.All, "lr", 0f, 1f, 1f, 0.3f, 0.25f, GorillaTagger.Instance.bodyCollider.transform.position, GorillaTagger.Instance.headCollider.transform.position + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * 1000f, 20f - (Time.time - startTimeTrigger));
         }
     }
 
     public static void AdminBringGun()
     {
-        GunLib.start2guns(() =>
+        GunLib.StartGun(() =>
         {
             if (Time.time < adminEventDelay)
                 return;
 
             adminEventDelay = Time.time + 0.1f;
 
-            CXS.CXS.ExecuteCommand(
+            CXS.ExecuteCommand(
                 "tpnv",
                 RigManager.GetPlayerFromVRRig(GunLib.LockedPlayer).ActorNumber,
                 GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 1.5f, 0f)
@@ -171,7 +172,7 @@ public class Console
         if (Time.time > adminEventDelay)
         {
             adminEventDelay = Time.time + 0.05f;
-            CXS.CXS.ExecuteCommand("tpnv", ReceiverGroup.Others, GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 1.5f, 0f));
+            CXS.ExecuteCommand("tpnv", ReceiverGroup.Others, GorillaTagger.Instance.headCollider.transform.position + new Vector3(0f, 1.5f, 0f));
         }
     }
 
@@ -195,8 +196,8 @@ public class Console
             {
                 Physics.Raycast(startPos + dir / 3f, dir, out RaycastHit Ray, 512f, Variables.NoInvisLayerMask());
                 VRRig gunTarget = Ray.collider.GetComponentInParent<VRRig>();
-                if (gunTarget && !gunTarget.isLocal)
-                    CXS.CXS.ExecuteCommand("silkick", ReceiverGroup.All,
+                if (gunTarget && !gunTarget.isOfflineVRRig)
+                    CXS.ExecuteCommand("silkick", ReceiverGroup.All,
                             gunTarget.Creator.UserId);
             }
             catch { }
@@ -204,14 +205,14 @@ public class Console
             if (Time.time > adminEventDelay)
             {
                 adminEventDelay = Time.time + 0.1f;
-                CXS.CXS.ExecuteCommand("laser", ReceiverGroup.All, true,
+                CXS.ExecuteCommand("laser", ReceiverGroup.All, true,
                         InputHandler.Instance.RightPrimary.IsPressed);
             }
         }
 
         bool isLasering = InputHandler.Instance.LeftPrimary.IsPressed || InputHandler.Instance.RightPrimary.IsPressed;
         if (lastLasering && !isLasering)
-            CXS.CXS.ExecuteCommand("laser", ReceiverGroup.All, false, false);
+            CXS.ExecuteCommand("laser", ReceiverGroup.All, false, false);
 
         lastLasering = isLasering;
     }
@@ -226,7 +227,7 @@ public class Console
 
         if (Time.time > scalenetdel && (!Mathf.Approximately(lastnetscale, scale) || PhotonNetwork.PlayerList.Length != lastplayercountscale))
         {
-            CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, scale);
+            CXS.ExecuteCommand("scale", ReceiverGroup.All, scale);
             scalenetdel = Time.time + 0.05f;
             lastnetscale = scale;
             lastplayercountscale = PhotonNetwork.PlayerList.Length;
@@ -235,7 +236,209 @@ public class Console
 
     public static void UnAdminNetworkScale()
     {
-        CXS.CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
+        CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
+    }
+
+    private const float RayDistance = 512f;
+    private const float MinDistance = 0.1f;
+    private const float StickDeadzone = 0.2f;
+    private const float FlingDelay = 0.5f;
+    private const float TeleportDelay = 0.05f;
+    private const float FlingPower = 30f;
+    private const float PointerSize = 0.025f;
+
+    private static readonly HandData left = new();
+    private static readonly HandData right = new();
+
+    public static void TelekinesisEnable()
+    {
+        Clear(left);
+        Clear(right);
+    }
+
+    public static void TelekinesisDisable()
+    {
+        Clear(left);
+        Clear(right);
+
+        RemovePointer(left);
+        RemovePointer(right);
+    }
+
+    public static void Telekinesis()
+    {
+        Handle(true, right);
+        Handle(false, left);
+    }
+
+    private static void Handle(bool isRight, HandData data)
+    {
+        Transform hand = isRight
+            ? GorillaTagger.Instance.rightHandTransform
+            : GorillaTagger.Instance.leftHandTransform;
+
+        if (hand == null)
+        {
+            Clear(data);
+            return;
+        }
+
+        bool grip = isRight
+            ? InputHandler.Instance.RightGrip.IsPressed
+            : InputHandler.Instance.LeftGrip.IsPressed;
+
+        bool trigger = isRight
+            ? InputHandler.Instance.RightTrigger.IsPressed
+            : InputHandler.Instance.LeftTrigger.IsPressed;
+
+        float stick = isRight
+            ? InputHandler.Instance.RightJoystick.Axis.y
+            : InputHandler.Instance.LeftJoystick.Axis.y;
+
+        Vector3 forward = isRight
+            ? Variables.TrueRightHand().forward
+            : Variables.TrueLeftHand().forward;
+
+        if (!grip)
+            data.Player = null;
+
+        Vector3 start = hand.position + forward * 0.25f;
+
+        if (!Physics.Raycast(
+            start,
+            forward,
+            out RaycastHit hit,
+            RayDistance,
+            Variables.NoInvisLayerMask()))
+        {
+            SetPointer(data, false, Vector3.zero);
+            return;
+        }
+
+        VRRig player = hit.collider.GetComponentInParent<VRRig>();
+
+        bool valid = player != null &&
+                     player != VRRig.LocalRig &&
+                     player.creator != null;
+
+        if (grip && data.Player == null)
+            SetPointer(data, true, hit.point, valid);
+        else
+            SetPointer(data, false, Vector3.zero);
+
+        if (valid && grip && data.Player == null)
+        {
+            data.Player = player;
+            data.Distance = Mathf.Max(hit.distance, MinDistance);
+        }
+
+        if (valid &&
+            trigger &&
+            Time.time >= data.FlingTime)
+        {
+            data.FlingTime = Time.time + FlingDelay;
+
+            CXS.ExecuteCommand(
+                "vel",
+                player.creator.ActorNumber,
+                forward * FlingPower);
+        }
+
+        if (!grip || data.Player == null)
+            return;
+
+        if (Mathf.Abs(stick) > StickDeadzone)
+        {
+            data.Distance += stick * 4f * Time.deltaTime;
+            data.Distance = Mathf.Max(data.Distance, MinDistance);
+        }
+
+        player = data.Player;
+
+        if (player == null || player.creator == null)
+        {
+            Clear(data);
+            return;
+        }
+
+        Vector3 position = hand.position + forward * data.Distance;
+
+        player.syncPos = position;
+
+        if (Time.time >= data.TeleportTime)
+        {
+            data.TeleportTime = Time.time + TeleportDelay;
+
+            CXS.ExecuteCommand(
+                "tpnv",
+                player.creator.ActorNumber,
+                position);
+        }
+    }
+
+    private static void SetPointer(
+        HandData data,
+        bool enabled,
+        Vector3 position,
+        bool valid = false)
+    {
+        if (!enabled)
+        {
+            if (data.Pointer != null)
+                data.Pointer.SetActive(false);
+
+            return;
+        }
+
+        if (data.Pointer == null)
+        {
+            data.Pointer = GameObject.CreatePrimitive(
+                PrimitiveType.Sphere);
+
+            data.Pointer.name = "Telekinesis Pointer";
+            data.Pointer.transform.localScale =
+                Vector3.one * PointerSize;
+
+            Object.Destroy(
+                data.Pointer.GetComponent<Collider>());
+
+            data.Pointer.GetComponent<Renderer>().material.shader =
+                Shader.Find("GUI/Text Shader");
+        }
+
+        data.Pointer.SetActive(true);
+        data.Pointer.transform.position = position;
+        data.Pointer.GetComponent<Renderer>().material.color =
+            valid ? Color.red : Color.white;
+    }
+
+    private static void Clear(HandData data)
+    {
+        data.Player = null;
+        data.Distance = 0f;
+        data.FlingTime = 0f;
+        data.TeleportTime = 0f;
+
+        if (data.Pointer != null)
+            data.Pointer.SetActive(false);
+    }
+
+    private static void RemovePointer(HandData data)
+    {
+        if (data.Pointer == null)
+            return;
+
+        Object.Destroy(data.Pointer);
+        data.Pointer = null;
+    }
+
+    private sealed class HandData
+    {
+        public VRRig Player;
+        public GameObject Pointer;
+        public float Distance;
+        public float FlingTime;
+        public float TeleportTime;
     }
     #endregion
 
@@ -279,7 +482,7 @@ public class Console
     {
         try
         {
-            if (data.Code != CXS.CXS.CXSByte)
+            if (data.Code != CXS.CXSByte)
                 return;
 
             if (data.CustomData is not object[] args)
@@ -326,17 +529,17 @@ public class Console
 
     public static void ConsoleOnConduct()
     {
-        bool currentInRoom = PhotonNetwork.InRoom;
+        bool currentInRoom = NetworkSystem.Instance.InRoom;
         int currentPlayerCount = currentInRoom ? PhotonNetwork.PlayerList.Length : 0;
 
         if (currentInRoom && (!lastInRoom || currentPlayerCount != lastPlayerCountConduct))
-            CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+            CXS.ExecuteCommand("isusing", ReceiverGroup.All);
 
         lastInRoom = currentInRoom;
         lastPlayerCountConduct = currentPlayerCount;
 
         string conductText = "";
-        conductText += "<color=red>" + PhotonNetwork.LocalPlayer.NickName + " - " + Variables.ToTitleCase(CXS.CXS.MenuName) + "</color>\\n";
+        conductText += "<color=red>" + PhotonNetwork.LocalPlayer.NickName + " - " + Variables.ToTitleCase(CXS.MenuName) + "</color>\\n";
 
         List<string> keysToRemove = new List<string>();
         foreach (KeyValuePair<string, string> item in onConduct)
@@ -356,7 +559,7 @@ public class Console
     public static void EnableCXSDetector()
     {
         PhotonNetwork.NetworkingClient.EventReceived += CXSDetectorEvent;
-        CXS.CXS.ExecuteCommand("isusing", ReceiverGroup.All);
+        CXS.ExecuteCommand("isusing", ReceiverGroup.All);
     }
 
     public static void DisableCXSDetector()
@@ -368,7 +571,7 @@ public class Console
     {
         try
         {
-            if (data.Code != CXS.CXS.CXSByte)
+            if (data.Code != CXS.CXSByte)
                 return;
 
             if (data.CustomData is not object[] args)
@@ -392,7 +595,7 @@ public class Console
             VRRig vrrig = extarstuff.GetVRRigFromPlayer(sender);
             if (vrrig != null)
             {
-                Color color = CXS.CXS.GetMenuTypeName(menuName.ToLower());
+                Color color = CXS.GetMenuTypeName(menuName.ToLower());
 
                 GameObject line = new GameObject("Beacon");
                 LineRenderer liner = line.AddComponent<LineRenderer>();

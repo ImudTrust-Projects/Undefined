@@ -1,9 +1,11 @@
 using BepInEx;
-using CXS;
+using Undefined.Admin.Menu;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
+using System.Linq;
+using System.Reflection;
 using Undefined.Menu;
 using Undefined.Mods.Categories;
 using Undefined.Utilities;
@@ -11,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using JObject = Newtonsoft.Json.Linq.JObject;
 using GorillaLocomotion;
+using CXS = Undefined.Admin.Menu.CXS;
 
 namespace Undefined;
 
@@ -30,12 +33,39 @@ public class Plugin : BaseUnityPlugin
     private Version latestVersion;
     private Version minimumVersion;
 
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class PatchOnAwake : Attribute { }
+    
+    private void PatchAwakePatches()
+    {
+        Type[] types;
+
+        try
+        {
+            types = Assembly.GetExecutingAssembly().GetTypes();
+        }
+        catch (ReflectionTypeLoadException e)
+        {
+            types = e.Types.Where(t => t != null).ToArray();
+        }
+
+        foreach (var type in types)
+        {
+            if (type == null || !type.IsClass)
+                continue;
+
+            if (type.GetCustomAttribute<PatchOnAwake>() == null)
+                continue;
+
+            harmony.CreateClassProcessor(type).Patch();
+        }
+    }
 
     private void Awake()
     {
         Instance = this;
 
-        ComponentHolder = new GameObject("Undefined");
+        ComponentHolder = new GameObject(Constants.PluginName);
         DontDestroyOnLoad(ComponentHolder);
 
         GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
@@ -44,18 +74,24 @@ public class Plugin : BaseUnityPlugin
 
     private void Start()
     {
-        CXS.CXS.LoadCXS();
+        CXS.LoadCXS();
 
         AudioHandler.LoadSounds();
 
         harmony = new Harmony(Constants.PluginGUID);
+        
         harmony.PatchAll();
+        PatchAwakePatches();
 
         ComponentHolder.AddComponent<Main>();
+        ComponentHolder.AddComponent<BoardManager>();
+        ComponentHolder.AddComponent<CoroutineManager>();
         ComponentHolder.AddComponent<NotificationLib>();
         ComponentHolder.AddComponent<RoomNotifications>();
         ComponentHolder.AddComponent<DiscordPresence>();
         ComponentHolder.AddComponent<SearchAndKeyboard>();
+        ComponentHolder.AddComponent<SoundBoard>();
+        ComponentHolder.AddComponent<RoomJoiner>();
 
         Variables.LoadEmbeddedBackground("Undefined.Resources.Embedded.icon.png");
 
@@ -71,8 +107,10 @@ public class Plugin : BaseUnityPlugin
         allsoundsids = GTPlayer.Instance.materialData.Count;
         SoundMods.PopulateSoundOptions();
 
-        if (ComponentHolder.GetComponent<InputHandler>() == null)
+        if (ComponentHolder != null && ComponentHolder.GetComponent<InputHandler>() == null)
             ComponentHolder.AddComponent<InputHandler>();
+
+        ComponentHolder.AddComponent<UpdateWindow>();
 
         SettingsSaver.Load();
 

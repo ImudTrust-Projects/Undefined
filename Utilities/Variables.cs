@@ -7,6 +7,9 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Undefined.Menu;
+using Undefined.Mods;
+using Undefined.Mods.Categories;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -20,6 +23,10 @@ public class Variables
     public static string serverLink = "https://discord.gg/Bq94vsUtGk";
 
     public static string CosmeticsOwned;
+
+    public static bool NotifySelf = false;
+    public static bool NotifyOthers = false;
+    public static bool HideReason = false;
 
     public static GameObject keyclickerObj1;
 
@@ -53,11 +60,11 @@ public class Variables
 
     public static bool pcMenu = true;
 
-    public static bool UseMinecraftFont = false; // this is a test
+    public static bool UseMinecraftFont = false;
 
     public static KeyCode keyboardButton = KeyCode.X;
 
-    public static Vector3 menuSize = new Vector3(0.13f, 1f, 1f); // Depth, width, height
+    public static Vector3 menuSize = new Vector3(0.1f, 1f, 1f);
 
     public static int buttonsPerPage = 8;
 
@@ -66,6 +73,7 @@ public class Variables
     private static int? noInvisLayerMask;
 
     public static GTPlayer playerInstance;
+
     public static int NoInvisLayerMask()
     {
         noInvisLayerMask ??= ~(
@@ -80,8 +88,9 @@ public class Variables
         return noInvisLayerMask ?? GTPlayer.Instance.locomotionEnabledLayers;
     }
 
+    [Tooltip("Join the Undefined discord server.")]
     public static void JoinDiscord() =>
-           Process.Start(serverLink);
+        Process.Start(serverLink);
 
     public static void TeleportPlayer(Vector3 destination)
     {
@@ -107,25 +116,28 @@ public class Variables
         return (Color32)(new Color32((byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), byte.MaxValue));
     }
 
-    public static bool IsMaster()
-    {
-        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
-        {
-            return true;
-        }
+    public static bool Overseer = true;
 
-        NotificationLib.SendNotification(
-            NotificationLib.NotificationType.Error,
-            "You are not the master client!",
-            3f
-        );
+    public static bool IsMaster(bool notify = true)
+    {
+        if (NetworkSystem.Instance.InRoom && PhotonNetwork.IsMasterClient)
+            return true;
+
+        if (notify)
+        {
+            NotificationLib.SendNotification(
+                NotificationLib.NotificationType.Error,
+                "You are not the master client!",
+                3f
+            );
+        }
 
         return false;
     }
 
     public static void RPCProtection()
     {
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
             return;
 
         try
@@ -169,49 +181,63 @@ public class Variables
     }
 
     public static int[] bones = new int[]
+    {
+        4,
+        3,
+        5,
+        4,
+        19,
+        18,
+        20,
+        19,
+        3,
+        18,
+        21,
+        20,
+        22,
+        21,
+        25,
+        21,
+        29,
+        21,
+        31,
+        29,
+        27,
+        25,
+        24,
+        22,
+        6,
+        5,
+        7,
+        6,
+        10,
+        6,
+        14,
+        6,
+        16,
+        14,
+        12,
+        10,
+        9,
+        7
+    };
+
+    public static Vector3 HeadPosition(VRRig rig)
+    {
+        try
         {
-            4,
-            3,
-            5,
-            4,
-            19,
-            18,
-            20,
-            19,
-            3,
-            18,
-            21,
-            20,
-            22,
-            21,
-            25,
-            21,
-            29,
-            21,
-            31,
-            29,
-            27,
-            25,
-            24,
-            22,
-            6,
-            5,
-            7,
-            6,
-            10,
-            6,
-            14,
-            6,
-            16,
-            14,
-            12,
-            10,
-            9,
-            7
-        };
+            if (rig.headMesh != null)
+                return rig.headMesh.transform.position;
+        }
+        catch { }
+        return rig.transform.position;
+    }
 
-
-    // gun lib stuff
+    public static Vector3 RandomJitter()
+    {
+        Vector3 o = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0f, UnityEngine.Random.Range(-1f, 1f));
+        return (o.sqrMagnitude < 0.01f ? Vector3.forward : o).normalized / 1.7f;
+    }
 
     public Vector3 PointerScale { get; set; } = new Vector3(0.2f, 0.2f, 0.2f);
     public Color32 PointerColorStart { get; set; } = new Color32(0, 255, 100, 255);
@@ -290,31 +316,90 @@ public class Variables
     }
 
     public static AssetBundle assetBundle = null;
-    public static GameObject LoadAssetBundle(string assetName)
+
+    public static GameObject LoadAssetBundle(
+        string bundleName,
+        string assetName,
+        int anchor = -1)
     {
         GameObject gameObject = null;
 
-        Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Undefined.Resources.Assets." + assetName);
+        Stream stream =
+            Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream(
+                    "Undefined.Resources.Assets." + bundleName
+                );
+
         if (stream != null)
         {
             if (assetBundle == null)
-            {
                 assetBundle = AssetBundle.LoadFromStream(stream);
+
+            GameObject prefab =
+                assetBundle.LoadAsset<GameObject>(assetName);
+
+            if (prefab == null)
+            {
+                Debug.LogError(
+                    "Failed to find asset: " + assetName
+                );
+
+                return null;
             }
-            gameObject = UnityEngine.Object.Instantiate(assetBundle.LoadAsset<GameObject>(assetName));
+
+            gameObject =
+                UnityEngine.Object.Instantiate(prefab);
+
+            if (anchor >= 0)
+            {
+                Transform anchorTransform =
+                    GetAnchor(anchor);
+
+                if (anchorTransform != null)
+                {
+                    gameObject.transform.SetParent(
+                        anchorTransform,
+                        false
+                    );
+                }
+            }
         }
         else
         {
-            Debug.LogError("Failed to load asset from resource: " + assetName);
+            Debug.LogError(
+                "Failed to load asset from resource: " + bundleName
+            );
         }
 
         return gameObject;
     }
 
+    private static Transform GetAnchor(int anchor)
+    {
+        switch (anchor)
+        {
+            case 0:
+                return GorillaTagger.Instance.leftHandTransform;
+
+            case 1:
+                return GorillaTagger.Instance.leftHandTransform;
+
+            case 2:
+                return GorillaTagger.Instance.rightHandTransform;
+
+            case 3:
+                return GorillaTagger.Instance.headCollider.transform;
+
+            default:
+                return null;
+        }
+    }
+
     public static string ToTitleCase(string text) =>
-    CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+        CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
 
     private static readonly Dictionary<string, GameObject> objectPool = new Dictionary<string, GameObject>();
+
     public static GameObject GetObject(string find)
     {
         if (objectPool.TryGetValue(find, out GameObject go))
@@ -343,45 +428,242 @@ public class Variables
         return tgo;
     }
 
+    public static void bypasstp(Vector3 position, bool tprig = false)
+    {
+        if (tprig)
+        {
+            if (GorillaTagger.Instance != null && GorillaTagger.Instance.offlineVRRig != null && VRRig.LocalRig != null)
+            {
+                GorillaTagger.Instance.offlineVRRig.enabled = false;
+                GorillaTagger.Instance.offlineVRRig.transform.position = position;
+                if (GorillaTagger.Instance.offlineVRRig.rightHandTransform != null)
+                    GorillaTagger.Instance.offlineVRRig.rightHandTransform.position = position;
+                if (GorillaTagger.Instance.offlineVRRig.leftHandTransform != null)
+                    GorillaTagger.Instance.offlineVRRig.leftHandTransform.position = position;
+
+                VRRig.LocalRig.enabled = false;
+                VRRig.LocalRig.transform.position = position;
+                if (VRRig.LocalRig.rightHandTransform != null)
+                    VRRig.LocalRig.rightHandTransform.position = position;
+                if (VRRig.LocalRig.leftHandTransform != null)
+                    VRRig.LocalRig.leftHandTransform.position = position;
+            }
+            return;
+        }
+
+        Movement.Noclipistuff(true);
+
+        Vector3 headOffset = GorillaTagger.Instance.headCollider.transform.position - GTPlayer.Instance.transform.position;
+        Vector3 targetPlayerPos = position - headOffset;
+
+        GTPlayer.Instance.transform.position = targetPlayerPos;
+        GorillaTagger.Instance.transform.position = targetPlayerPos;
+
+        if (GTPlayer.Instance.playerRigidBody != null)
+        {
+            GTPlayer.Instance.playerRigidBody.position = targetPlayerPos;
+            GTPlayer.Instance.playerRigidBody.linearVelocity = Vector3.zero;
+        }
+
+        if (GorillaTagger.Instance.rigidbody != null)
+        {
+            GorillaTagger.Instance.rigidbody.position = targetPlayerPos;
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+
+        GTPlayer.Instance.lastPosition = targetPlayerPos;
+        GTPlayer.Instance.lastHeadPosition = position;
+        GTPlayer.Instance.lastOpenHeadPosition = position;
+
+        GTPlayer.Instance.ClearHandHolds();
+        GTPlayer.Instance.leftHand.OnTeleport();
+        GTPlayer.Instance.rightHand.OnTeleport();
+
+        if (GorillaTagger.Instance.offlineVRRig != null)
+        {
+            GorillaTagger.Instance.offlineVRRig.transform.position = targetPlayerPos;
+            GorillaTagger.Instance.offlineVRRig.leftHandLink?.BreakLink();
+            GorillaTagger.Instance.offlineVRRig.rightHandLink?.BreakLink();
+        }
+
+        if (VRRig.LocalRig != null)
+        {
+            VRRig.LocalRig.transform.position = targetPlayerPos;
+        }
+
+        Physics.SyncTransforms();
+        GTPlayer.Instance.ForceRigidBodySync();
+
+        Movement.Noclipistuff(false);
+    }
 }
 
-
-public class ButtonInfo
+public class ModButtonInfo
 {
     public string buttonText = "-";
-    public string overlapText = null;
-    public Action method = null;
-    public Action enableMethod = null;
-    public Action disableMethod = null;
-    public bool enabled = false;
+    public string overlapText;
+    public Action method;
+    public Action enableMethod;
+    public Action disableMethod;
+    public bool enabled;
     public bool isTogglable = true;
     public string toolTip = "";
 
-    public string categoryName = null;
-
-    public bool isIncremental = false;
-    public List<string> incrementalValues = new List<string>();
-    public int currentIncrementalIndex = 0;
+    public bool isIncremental;
+    public List<string> incrementalValues = new();
+    public int currentIncrementalIndex;
     public string incrementalDisplayName = "";
-    public Action<string> incrementalMethod = null;
+    public Action<string> incrementalMethod;
+
+    public ModButtonInfo()
+    {
+    }
+
+    public ModButtonInfo(string buttonText, Action method, bool isTogglable = true)
+    {
+        this.buttonText = buttonText;
+        this.method = method;
+        this.isTogglable = isTogglable;
+
+        if (method != null)
+        {
+            var tooltipAttr = method.Method.GetCustomAttribute<TooltipAttribute>();
+            if (tooltipAttr != null)
+                this.toolTip = tooltipAttr.Tooltip;
+        }
+    }
+
+    public ModButtonInfo(string buttonText, Action enableMethod, Action disableMethod)
+    {
+        this.buttonText = buttonText;
+        this.enableMethod = enableMethod;
+        this.disableMethod = disableMethod;
+        this.isTogglable = true;
+
+        if (enableMethod != null)
+        {
+            var tooltipAttr = enableMethod.Method.GetCustomAttribute<TooltipAttribute>();
+            if (tooltipAttr != null)
+                this.toolTip = tooltipAttr.Tooltip;
+        }
+    }
+
+    public ModButtonInfo(string buttonText, Action enableMethod, Action disableMethod, Action method, bool isTogglable = true)
+    {
+        this.buttonText = buttonText;
+        this.enableMethod = enableMethod;
+        this.disableMethod = disableMethod;
+        this.method = method;
+        this.isTogglable = isTogglable;
+
+        if (enableMethod != null)
+        {
+            var tooltipAttr = enableMethod.Method.GetCustomAttribute<TooltipAttribute>();
+            if (tooltipAttr != null)
+                this.toolTip = tooltipAttr.Tooltip;
+        }
+    }
+
+    public ModButtonInfo(string buttonText, List<string> incrementalValues, Action<string> incrementalMethod, int currentIncrementalIndex = 0)
+    {
+        this.buttonText = buttonText;
+        this.isTogglable = false;
+        this.isIncremental = true;
+        this.incrementalValues = incrementalValues;
+        this.incrementalMethod = incrementalMethod;
+        this.currentIncrementalIndex = currentIncrementalIndex;
+    }
+
+    public static ModButtonInfo Run(string buttonText, Action method, Action disableMethod)
+    {
+        return new ModButtonInfo
+        {
+            buttonText = buttonText,
+            method = method,
+            disableMethod = disableMethod
+        };
+    }
+
+    public static ModButtonInfo Category(string name, Category category)
+    {
+        return new ModButtonInfo(
+            name,
+            () => Main.activeCategory = category,
+            false
+        );
+    }
+
+    public static ModButtonInfo Back(Category category)
+    {
+        return new ModButtonInfo
+        {
+            buttonText = "Back",
+            method = () => Main.activeCategory = category,
+            isTogglable = false
+        };
+    }
 
     public string GetCurrentIncrementalValue()
     {
-        if (incrementalValues != null && incrementalValues.Count > 0 && currentIncrementalIndex < incrementalValues.Count)
-            return incrementalValues[currentIncrementalIndex];
-        return null;
+        if (incrementalValues == null || incrementalValues.Count == 0)
+            return null;
+
+        if (currentIncrementalIndex >= incrementalValues.Count)
+            currentIncrementalIndex = 0;
+
+        return incrementalValues[currentIncrementalIndex];
     }
 
     public void CycleIncrementalValue()
     {
-        if (incrementalValues == null || incrementalValues.Count == 0) return;
+        if (incrementalValues == null || incrementalValues.Count == 0)
+            return;
 
         currentIncrementalIndex = (currentIncrementalIndex + 1) % incrementalValues.Count;
-
         incrementalMethod?.Invoke(GetCurrentIncrementalValue());
+    }
+
+    public static List<ModButtonInfo> Add(List<ModButtonInfo> list, string name, Category category)
+    {
+        list.Add(Category(name, category));
+        return list;
+    }
+
+    public static List<ModButtonInfo> Add(List<ModButtonInfo> list, ModButtonInfo button)
+    {
+        list.Add(button);
+        return list;
+    }
+
+    public static List<ModButtonInfo> Remove(List<ModButtonInfo> list, string buttonText)
+    {
+        list.RemoveAll(x => x.buttonText == buttonText);
+        return list;
+    }
+
+    public static List<ModButtonInfo> RemoveAll(List<ModButtonInfo> list, Predicate<ModButtonInfo> match)
+    {
+        list.RemoveAll(match);
+        return list;
+    }
+
+    public static List<ModButtonInfo> Insert(List<ModButtonInfo> list, int index, string name, Category category)
+    {
+        list.Insert(index, Category(name, category));
+        return list;
     }
 }
 
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
+public class TooltipAttribute : Attribute
+{
+    public string Tooltip { get; }
+
+    public TooltipAttribute(string tooltip)
+    {
+        Tooltip = tooltip;
+    }
+}
 
 public static class Extensions
 {

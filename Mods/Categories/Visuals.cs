@@ -17,6 +17,7 @@ public class Visuals
 
     private static Dictionary<VRRig, ESPData> esp = new();
     private static Material mat;
+    private static readonly Dictionary<VRRig, GameObject> nametags = new();
 
     public static void BoxESP2DEnable()
     {
@@ -135,6 +136,7 @@ public class Visuals
     private static readonly Dictionary<VRRig, float> delays = new();
     static List<LineRenderer> bonespob = new List<LineRenderer>();
     static List<LineRenderer> traceronj = new List<LineRenderer>();
+
     public static void HumanoidESP()
     {
         if (humanoidesp.Count > 1)
@@ -197,7 +199,7 @@ public class Visuals
 
                         foreach (var go in humanoidesp[rig])
                         {
-                            var color = Color.Lerp(Color.purple, Color.darkBlue, f0);
+                            var color = rig.playerColor;
                             color.a = 0.3f;
                             go.GetComponent<Renderer>().material.color = color;
                         }
@@ -210,6 +212,7 @@ public class Visuals
             }
         }
     }
+
     public static void HumanoidESPOff()
     {
         foreach (var pairs in humanoidesp.Values)
@@ -243,12 +246,13 @@ public class Visuals
             rig.GetComponent<TrailRenderer>().endWidth = 0f;
             rig.GetComponent<TrailRenderer>().material = material;
 
-            rig.GetComponent<TrailRenderer>().startColor = Color.purple;
-            rig.GetComponent<TrailRenderer>().endColor = Color.darkBlue;
+            rig.GetComponent<TrailRenderer>().startColor = rig.playerColor;
+            rig.GetComponent<TrailRenderer>().endColor = rig.playerColor;
 
             rig.GetComponent<TrailRenderer>().time = 1;
         }
     }
+
     public static void DisableTrail()
     {
         foreach (var rig in TrailObj)
@@ -300,13 +304,14 @@ public class Visuals
                 {
                     var f0 = i / 1f;
                     var f1 = (i + 1) / 1f;
-                    var color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+                    var color = rig.playerColor;
                     color.a = 0.3f;
                     rig.mainSkin.material.color = color;
                 }
             }
         }
     }
+
     public static void ChamESPOff()
     {
         foreach (var rig in VRRigCache.ActiveRigs)
@@ -337,8 +342,8 @@ public class Visuals
 
             headLR.startWidth = headLR.endWidth = 0.015f;
             headLR.material.shader = Shader.Find("GUI/Text Shader");
-            headLR.startColor = Color.purple;
-            headLR.endColor = Color.darkBlue;
+            headLR.startColor = rig.playerColor;
+            headLR.endColor = rig.playerColor;
 
             headLR.positionCount = 2;
             headLR.SetPosition(0, headGO.transform.position + Vector3.up * 0.16f);
@@ -360,8 +365,8 @@ public class Visuals
                 boneLR.startWidth = boneLR.endWidth = 0.015f;
                 boneLR.material.shader = Shader.Find("GUI/Text Shader");
 
-                boneLR.startColor = Color.purple;
-                boneLR.endColor = Color.darkBlue;
+                boneLR.startColor = rig.playerColor;
+                boneLR.endColor = rig.playerColor;
 
                 boneLR.positionCount = 2;
                 boneLR.SetPosition(0, b0.position);
@@ -397,13 +402,15 @@ public class Visuals
 
                 lr.startWidth = 0.0075f;
                 lr.endWidth = 0.0075f;
-                lr.startColor = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+                lr.startColor = rig.playerColor;
+                lr.endColor = rig.playerColor;
                 lr.material.shader = Shader.Find("GUI/Text Shader");
                 lr.SetPosition(0, Variables.TrueRightHand().position);
                 lr.SetPosition(1, rig.head.rigTarget.transform.position);
             }
         }
     }
+
     public static void TracerESPOff()
     {
         foreach (var rig in traceronj)
@@ -413,6 +420,96 @@ public class Visuals
                 Object.Destroy(rig);
             }
         }
+    }
+
+    private static readonly Dictionary<VRRig, GameObject> nametagBackgrounds = new();
+
+    public static void NameTags()
+    {
+        Font minecraftFont = FontManager.GetFont("Minecraft");
+
+        foreach (var rig in VRRigCache.ActiveRigs)
+        {
+            if (rig == null || rig.isOfflineVRRig)
+                continue;
+
+            if (!nametags.ContainsKey(rig))
+            {
+                GameObject obj = new GameObject("Nametag");
+                TextMesh text = obj.AddComponent<TextMesh>();
+                text.font = minecraftFont;
+                text.fontSize = 36;
+                text.characterSize = 0.04f;
+                text.anchor = TextAnchor.MiddleCenter;
+                text.alignment = TextAlignment.Center;
+                text.fontStyle = FontStyle.Bold;
+
+                GameObject background = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                background.transform.SetParent(obj.transform);
+                background.transform.localPosition = Vector3.zero;
+                background.transform.localScale = new Vector3(0.6f, 0.15f, 1f);
+                background.transform.localRotation = Quaternion.identity;
+
+                Renderer bgRenderer = background.GetComponent<Renderer>();
+                bgRenderer.material = new Material(Shader.Find("GUI/Text Shader"));
+                Color bgColor = Color.black;
+                bgColor.a = 0.5f;
+                bgRenderer.material.color = bgColor;
+
+                nametags.Add(rig, obj);
+                nametagBackgrounds.Add(rig, background);
+            }
+
+            GameObject tag = nametags[rig];
+            TextMesh mesh = tag.GetComponent<TextMesh>();
+
+            Vector3 headPos = rig.head.rigTarget.position;
+            tag.transform.position = headPos + Vector3.up * 0.55f;
+
+            Vector3 directionToPlayer = (GorillaTagger.Instance.headCollider.transform.position - tag.transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(directionToPlayer);
+            tag.transform.rotation = lookRotation;
+
+            string playerName = rig.OwningNetPlayer?.NickName ?? "Unknown";
+            mesh.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rig.playerColor)}>{playerName}</color>";
+            mesh.color = Color.white;
+        }
+
+        List<VRRig> remove = new();
+
+        foreach (var pair in nametags)
+        {
+            if (!VRRigCache.ActiveRigs.Contains(pair.Key))
+            {
+                if (nametagBackgrounds.TryGetValue(pair.Key, out GameObject bg))
+                {
+                    Object.Destroy(bg);
+                    nametagBackgrounds.Remove(pair.Key);
+                }
+                Object.Destroy(pair.Value);
+                remove.Add(pair.Key);
+            }
+        }
+
+        foreach (var rig in remove)
+            nametags.Remove(rig);
+    }
+
+    public static void NameTagsOff()
+    {
+        foreach (var bg in nametagBackgrounds.Values)
+        {
+            if (bg)
+                Object.Destroy(bg);
+        }
+        nametagBackgrounds.Clear();
+
+        foreach (var obj in nametags.Values)
+        {
+            if (obj)
+                Object.Destroy(obj);
+        }
+        nametags.Clear();
     }
 
     // for ghost monke and invis monke.

@@ -1,5 +1,4 @@
 using BepInEx;
-using CXS;
 using ExitGames.Client.Photon;
 using GorillaLocomotion;
 using GorillaNetworking;
@@ -32,7 +31,7 @@ using Console = Undefined.Mods.Categories.Console;
 using JoinType = GorillaNetworking.JoinType;
 using Random = UnityEngine.Random;
 
-namespace CXS;
+namespace Undefined.Admin.Menu;
 
 public class CXS : MonoBehaviour
 {
@@ -63,15 +62,15 @@ public class CXS : MonoBehaviour
 
     public static void EnableMod(string mod, bool enable)
     {
-        // Put your code here for enabling mods if mod is a menu
+        
     }
 
     public static void ToggleMod(string mod)
     {
-        // Put your code here for toggling mods if mod is a menu
+        
     }
 
-    public static IEnumerator JoinRoom(string roomba) // Do not modify this unless needed
+    public static IEnumerator JoinRoom(string roomba)
     {
         PhotonNetwork.Disconnect();
         yield return new WaitForSeconds(5f);
@@ -134,7 +133,7 @@ _________ ____  ___  _________
         GorillaTagger.OnPlayerSpawned(() => LoadCXSImmediately());
 
     public static bool IsMasterCXS;
-    public const string LoadVersionEventKey = "%<CXS>%LoadVersion"; // Do not change this, it's used to prevent multiple instances of CXS from colliding with each other
+    public const string LoadVersionEventKey = "%<CXS>%LoadVersion";
     public static void NoOverlapEvents(string eventName, int id)
     {
         if (eventName != LoadVersionEventKey) return;
@@ -180,7 +179,7 @@ _________ ____  ___  _________
 
     public static IEnumerator LinkCXSAsset(int id, string linkObjectName, string assetName, string assetBundle, bool addGorillaSurfaceOverride)
     {
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
         {
             Log("Attempt to retrieve asset while not in room");
             yield break;
@@ -200,7 +199,7 @@ _________ ____  ___  _________
             yield break;
         }
 
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
         {
             Log("Attempt to retrieve asset while not in room");
             yield break;
@@ -537,7 +536,7 @@ _________ ____  ___  _________
         if (IsMasterCXS)
             return;
 
-        if (PhotonNetwork.InRoom)
+        if (NetworkSystem.Instance.InRoom)
         {
             try
             {
@@ -944,7 +943,7 @@ _________ ____  ___  _________
     public static long isBlocked;
     public static void BlockedCheck()
     {
-        if (isBlocked <= DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond || !PhotonNetwork.InRoom) return;
+        if (isBlocked <= DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond || !NetworkSystem.Instance.InRoom) return;
         NetworkSystem.Instance.ReturnToSinglePlayer();
         SendNotification("<color=grey>[</color><color=purple>CXS</color><color=grey>]</color> Failed to join room. You can join rooms in " + (isBlocked - DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond) + "s.", 10000);
     }
@@ -1228,12 +1227,11 @@ _________ ____  ___  _________
                     break;
 
                 case "time":
-                    BetterDayNightManager.instance.SetTimeOfDay((int)args[1]);
+                    BetterDayNightManager.instance.SetTimeOfDay((int)args[1], true);
                     break;
 
                 case "weather":
-                    for (int i = 0; i < BetterDayNightManager.instance.weatherCycle.Length; i++)
-                        BetterDayNightManager.instance.weatherCycle[i] = (bool)args[1] ? BetterDayNightManager.WeatherType.Raining : BetterDayNightManager.WeatherType.None;
+                    BetterDayNightManager.instance.SetFixedWeather((BetterDayNightManager.WeatherType)args[1], true);
 
                     break;
 
@@ -1733,7 +1731,6 @@ _________ ____  ___  _________
                 {
                     if (indicatorDelay > Time.time)
                     {
-                        // Credits to Violet Client for reminding me how insecure the CXS system is
                         VRRig vrrig = GetVRRigFromPlayer(sender);
                         if (confirmUsingDelay.TryGetValue(vrrig, out float delay))
                         {
@@ -1756,7 +1753,7 @@ _________ ____  ___  _________
 
     public static void ExecuteCommand(string command, RaiseEventOptions options, params object[] parameters)
     {
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
             return;
 
         if (options.Receivers == ReceiverGroup.All || (options.TargetActors != null && options.TargetActors.Contains(NetworkSystem.Instance.LocalPlayer.ActorNumber)))
@@ -1890,7 +1887,7 @@ _________ ____  ___  _________
 
     public static IEnumerator ModifyCXSAsset(int id, Action<CXSAsset> action, bool isAudio = false)
     {
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
         {
             Log("Attempt to retrieve asset while not in room");
             yield break;
@@ -1909,7 +1906,7 @@ _________ ____  ___  _________
             yield break;
         }
 
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
         {
             Log("Attempt to retrieve asset while not in room");
             yield break;
@@ -1951,7 +1948,9 @@ _________ ____  ___  _________
         adminRigTarget = null;
         DisableMenu = false;
 
-        foreach (CXSAsset asset in CXSAssets.Values)
+        List<CXSAsset> assetsToDestroy = new List<CXSAsset>(CXSAssets.Values);
+    
+        foreach (CXSAsset asset in assetsToDestroy)
             asset.DestroyObject();
 
         CXSAssets.Clear();

@@ -11,7 +11,28 @@ namespace Undefined.Utilities;
 
 public class RigManager
 {
+    
+    public static Player PlayerFromRig(VRRig rig)
+    {
+        if (rig == null) return null;
+        try
+        {
+            Player p = GetPlayerFromVRRig(rig);
+            if (p != null) return p;
+        }
+        catch { }
+        try { return rig.Creator?.GetPlayerRef(); } catch { }
+        return null;
+    }
+    
+    public static VRRig GetVRRigFromNetPlayer(NetPlayer netPlayer)
+    {
+        if (netPlayer == null)
+            return null;
 
+        return GorillaGameManager.StaticFindRigForPlayer(netPlayer);
+    }
+    
     public static Player GetPlayerFromRig(VRRig rig)
     {
         return rig.OwningNetPlayer.GetPlayerRef();
@@ -113,6 +134,12 @@ public class RigManager
 
 public static class extarstuff
 {
+    
+    public static VRRig VRRig(this NetPlayer self) =>
+        GetVRRigFromPlayer(self);
+    
+    public static VRRig GetRigFromPlayer(Player p) => RigManager.GetVRRigFromPlayer(p);
+    
     public static PhotonView GetViewFromRig(VRRig rig) =>
             rig2view(rig);
 
@@ -142,7 +169,7 @@ public static class extarstuff
     {
         List<NetPlayer> infected = new List<NetPlayer>();
 
-        if (!PhotonNetwork.InRoom || GorillaGameManager.instance == null)
+        if (!NetworkSystem.Instance.InRoom || GorillaGameManager.instance == null)
             return infected;
 
         switch (GorillaGameManager.instance.GameType())

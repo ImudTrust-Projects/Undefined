@@ -25,7 +25,7 @@ public static class SettingsSaver
             data.ActiveMods.Add(btn.buttonText);
         }
 
-        foreach (var category in ModButtons.buttons)
+        foreach (var category in ModButtons.Buttons.Values)
         {
             foreach (var btn in category)
             {
@@ -49,7 +49,7 @@ public static class SettingsSaver
 
         if (data == null) return;
 
-        foreach (var category in ModButtons.buttons)
+        foreach (var category in ModButtons.Buttons.Values)
         {
             foreach (var btn in category)
             {
@@ -61,7 +61,7 @@ public static class SettingsSaver
             }
         }
 
-        foreach (var category in ModButtons.buttons)
+        foreach (var category in ModButtons.Buttons.Values)
         {
             foreach (var btn in category)
             {

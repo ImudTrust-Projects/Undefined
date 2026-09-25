@@ -24,7 +24,8 @@ public class NotificationLib : MonoBehaviour
         Room,
         Error,
         Alert,
-        Info
+        Info,
+        AntiCheat
     }
 
     private static readonly Dictionary<string, float> _notificationTimestamps = new();
@@ -69,7 +70,8 @@ public class NotificationLib : MonoBehaviour
         { NotificationType.Room, "#C040FF" },
         { NotificationType.Error, "#FF0000" },
         { NotificationType.Alert, "#FFD700" },
-        { NotificationType.Info, "#B0B0B0" }
+        { NotificationType.Info, "#B0B0B0" },
+        { NotificationType.AntiCheat, "#FFD700" }
     };
 
     public static string PreviousNotification { get; private set; }
@@ -330,7 +332,7 @@ public class NotificationLib : MonoBehaviour
         }
 
 
-        List<ButtonInfo> activeMods = ModButtons.GetActiveMods();
+        List<ModButtonInfo> activeMods = ModButtons.GetActiveMods();
 
 
         int version = activeMods.Count;
@@ -346,7 +348,7 @@ public class NotificationLib : MonoBehaviour
         _enabledModsBuffer.Clear();
 
 
-        foreach (ButtonInfo mod in activeMods)
+        foreach (ModButtonInfo mod in activeMods)
             _enabledModsBuffer.Add(mod.buttonText);
 
 

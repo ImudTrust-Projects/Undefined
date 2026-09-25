@@ -37,7 +37,7 @@ public class GunLib
     public static Color PointerColor =>
         Color.Lerp(GunColor, Color.white, 0.35f);
 
-    public static void start2guns(Action action, bool lockOn)
+    public static void StartGun(Action action, bool lockOn)
     {
         if (IsXRDeviceActive())
             StartVrGun(action, lockOn);

@@ -5,7 +5,9 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Photon.Pun;
 using TMPro;
+using Undefined.Mods;
 using Undefined.Mods.Categories;
 using Undefined.Utilities;
 using UnityEngine;
@@ -16,12 +18,15 @@ using UnityEngine.XR;
 using static Undefined.MENUSETTINGS.Settings;
 using static Undefined.Mods.ModButtons;
 using static Undefined.Utilities.Variables;
+using Object = UnityEngine.Object;
 
 namespace Undefined.Menu;
 
 public class Main : MonoBehaviour
 {
-    public static int activeCategory
+    private static Category categoryIndex;
+
+    public static Category activeCategory
     {
         get => categoryIndex;
         set
@@ -32,7 +37,7 @@ public class Main : MonoBehaviour
     }
     private static bool prevLeftTrigger;
     private static bool prevRightTrigger;
-    private static readonly Dictionary<string, (int Cat, int Idx)> searchCache = new Dictionary<string, (int Cat, int Idx)>();
+    private static readonly Dictionary<string, (Category Cat, int Idx)> searchCache = new Dictionary<string, (Category Cat, int Idx)>();
 
     private void Update()
     {
@@ -40,11 +45,6 @@ public class Main : MonoBehaviour
         {
             if (InputHandler.Instance == null)
                 return;
-
-            if (Settings.Ghostview && !VRRig.LocalRig.enabled)
-            {
-                Visuals.CreateCubes();
-            }
 
             bool openRequested = (!rightHanded && InputHandler.Instance.LeftSecondary.IsPressed) ||
                                  (rightHanded && InputHandler.Instance.RightSecondary.IsPressed);
@@ -116,7 +116,7 @@ public class Main : MonoBehaviour
                 fpsLabel.text = "FPS: " + Mathf.Ceil(1f / Time.unscaledDeltaTime);
             }
 
-            var activeMods = buttons.SelectMany(x => x).Where(b => b.enabled && b.method != null);
+            var activeMods = ModButtons.Buttons.Values.SelectMany(x => x).Where(b => b.enabled && b.method != null);
             foreach (var mod in activeMods)
             {
                 try
@@ -310,14 +310,18 @@ public class Main : MonoBehaviour
             discTextTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
-        ButtonInfo[] pageButtons = buttons[activeCategory].Skip(activePage * buttonsPerPage).Take(buttonsPerPage).ToArray();
+        ModButtonInfo[] pageButtons = Buttons[activeCategory]
+            .Skip(activePage * buttonsPerPage)
+            .Take(buttonsPerPage)
+            .ToArray();
+
         for (int i = 0; i < pageButtons.Length; i++)
         {
             BuildButton(i * 0.1f, pageButtons[i]);
         }
     }
 
-    public static void BuildButton(float offset, ButtonInfo info)
+    public static void BuildButton(float offset, ModButtonInfo info)
     {
         GameObject btnObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
         if (!UnityInput.Current.GetKey(keyboardButton))
@@ -346,7 +350,7 @@ public class Main : MonoBehaviour
 
         if (info.isIncremental)
         {
-            string value = Settings.GetDisplayName(info.GetCurrentIncrementalValue());
+            string value = SoundSettings.GetDisplayName(info.GetCurrentIncrementalValue());
             baseText = $"{info.buttonText} [<color=#00FFFF>{value}</color>]";
         }
         else
@@ -373,13 +377,15 @@ public class Main : MonoBehaviour
 
     public static void RebuildMenu()
     {
-        if (activeCategory == 3)
+        if (activeCategory == Category.EnabledMods)
         {
             EnabledMods.UpdateCategory();
         }
 
         if (activeMenu != null)
         {
+            searchCache.Clear();
+
             Destroy(activeMenu);
             activeMenu = null;
             BuildMenu();
@@ -494,25 +500,38 @@ public class Main : MonoBehaviour
 
     public static void ChangePage(bool next)
     {
-        int totalPages = (buttons[activeCategory].Length + buttonsPerPage - 1) / buttonsPerPage;
-        if (totalPages <= 1) return;
+        int totalPages = (Buttons[activeCategory].Length + buttonsPerPage - 1) / buttonsPerPage;
+        if (totalPages <= 1)
+            return;
 
         if (next)
         {
             activePage++;
-            if (activePage >= totalPages) activePage = 0;
+            if (activePage >= totalPages)
+                activePage = 0;
         }
         else
         {
             activePage--;
-            if (activePage < 0) activePage = totalPages - 1;
+            if (activePage < 0)
+                activePage = totalPages - 1;
         }
+
         RebuildMenu();
     }
 
     public static void ProcessClick(string text)
     {
-        ButtonInfo target = FindButton(text);
+        if (text == "Disconnect")
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                PhotonNetwork.Disconnect();
+            }
+            return;
+        }
+        
+        ModButtonInfo target = FindButton(text);
         if (target != null)
         {
             if (target.isIncremental)
@@ -530,73 +549,56 @@ public class Main : MonoBehaviour
                 if (target.enabled)
                 {
                     target.enableMethod?.Invoke();
-                    NotificationLib.SendNotification(
-                        NotificationLib.NotificationType.Enabled, target.toolTip);
+
+                    if (!string.IsNullOrEmpty(target.toolTip))
+                    {
+                        NotificationLib.SendNotification(
+                            NotificationLib.NotificationType.Enabled,
+                            target.toolTip
+                        );
+                    }
                 }
                 else
                 {
                     target.disableMethod?.Invoke();
-                    NotificationLib.SendNotification(
-                        NotificationLib.NotificationType.Disabled,
-                        target.toolTip);
+
+                    if (!string.IsNullOrEmpty(target.toolTip))
+                    {
+                        NotificationLib.SendNotification(
+                            NotificationLib.NotificationType.Disabled,
+                            target.toolTip
+                        );
+                    }
                 }
             }
             else
             {
                 target.method?.Invoke();
-                NotificationLib.SendNotification(
-                    NotificationLib.NotificationType.Info,
-                    target.toolTip);
             }
         }
         else
         {
             Debug.LogError($"{text} does not exist");
         }
+
         RebuildMenu();
         SettingsSaver.Save();
     }
 
-    public static ButtonInfo FindButton(string text)
+    public static ModButtonInfo FindButton(string text)
     {
-        if (text == null) return null;
+        if (text == null)
+            return null;
 
-        if (searchCache.TryGetValue(text, out var entry))
+        if (Buttons.TryGetValue(activeCategory, out var categoryButtons))
         {
-            try
+            foreach (var button in categoryButtons)
             {
-                if (buttons[entry.Cat][entry.Idx].buttonText == text)
-                {
-                    return buttons[entry.Cat][entry.Idx];
-                }
-            }
-            catch
-            {
-                searchCache.Remove(text);
+                if (button != null && button.buttonText == text)
+                    return button;
             }
         }
 
-        for (int cat = 0; cat < buttons.Length; cat++)
-        {
-            for (int idx = 0; idx < buttons[cat].Length; idx++)
-            {
-                if (buttons[cat][idx].buttonText == text)
-                {
-                    try
-                    {
-                        searchCache[text] = (cat, idx);
-                    }
-                    catch
-                    {
-                        if (searchCache.ContainsKey(text))
-                        {
-                            searchCache.Remove(text);
-                        }
-                    }
-                    return buttons[cat][idx];
-                }
-            }
-        }
         return null;
     }
 
@@ -650,6 +652,57 @@ public class Main : MonoBehaviour
             rot * Vector3.forward,
             rot * Vector3.right
         );
+    }
+
+    static Material mat = null;
+    static bool mat1;
+    public static VRRig ghostRig;
+
+    public static void Overseer()
+    {
+        if (Variables.Overseer)
+        {
+            if (mat == null)
+                mat = new Material(Shader.Find("GUI/Text Shader")) { color = new Color32(255, 255, 255, 90) };
+
+            if (ghostRig == null)
+            {
+                ghostRig = Object.Instantiate<VRRig>(
+                    GorillaTagger.Instance.offlineVRRig,
+                    GorillaLocomotion.GTPlayer.Instance.transform.position,
+                    GorillaLocomotion.GTPlayer.Instance.transform.rotation
+                );
+                ghostRig.enabled = false;
+                ghostRig.transform.position = Vector3.zero;
+
+                ghostRig.transform.Find("VR Constraints/LeftArm/Left Arm IK/SlideAudio").gameObject.SetActive(false);
+                ghostRig.transform.Find("VR Constraints/RightArm/Right Arm IK/SlideAudio").gameObject.SetActive(false);
+            }
+
+            if (!GorillaTagger.Instance.offlineVRRig.enabled)
+            {
+                mat1 = false;
+                ghostRig.enabled = true;
+                ghostRig.rightHandTransform.position = GorillaLocomotion.GTPlayer.Instance.RightHand.controllerTransform.position;
+                ghostRig.leftHandTransform.position = GorillaLocomotion.GTPlayer.Instance.LeftHand.controllerTransform.position;
+                ghostRig.mainSkin.material = mat;
+            }
+            else
+            {
+                if (!mat1)
+                {
+                    ghostRig.enabled = false;
+                    ghostRig.mainSkin.material = null;
+                    ghostRig.transform.position = Vector3.zero;
+                    mat1 = true;
+                }
+            }
+        }
+        else if (ghostRig != null)
+        {
+            Destroy(ghostRig);
+            ghostRig = null;
+        }
     }
 
     public static void ApplyScale(GameObject obj, Vector3 targetScale)

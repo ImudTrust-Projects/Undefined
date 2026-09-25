@@ -6,6 +6,7 @@ using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Undefined.Menu;
 using Undefined.Mods;
@@ -18,7 +19,7 @@ using Valve.Newtonsoft.Json.Linq;
 using static Undefined.Menu.Main;
 using static Undefined.Mods.ModButtons;
 
-namespace CXS;
+namespace Undefined.Admin.Menu;
 
 public class ServerData : MonoBehaviour
 {
@@ -34,52 +35,28 @@ public class ServerData : MonoBehaviour
     public static void SetupAdminPanel(string playerName)
     {
         string userId = PhotonNetwork.LocalPlayer?.UserId;
+
         if (string.IsNullOrEmpty(userId))
             return;
 
         bool isAdmin = Administrators.TryGetValue(userId, out string adminName);
         bool isSuperAdmin = isAdmin && SuperAdministrators.Contains(adminName);
 
-        int adminCategory = ModButtons.FindCategory("Admin");
-        int superAdminCategory = ModButtons.FindCategory("SuperAdmin");
-
-        if (adminCategory == -1)
-        {
-            CXS.Log("Admin category not found!");
+        if (!isAdmin)
             return;
-        }
 
-        List<ButtonInfo> mainButtons = new List<ButtonInfo>(ModButtons.buttons[0]);
+        var mainButtons = ModButtons.Buttons[Category.Main].ToList();
+        ModButtonInfo.Remove(mainButtons, "Admin");
+        ModButtonInfo.Add(mainButtons, "Admin", Category.Admin);
+        ModButtons.Buttons[Category.Main] = mainButtons.ToArray();
 
-        mainButtons.RemoveAll(x => x.buttonText == "Admin");
-
-        if (isAdmin)
+        if (isSuperAdmin)
         {
-            mainButtons.Add(new ButtonInfo
-            {
-                buttonText = "Admin",
-                method = () => Main.activeCategory = adminCategory,
-                isTogglable = false
-            });
+            var adminButtons = ModButtons.Buttons[Category.Admin].ToList();
+            ModButtonInfo.Remove(adminButtons, "SuperAdmin");
+            ModButtonInfo.Insert(adminButtons, 1, "SuperAdmin", Category.SuperAdmin);
+            ModButtons.Buttons[Category.Admin] = adminButtons.ToArray();
         }
-
-        ModButtons.buttons[0] = mainButtons.ToArray();
-
-        List<ButtonInfo> adminButtons = new List<ButtonInfo>(ModButtons.buttons[adminCategory]);
-
-        adminButtons.RemoveAll(x => x.buttonText == "SuperAdmin");
-
-        if (isSuperAdmin && superAdminCategory != -1)
-        {
-            adminButtons.Insert(1, new ButtonInfo
-            {
-                buttonText = "SuperAdmin",
-                method = () => Main.activeCategory = superAdminCategory,
-                isTogglable = false
-            });
-        }
-
-        ModButtons.buttons[adminCategory] = adminButtons.ToArray();
 
         if (isSuperAdmin)
         {
@@ -90,7 +67,7 @@ public class ServerData : MonoBehaviour
                 5f
             );
         }
-        else if (isAdmin)
+        else
         {
             NotificationLib.SendNotification(
                 NotificationLib.NotificationType.Info,
@@ -100,6 +77,7 @@ public class ServerData : MonoBehaviour
             );
         }
     }
+
     public static void SetupBetaTester(string playerName)
     {
         NotificationLib.SendNotification(
@@ -169,12 +147,12 @@ public class ServerData : MonoBehaviour
                 ReloadTime = Time.time + 5f;
         }
 
-        if (Time.time > DataSyncDelay || !PhotonNetwork.InRoom)
+        if (Time.time > DataSyncDelay || !NetworkSystem.Instance.InRoom)
         {
-            if (PhotonNetwork.InRoom && PhotonNetwork.PlayerList.Length != PlayerCount)
+            if (NetworkSystem.Instance.InRoom && PhotonNetwork.PlayerList.Length != PlayerCount)
                 instance.StartCoroutine(PlayerDataSync(PhotonNetwork.CurrentRoom.Name, PhotonNetwork.CloudRegion));
 
-            PlayerCount = PhotonNetwork.InRoom ? PhotonNetwork.PlayerList.Length : -1;
+            PlayerCount = NetworkSystem.Instance.InRoom ? PhotonNetwork.PlayerList.Length : -1;
         }
     }
 
@@ -224,6 +202,7 @@ public class ServerData : MonoBehaviour
     public static readonly List<string> SuperAdministrators = new List<string>();
     public static readonly List<string> BetaTesterNames = new List<string>();
     public static readonly List<string> BetaTesters = new List<string>();
+
     public static IEnumerator LoadServerData()
     {
         using (UnityWebRequest request = UnityWebRequest.Get(ServerDataEndpoint))
@@ -402,7 +381,7 @@ public class ServerData : MonoBehaviour
         DataSyncDelay = Time.time + 3f;
         yield return new WaitForSeconds(3f);
 
-        if (!PhotonNetwork.InRoom)
+        if (!NetworkSystem.Instance.InRoom)
             yield break;
 
         Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();

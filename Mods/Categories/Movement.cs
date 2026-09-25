@@ -14,6 +14,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using TMPro;
+using Undefined.MENUSETTINGS;
+using Undefined.Patches;
 using Undefined.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -36,7 +38,7 @@ public class Movement
     public static float subThingy;
     public static float subThingyZ;
 
-    public static float FlySpeed = 10f; // this is very bad, but it works for now. I will fix this later
+    public static float FlySpeed = 10f; // I will fix this in later updates i'm super lazy right now.
 
     public static int platMode = 0;
     public static int platInput = 0;
@@ -133,7 +135,7 @@ public class Movement
 
     private static void ApplyMode(Renderer renderer)
     {
-        Color platformColor = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+        Color platformColor = Settings.backgroundColor.colors[0].color;
 
         switch (platMode)
         {
@@ -203,8 +205,100 @@ public class Movement
         lastLeftHeld = false;
         lastRightHeld = false;
     }
+    
+    public static float jspeed = 7.5f;
+    public static float jmulti = 1.1f;
+    
+    public static readonly float[] SpeedBoostAmounts = { 2f, 7.5f, 8f, 9f, 200f };
+    public static readonly float[] SpeedBoostMultipliers = { 0.5f, 1.1f, 1.5f, 2f, 10f };
+    public static readonly List<string> SpeedBoostNames = new()
+    {
+        "Slow",
+        "Normal",
+        "Middle",
+        "Fast",
+        "Ultra Fast"
+    };
+
+    public static int speedBoostMode;
+
+    public static void SetSpeedBoost(string mode)
+    {
+        speedBoostMode = SpeedBoostNames.IndexOf(mode);
+
+        if (speedBoostMode < 0)
+            speedBoostMode = 0;
+
+        jspeed = SpeedBoostAmounts[speedBoostMode];
+        jmulti = SpeedBoostMultipliers[speedBoostMode];
+
+        NotificationLib.SendNotification(
+            NotificationLib.NotificationType.Info,
+            $"Speed: {SpeedBoostNames[speedBoostMode]}"
+        );
+    }
+
+    private static bool speedBoostEnabled;
+
+    public static void SpeedBoost()
+    {
+        speedBoostEnabled = !speedBoostEnabled;
+
+        if (speedBoostEnabled)
+        {
+            GTPlayer.Instance.maxJumpSpeed = jspeed;
+            GTPlayer.Instance.jumpMultiplier = jmulti;
+        }
+        else
+        {
+            GTPlayer.Instance.maxJumpSpeed = 6.5f;
+            GTPlayer.Instance.jumpMultiplier = 1f;
+        }
+    }
 
     public static void Fly()
+    {
+        if (InputHandler.Instance.RightPrimary.IsPressed)
+        {
+            GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * (Time.deltaTime * FlySpeed);
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+    }
+    
+    public static void CarMonkeyandfly(float speed, bool fly)
+    {
+        if (InputHandler.Instance.RightSecondary.IsPressed)
+        {
+            GorillaLocomotion.GTPlayer.Instance.transform.position += GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime * speed;
+            if (fly) GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        }
+    }
+    
+    public static void SlingshotFly()
+    {
+        if (InputHandler.Instance.RightPrimary.IsPressed)
+            GorillaTagger.Instance.rigidbody.linearVelocity += GTPlayer.Instance.headCollider.transform.forward * (Time.deltaTime * (FlySpeed * 2));
+    }
+    public static void TriggerFly()
+    {
+        if (InputHandler.Instance.RightTrigger.IsPressed)
+        {
+            GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * (Time.deltaTime * FlySpeed);
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+            
+    }
+    
+    public static void HandFly()
+    {
+        if (InputHandler.Instance.RightPrimary.IsPressed)
+        {
+            GTPlayer.Instance.transform.position += Variables.TrueRightHand().forward * (Time.deltaTime * FlySpeed);
+            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        }
+    }
+    
+    public static void NoClipFly()
     {
         if (InputHandler.Instance.RightPrimary.IsPressed)
         {
@@ -246,13 +340,35 @@ public class Movement
         if (Invis_Toggled)
         {
             VRRig.LocalRig.enabled = false;
-            VRRig.LocalRig.transform.position = new Vector3(0f, -100f, 0f);
+            Variables.bypasstp(new Vector3(0f, -100f, 0f), true);
         }
         else
         {
             VRRig.LocalRig.enabled = true;
         }
     }
+    
+    public static void StickyHands()
+    {
+        bool leftGrip = InputHandler.Instance.LeftGrip.IsPressed;
+        bool rightGrip = InputHandler.Instance.RightGrip.IsPressed;
+
+        if (leftGrip || rightGrip)
+        {
+            bool leftTouching = Physics.Raycast(GorillaTagger.Instance.leftHandTransform.position, -GorillaTagger.Instance.leftHandTransform.up, 0.25f, GunLib.BypassLayers);
+            bool rightTouching = Physics.Raycast(GorillaTagger.Instance.rightHandTransform.position, -GorillaTagger.Instance.rightHandTransform.up, 0.25f, GunLib.BypassLayers);
+
+            if ((leftGrip && leftTouching) || (rightGrip && rightTouching))
+            {
+                GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+                GorillaTagger.Instance.rigidbody.useGravity = false;
+                return;
+            }
+        }
+        GorillaTagger.Instance.rigidbody.useGravity = true;
+    }
+
+    public static void ResetStickyHands() => GorillaTagger.Instance.rigidbody.useGravity = true;
 
     public static void NoClip()
     {
@@ -306,6 +422,7 @@ public class Movement
         }
     }
 
+    // this is broken :/
     public static void AutoElevatorClimb()
     {
         if (InputHandler.Instance.RightGrip.IsPressed)
@@ -361,7 +478,7 @@ public class Movement
 
             Noclipistuff(true);
 
-            Color color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+            Color color = Settings.backgroundColor.colors[0].color;
             color = Color.Lerp(color, Color.white, 0.35f);
             color.a = 0.5f;
 
@@ -384,7 +501,7 @@ public class Movement
         }
         else
         {
-            Color color = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+            Color color = Settings.backgroundColor.colors[0].color;
             color.a = 1f;
 
             checkpoint.GetComponent<Renderer>().material.color = color;
@@ -402,6 +519,15 @@ public class Movement
         }
     }
 
+    public static void Dash()
+    {
+        if (!InputHandler.Instance.RightPrimary.WasPressed)
+            return;
+
+        GorillaTagger.Instance.rigidbody.linearVelocity += 
+            GTPlayer.Instance.headCollider.transform.forward * FlySpeed;
+    }
+
     public static void GravityManager(Gravitytypes type)
     {
         switch (type)
@@ -413,7 +539,7 @@ public class Movement
                 GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.67f, ForceMode.Acceleration); // omg 67
                 break;
             case Gravitytypes.Zero:
-                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration);
+                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration); // trying a new zero grav since the old one was weird.
                 break;
             case Gravitytypes.Reverse:
                 GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * 3f, ForceMode.Acceleration);
@@ -430,6 +556,18 @@ public class Movement
         High,
         Zero,
         Reverse
+    }
+    
+    public static void UpAndDown()
+    {
+        if (InputHandler.Instance.RightTrigger.IsPressed)
+        {
+            GorillaTagger.Instance.rigidbody.AddForce(GTPlayer.Instance.bodyCollider.transform.up * 20f * Time.deltaTime, ForceMode.VelocityChange);
+        }
+        if (InputHandler.Instance.LeftTrigger.IsPressed)
+        {
+            GorillaTagger.Instance.rigidbody.AddForce(-GTPlayer.Instance.bodyCollider.transform.up * 20f * Time.deltaTime, ForceMode.VelocityChange);
+        }
     }
 
     public static void CheckPointDisable()
@@ -459,9 +597,6 @@ public class Movement
         GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.Lerp(GorillaTagger.Instance.rigidbody.linearVelocity, velocity, 0.12875f);
     }
 
-    public static void SpiderCrawl() =>
-            GorillaTagger.Instance.headCollider.transform.rotation = Quaternion.Euler(-270, GorillaTagger.Instance.headCollider.transform.rotation.eulerAngles.y, 0);
-
     private static bool wasLeftTouching;
     private static bool wasRightTouching;
 
@@ -487,9 +622,6 @@ public class Movement
         wasLeftTouching = leftTouching;
         wasRightTouching = rightTouching;
     }
-
-    public static void NoTagFreeze() =>
-        GTPlayer.Instance.disableMovement = false;
 
     public static void WASDFly()
     {
@@ -584,7 +716,7 @@ public class Movement
 
     public static void TeleportGun()
     {
-        GunLib.start2guns(delegate ()
+        GunLib.StartGun(() =>
         {
             if (!teleportGunPressed)
             {
@@ -622,6 +754,17 @@ public class Movement
             {
                 collider.enabled = true;
             }
+        }
+    }
+    
+    public static void WalkOnWater()
+    {
+        GameObject gameObject = GameObject.Find("Beach/B_WaterVolumes");
+        Transform transform = gameObject.transform;
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            GameObject gameObject2 = transform.GetChild(i).gameObject;
+            gameObject2.layer = LayerMask.NameToLayer("Default");
         }
     }
 }
