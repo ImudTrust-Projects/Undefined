@@ -373,6 +373,12 @@ public class Main : MonoBehaviour
         textTrans.sizeDelta = new Vector2(0.2f, 0.03f);
         textTrans.localPosition = new Vector3(0.064f, 0f, 0.111f - offset / 2.6f - 0.0025f);
         textTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+
+        if (FavouriteMods.IsFavourite(info))
+        {
+            textTrans.sizeDelta = new Vector2(0.15f, 0.03f);
+            FavouriteMods.AddStar(textTrans);
+        }
     }
 
     public static void RebuildMenu()
@@ -380,6 +386,11 @@ public class Main : MonoBehaviour
         if (activeCategory == Category.EnabledMods)
         {
             EnabledMods.UpdateCategory();
+        }
+
+        if (activeCategory == Category.FavouriteMods)
+        {
+            FavouriteMods.UpdateCategory();
         }
 
         if (activeMenu != null)
@@ -532,6 +543,14 @@ public class Main : MonoBehaviour
         }
         
         ModButtonInfo target = FindButton(text);
+        if (target != null && FavouriteMods.HoldingFavouriteGrip() && FavouriteMods.CanFavourite(target))
+        {
+            FavouriteMods.Toggle(target);
+            RebuildMenu();
+            SettingsSaver.Save();
+            return;
+        }
+
         if (target != null)
         {
             if (target.isIncremental)

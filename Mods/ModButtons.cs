@@ -30,6 +30,7 @@ public static class ModButtons
 
             Category("Settings", Category.Settings),
             Category("Enabled", Category.EnabledMods),
+            Category("Favourites", Category.FavouriteMods),
             Category("Room", Category.RoomMods),
             Category("Movement", Category.MovementMods),
             Category("Fun", Category.FunMods),
@@ -64,6 +65,11 @@ public static class ModButtons
         },
 
         [Category.EnabledMods] = new ModButtonInfo[]
+        {
+            Back(Category.Main),
+        },
+
+        [Category.FavouriteMods] = new ModButtonInfo[]
         {
             Back(Category.Main),
         },
@@ -146,8 +152,6 @@ public static class ModButtons
             new ModButtonInfo("Flap Arms", Fun.FlapArms) { disableMethod = Fun.ResetRig },
             new ModButtonInfo("Clap", Fun.Clap) { disableMethod = Fun.ResetRig },
             new ModButtonInfo("Wave", Fun.Wave) { disableMethod = Fun.ResetRig },
-            new ModButtonInfo("Grab Rig", Fun.GrabRig),
-            new ModButtonInfo("Helicopter Rig", Fun.HelicopterRig),
             new ModButtonInfo("Rig Gun", Fun.MoveRigGun),
             new ModButtonInfo("Spectate Gun", Fun.SpectateGun),
             new ModButtonInfo("Set Name HIDE", Fun.SetNameHIDE, false),
@@ -180,7 +184,7 @@ public static class ModButtons
             Back(Category.Main),
             new ModButtonInfo("Close Game", () => Application.Quit(), false),
             new ModButtonInfo("Anti Report", () => Safety.AntiReport()),
-            //new ModButtonInfo("Anti Report (Fling)", () => Safety.AntiReportSnowballfling()),
+            new ModButtonInfo("Anti Report (Fling)", () => Safety.AntiReportSnowballfling()),
             new ModButtonInfo("Anti Moderator", () => Safety.AntiModeration()),
             new ModButtonInfo("Restart Game", () => Safety.RestartGame(), false),
             new ModButtonInfo("Anti-Cheat Notify", () => Variables.NotifySelf = true, () => Variables.NotifySelf = false),
@@ -256,11 +260,11 @@ public static class ModButtons
             new ModButtonInfo("Untag All", () => Master.UntagAll(), false),
             new ModButtonInfo("Force Tag Lag", () => Master.ForceTagLag()),
             new ModButtonInfo("No Tag Cooldown", () => Master.NoTagCooldown()),
-            //new ModButtonInfo("Lock Room", () => Master.LockRoom()),
-            //new ModButtonInfo("Unlock Room", () => Master.UnlockRoom()),
-            //new ModButtonInfo("Spaz Room", () => Master.SpazRoom()),
-            //new ModButtonInfo("Vibrate Gun", () => Master.ViberateGun()),
-            //new ModButtonInfo("Vibrate All", () => Master.ViberateAll()),
+            new ModButtonInfo("Lock Room", () => Master.LockRoom()),
+            new ModButtonInfo("Unlock Room", () => Master.UnlockRoom()),
+            new ModButtonInfo("Spaz Room", () => Master.SpazRoom()),
+            new ModButtonInfo("Vibrate Gun", () => Master.ViberateGun()),
+            new ModButtonInfo("Vibrate All", () => Master.ViberateAll()),
             new ModButtonInfo("Material Gun", () => Master.MatGun()),
             new ModButtonInfo("Material All", () => Master.MatAll()),
         },
@@ -274,16 +278,16 @@ public static class ModButtons
         {
             Back(Category.Main),
             new ModButtonInfo("Stutter Master", () => StutterMaster()),
-            //new ModButtonInfo("Destroy Gun", () => DestroyGun()),
-            //new ModButtonInfo("Destroy All", () => DestroyAll()),
-            //new ModButtonInfo("Lag Gun", () => LagGun()),
-            //new ModButtonInfo("Lag All", () => LagAll()),
-            //new ModButtonInfo("Lag On Touch", () => LagOnTouch()),
-            //new ModButtonInfo("Stump Kick All", () => STumpkickall()),
+            new ModButtonInfo("Destroy Gun", () => DestroyGun()),
+            new ModButtonInfo("Destroy All", () => DestroyAll()),
+            new ModButtonInfo("Lag Gun", () => LagGun()),
+            new ModButtonInfo("Lag All", () => LagAll()),
+            new ModButtonInfo("Lag On Touch", () => LagOnTouch()),
+            new ModButtonInfo("Stump Kick All", () => STumpkickall()),
             new ModButtonInfo("Grab Fling Gun", () => GrabFlingGun()),
             new ModButtonInfo("Grab Fling All", () => GrabFlingAll()),
-            //new ModButtonInfo("SnowBall Fling Gun", () => SnowBallLauncherGun()),
-            //new ModButtonInfo("SnowBall Up Up and Away Gun", () => SnowballUpAwayGun()),
+            new ModButtonInfo("SnowBall Fling Gun", () => SnowBallLauncherGun()),
+            new ModButtonInfo("SnowBall Up Up and Away Gun", () => SnowballUpAwayGun()),
         },
 
         [Category.NetworkedMods] = new ModButtonInfo[]

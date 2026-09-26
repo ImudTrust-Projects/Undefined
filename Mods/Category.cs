@@ -6,6 +6,7 @@ public enum Category
     Settings,
     MenuSettings,
     EnabledMods,
+    FavouriteMods,
     RoomMods,
     MovementMods,
     FunMods,

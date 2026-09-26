@@ -573,7 +573,9 @@ public class Fun
             UCam = null;
         }
     }
-    
+
+
+
     public static void UpsideDownHead()
     {
         GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 180f;
@@ -658,6 +660,7 @@ public class Fun
 
         SetHands(left, right);
     }
+
 
     public static void ResetRig()
     {

@@ -3,6 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Undefined.Menu;
 using Undefined.Mods;
+using Undefined.Mods.Categories;
 
 namespace Undefined.Utilities;
 
@@ -14,6 +15,7 @@ public static class SettingsSaver
     {
         public List<string> ActiveMods = new List<string>();
         public Dictionary<string, int> IncrementalSettings = new Dictionary<string, int>();
+        public List<string> Favourites = new List<string>();
     }
 
     public static void Save()
@@ -24,6 +26,8 @@ public static class SettingsSaver
         {
             data.ActiveMods.Add(btn.buttonText);
         }
+
+        data.Favourites.AddRange(FavouriteMods.Favourites);
 
         foreach (var category in ModButtons.Buttons.Values)
         {
@@ -48,6 +52,10 @@ public static class SettingsSaver
         var data = JsonConvert.DeserializeObject<SaveData>(json);
 
         if (data == null) return;
+
+        FavouriteMods.Favourites.Clear();
+        if (data.Favourites != null)
+            FavouriteMods.Favourites.AddRange(data.Favourites);
 
         foreach (var category in ModButtons.Buttons.Values)
         {

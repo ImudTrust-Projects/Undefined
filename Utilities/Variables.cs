@@ -507,6 +507,7 @@ public class ModButtonInfo
     public Action disableMethod;
     public bool enabled;
     public bool isTogglable = true;
+    public bool isCategory;
     public string toolTip = "";
 
     public bool isIncremental;
@@ -590,7 +591,10 @@ public class ModButtonInfo
             name,
             () => Main.activeCategory = category,
             false
-        );
+        )
+        {
+            isCategory = true
+        };
     }
 
     public static ModButtonInfo Back(Category category)
@@ -599,7 +603,8 @@ public class ModButtonInfo
         {
             buttonText = "Back",
             method = () => Main.activeCategory = category,
-            isTogglable = false
+            isTogglable = false,
+            isCategory = true
         };
     }
 
