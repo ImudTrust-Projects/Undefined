@@ -181,7 +181,7 @@ public class BoardManager : MonoBehaviour
         );
 
 
-        SetText(
+        /*SetText(
             "Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText",
             CoCTitle
         );
@@ -190,7 +190,7 @@ public class BoardManager : MonoBehaviour
         SetText(
             "Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData",
             CoCText
-        );
+        );*/
     }
 
 

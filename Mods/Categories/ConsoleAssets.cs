@@ -12,6 +12,7 @@ using UnityEngine;
 using static Bindings;
 using static UnityEngine.GridBrushBase;
 using CXS = Undefined.Admin.Menu.CXS;
+using Random = UnityEngine.Random;
 
 namespace Undefined.Mods.Categories;
 
@@ -929,6 +930,46 @@ public class ConsoleAssets
         allocatedBoombox[actorNum] = -1;
         networkDelayByBoombox[boomboxId] = 0f;
         scaleNetworkedByBoombox[boomboxId] = Vector3.one;
+    }
+    #endregion
+
+    #region Coin Flip
+    private static int allocatedCoinId = -1;
+    private static bool lastFlipping;
+
+    public static void CoinFlip()
+    {
+        if (InputHandler.Instance.RightGrip.IsPressed && InputHandler.Instance.RightTrigger.IsPressed)
+        {
+            if (allocatedCoinId == -1 && (InputHandler.Instance.RightPrimary.WasPressed || InputHandler.Instance.RightSecondary.WasPressed))
+            {
+                allocatedCoinId = CXS.GetFreeAssetID();
+                CXS.ExecuteCommand("asset-spawn", (ReceiverGroup)1, "console.main1", "Coin", allocatedCoinId);
+                CXS.ExecuteCommand("asset-setanchor", (ReceiverGroup)1, allocatedCoinId, 2);
+                Variables.RPCProtection();
+                
+            }
+
+            if (allocatedCoinId != -1)
+            {
+                bool flag = InputHandler.Instance.RightPrimary.WasPressed || InputHandler.Instance.RightSecondary.WasPressed;
+                if (!flag && lastFlipping)
+                {
+                    CXS.ExecuteCommand("asset-playanimation", (ReceiverGroup)1, allocatedCoinId, "CoinHolder", (Random.Range(0f, 1f) >= 0.5f) ? "Heads" : "Tails");
+                    CXS.ExecuteCommand("asset-playsound", (ReceiverGroup)1, allocatedCoinId, "CoinHolder", "Flip");
+                }
+                lastFlipping = flag;
+            }
+        }
+        else
+        {
+            lastFlipping = false;
+            if (allocatedCoinId != -1)
+            {
+                CXS.ExecuteCommand("asset-destroy", (ReceiverGroup)1, allocatedCoinId);
+                allocatedCoinId = -1;
+            }
+        }
     }
     #endregion
 }

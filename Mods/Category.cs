@@ -19,7 +19,6 @@ public enum Category
     MasterMods,
     SoundBoard,
     OverpoweredMods,
-    NetworkedMods,
     DiscordRPC,
     Admin,
     SuperAdmin,

@@ -9,15 +9,23 @@ namespace Undefined.Mods.Categories;
 
 public class Visuals
 {
+    static Dictionary<VRRig, List<GameObject>> humanoidesp = new Dictionary<VRRig, List<GameObject>>();
+    static List<TrailRenderer> TrailObj = new List<TrailRenderer>();
+    private static readonly Dictionary<VRRig, float> delays = new();
+    static List<LineRenderer> bonespob = new List<LineRenderer>();
+    static List<LineRenderer> traceronj = new List<LineRenderer>();
+    
+    private static Dictionary<VRRig, ESPData> esp = new();
+    private static Material mat;
+    private static readonly Dictionary<VRRig, GameObject> nametags = new();
+    
+    private static readonly Dictionary<VRRig, GameObject> nametagBackgrounds = new();
+    
     private class ESPData
     {
         public GameObject[] objs;
         public Renderer[] rends;
     }
-
-    private static Dictionary<VRRig, ESPData> esp = new();
-    private static Material mat;
-    private static readonly Dictionary<VRRig, GameObject> nametags = new();
 
     public static void BoxESP2DEnable()
     {
@@ -130,12 +138,6 @@ public class Visuals
 
         mat = null;
     }
-
-    static Dictionary<VRRig, List<GameObject>> humanoidesp = new Dictionary<VRRig, List<GameObject>>();
-    static List<TrailRenderer> TrailObj = new List<TrailRenderer>();
-    private static readonly Dictionary<VRRig, float> delays = new();
-    static List<LineRenderer> bonespob = new List<LineRenderer>();
-    static List<LineRenderer> traceronj = new List<LineRenderer>();
 
     public static void HumanoidESP()
     {
@@ -421,8 +423,6 @@ public class Visuals
             }
         }
     }
-
-    private static readonly Dictionary<VRRig, GameObject> nametagBackgrounds = new();
 
     public static void NameTags()
     {

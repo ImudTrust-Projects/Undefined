@@ -177,6 +177,7 @@ public static class ModButtons
             ModButtonInfo.Run("Chams", () => Visuals.ChamESPOn(), () => Visuals.ChamESPOff()),
             ModButtonInfo.Run("Bone ESP", () => Visuals.BoneESP(), () => Visuals.BoneESPOff()),
             ModButtonInfo.Run("Tracers", () => Visuals.TracerESP(), () => Visuals.TracerESPOff()),
+            new ModButtonInfo("Enable Terraformer", () => Master.EnableTerraformer(), () => Master.DisableTerraformer()),
         },
 
         [Category.SafetyMods] = new ModButtonInfo[]
@@ -199,12 +200,14 @@ public static class ModButtons
             ModButtonInfo.Run("Tag Fix", () => Advantages.TagFix(), () => Advantages.DisableTagFix()),
             ModButtonInfo.Run("Tag Reach", Advantages.TagReach, () => GorillaTagger.Instance.maxTagDistance = 1.2f),
             new ModButtonInfo("No Tag On Join", () => Advantages.NoTagOnJoin()),
+            new ModButtonInfo("No Tag On Join", () => Advantages.TrackingAbuseFlick()),
             new ModButtonInfo("45 fps", () => Advantages.FPS(true, 45),() => Advantages.FPS(false) ),
             new ModButtonInfo("60 fps", () => Advantages.FPS(true, 60),() => Advantages.FPS(false) ),
             new ModButtonInfo("90 fps", () => Advantages.FPS(true, 90),() => Advantages.FPS(false) ),
             new ModButtonInfo("120 fps", () => Advantages.FPS(true, 120),() => Advantages.FPS(false) ),
             new ModButtonInfo("Unlock fps", () => Advantages.UnlockFps(true),() => Advantages.UnlockFps(false) ),
             new ModButtonInfo("No Tag Freeze", () => Advantages.NoTagFreeze()),
+            new ModButtonInfo("Remove QuitBox", () => Advantages.NoTagFreeze()),
         },
 
         [Category.MapLoader] = new ModButtonInfo[]
@@ -267,6 +270,10 @@ public static class ModButtons
             new ModButtonInfo("Vibrate All", () => Master.ViberateAll()),
             new ModButtonInfo("Material Gun", () => Master.MatGun()),
             new ModButtonInfo("Material All", () => Master.MatAll()),
+            new ModButtonInfo("Spawn Lucy", () => Master.SpawnLucy()),
+            new ModButtonInfo("Lucy Chase Gun", () => Master.LucyChaseGun()),
+            new ModButtonInfo("Fast Broomsticks", () => Master.FastBroomsticks(), () => Master.ResetBroomsticks()),
+            new ModButtonInfo("Slow Broomsticks", () => Master.SlowBroomsticks(), () => Master.ResetBroomsticks()),
         },
 
         [Category.SoundBoard] = new ModButtonInfo[]
@@ -288,11 +295,6 @@ public static class ModButtons
             new ModButtonInfo("Grab Fling All", () => GrabFlingAll()),
             new ModButtonInfo("SnowBall Fling Gun", () => SnowBallLauncherGun()),
             new ModButtonInfo("SnowBall Up Up and Away Gun", () => SnowballUpAwayGun()),
-        },
-
-        [Category.NetworkedMods] = new ModButtonInfo[]
-        {
-            Back(Category.Main),
         },
 
         [Category.DiscordRPC] = new ModButtonInfo[]
@@ -332,6 +334,7 @@ public static class ModButtons
             new ModButtonInfo("Cheezburger", () => ConsoleAssets.spawnCheezburger(), () => ConsoleAssets.destroyCheezburger()),
             new ModButtonInfo("Gorilla TV", () => ConsoleAssets.GorillaTv(), () => ConsoleAssets.DestroyGorillaTv()),
             new ModButtonInfo("Cherry Bomb", () => ConsoleAssets.CherryBomb(), () => ConsoleAssets.destroyCherryBomb(), () => ConsoleAssets.UpdateCherryBomb() ),
+            new ModButtonInfo("Coin Flip", () => ConsoleAssets.CoinFlip()),
         },
     };
 

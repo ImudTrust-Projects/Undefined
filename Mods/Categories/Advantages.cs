@@ -12,7 +12,7 @@ namespace Undefined.Mods.Categories;
 
 public class Advantages
 {
-    public static void TagGun()
+    /*public static void TagGun2()
     {
         GunLib.StartGun(() =>
         {
@@ -29,6 +29,47 @@ public class Advantages
 
             GameMode.ReportTag(GunLib.LockedPlayer.Creator);
         }, true);
+    }*/
+
+    public static void TagGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            TagPlayer(GunLib.LockedPlayer);
+        }, true);
+    }
+
+    private static void TagPlayer(VRRig targetRig)
+    {
+        bool isRealPlayer = !targetRig.isOfflineVRRig;
+
+        if (isRealPlayer)
+        {
+            bool targetIsNotInfected =
+                !targetRig.mainSkin.material.name.Contains("fected");
+
+            if (targetIsNotInfected)
+            {
+                GorillaTagger.Instance.offlineVRRig.enabled = false;
+                GorillaTagger.Instance.offlineVRRig.transform.position =
+                    targetRig.headConstraint.transform.position;
+
+                GameMode.ReportTag(targetRig.Creator);
+            }
+            else
+            {
+                GorillaTagger.Instance.offlineVRRig.enabled = true;
+            }
+        }
+
+        bool shouldEnableOfflineRig =
+            !PhotonNetwork.InRoom ||
+            targetRig.mainSkin.material.name.Contains("fected");
+
+        if (shouldEnableOfflineRig)
+        {
+            GorillaTagger.Instance.offlineVRRig.enabled = true;
+        }
     }
 
     public static void TagAll()
@@ -98,6 +139,28 @@ public class Advantages
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash, null, null);
         PlayerPrefs.Save();
     }
+
+    public static void TrackingAbuseFlick()
+    {
+        if (!ControllerInputPoller.instance.rightControllerSecondaryButton)
+        {
+            return;
+        }
+
+        Transform head = GorillaTagger.Instance.headCollider.transform;
+        Vector3 forward = head.forward.normalized;
+        Vector3 right = head.right.normalized;
+        float time = Time.time;
+        Vector3 trackingJitter = new Vector3(
+            Mathf.PerlinNoise(time * 10f, 0f) - 0.5f,
+            Mathf.PerlinNoise(0f, time * 10f) - 0.5f,
+            Mathf.PerlinNoise(time * 10f, time * 10f) - 0.5f) * 0.05f;
+        Vector3 handOffset = new Vector3(0f, 1.5f, 0f) + right * Mathf.Sin(time * 0.1f) * 0.3f;
+
+        GorillaTagger.Instance.rightHandTransform.position = head.position + handOffset + trackingJitter + right * 0.2f;
+        GorillaTagger.Instance.leftHandTransform.position = head.position + handOffset + trackingJitter - right * 0.2f;
+        GTPlayer.Instance.bodyCollider.attachedRigidbody.velocity = (-forward + right * 0.1f).normalized * 16f;
+    }
     
     private static int oldFPS;
 
@@ -136,4 +199,29 @@ public class Advantages
     
     public static void NoTagFreeze() =>
         GTPlayer.Instance.disableMovement = false;
+
+    private static GameObject quitBox;
+    
+    public static void QuitBoxTP()
+    {
+        if (GTPlayer.Instance == null)
+            return;
+
+        quitBox ??= GameObject.Find("QuitBox");
+
+        if (quitBox == null)
+            return;
+
+        if (Vector3.Distance(GTPlayer.Instance.transform.position, quitBox.transform.position) >= 1f)
+            return;
+
+        GTPlayer.Instance.TeleportTo(
+            new Vector3(-68.647f, 12.406f, -83.699f),
+            GTPlayer.Instance.transform.rotation,
+            false,
+            true
+        );
+
+        GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+    }
 }

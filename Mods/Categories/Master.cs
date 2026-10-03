@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ExitGames.Client.Photon;
+using GorillaLocomotion.Gameplay;
 using Photon.Realtime;
 using Undefined.Utilities;
 using UnityEngine;
@@ -13,6 +14,11 @@ namespace Undefined.Mods.Categories;
 
 public class Master
 {
+    private static HalloweenGhostChaser lucy;
+    private static GameObject terraformer;
+    private static float delay;
+
+    
     public static void GreyScreen()
     {
         if (GreyZoneManager.Instance == null) return;
@@ -274,8 +280,7 @@ public class Master
 
         AddInfected(netPlayer);
     }
-
-    private static float delay;
+    
     public static void MatGun()
     {
         GunLib.StartGun(() =>
@@ -302,4 +307,165 @@ public class Master
         }
     }
     
+    private static HalloweenGhostChaser GetLucy()
+    {
+        if (lucy == null)
+        {
+            GameObject obj = GameObject.Find(
+                "Environment Objects/05Maze_PersistentObjects/Ghosts/Halloween Ghost/FloatingChaseSkeleton");
+
+            if (obj != null)
+                lucy = obj.GetComponent<HalloweenGhostChaser>();
+        }
+
+        return lucy;
+    }
+
+    private static GameObject GetTerraformer()
+    {
+        if (terraformer == null)
+        {
+            terraformer = GameObject.Find(
+                "Environment Objects/LocalObjects_Prefab/Forest/2026_Halloween_Forest/Terraformer");
+        }
+
+        return terraformer;
+    }
+
+    public static void EnableTerraformer()
+    {
+        GetTerraformer()?.SetActive(true);
+    }
+
+    public static void DisableTerraformer()
+    {
+        GetTerraformer()?.SetActive(false);
+    }
+
+    public static void SpawnLucy()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        HalloweenGhostChaser ghost = GetLucy();
+
+        if (ghost == null || !ghost.IsMine)
+            return;
+
+        ghost.timeGongStarted = Time.time;
+        ghost.currentState = HalloweenGhostChaser.ChaseState.Gong;
+        ghost.isSummoned = false;
+    }
+
+    public static void LucyChaseGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            HalloweenGhostChaser ghost = GetLucy();
+
+            if (ghost == null || GunLib.LockedPlayer == null)
+                return;
+
+            if (!Variables.IsMaster(false) || !ghost.IsMine)
+                return;
+
+            ghost.currentState = HalloweenGhostChaser.ChaseState.Chasing;
+            ghost.targetPlayer = GunLib.LockedPlayer.creator;
+            ghost.followTarget = GunLib.LockedPlayer.head.rigTarget;
+        }, true);
+    }
+    
+    public static void LucyGrabGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            HalloweenGhostChaser ghost = GetLucy();
+
+            if (ghost == null || GunLib.LockedPlayer == null)
+                return;
+
+            if (!Variables.IsMaster(false) || !ghost.IsMine)
+                return;
+
+            ghost.isSummoned = true;
+            ghost.targetPlayer = GunLib.LockedPlayer.creator;
+            ghost.followTarget = GunLib.LockedPlayer.head.rigTarget;
+            ghost.currentState = HalloweenGhostChaser.ChaseState.Grabbing;
+        }, true);
+    }
+    
+    public static void SlowLucy()
+    {
+        HalloweenGhostChaser ghost = GetLucy();
+
+        if (ghost == null || !ghost.IsMine || !Variables.IsMaster(false))
+            return;
+
+        ghost.currentSpeed = 1f;
+        ghost.velocityStep = 0.25f;
+        ghost.velocityIncreaseTime = 20f;
+    }
+
+    public static void FastLucy()
+    {
+        HalloweenGhostChaser ghost = GetLucy();
+
+        if (ghost == null || !ghost.IsMine || !Variables.IsMaster(false))
+            return;
+
+        ghost.currentSpeed = 15f;
+        ghost.velocityStep = 3f;
+        ghost.velocityIncreaseTime = 5f;
+    }
+
+    public static void ResetLucySpeed()
+    {
+        HalloweenGhostChaser ghost = GetLucy();
+
+        if (ghost == null || !ghost.IsMine || !Variables.IsMaster(false))
+            return;
+
+        ghost.currentSpeed = 3f;
+        ghost.velocityStep = 1f;
+        ghost.velocityIncreaseTime = 20f;
+    }
+
+    public static void FastBroomsticks()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        SetBroomstickSpeed(10f);
+    }
+
+    public static void SlowBroomsticks()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        SetBroomstickSpeed(60f);
+    }
+
+    public static void ResetBroomsticks()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        SetBroomstickSpeed(30f);
+    }
+
+    private static void SetBroomstickSpeed(float duration)
+    {
+        const string path =
+            "Environment Objects/LocalObjects_Prefab/Forest/2026_Halloween_Forest/Broomsticks/";
+
+        GameObject broomstick2 = GameObject.Find(path + "Broomstick2/NoncontrollableBroomstick");
+        GameObject broomstick3 = GameObject.Find(path + "Broomstick3/NoncontrollableBroomstick");
+
+        if (broomstick2 != null)
+            broomstick2.GetComponent<NoncontrollableBroomstick>().duration = duration;
+
+        if (broomstick3 != null)
+            broomstick3.GetComponent<NoncontrollableBroomstick>().duration = duration;
+    }
 }

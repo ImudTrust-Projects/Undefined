@@ -1,7 +1,11 @@
 ﻿using BepInEx;
 using ExitGames.Client.Photon;
 using Fusion;
+using GorillaLocomotion;
+using GorillaLocomotion.Gameplay;
+using GorillaNetworking;
 using GorillaTagScripts;
+using HarmonyLib;
 using Photon.Pun;
 using Photon.Realtime;
 using POpusCodec.Enums;
@@ -10,9 +14,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using GorillaLocomotion;
-using GorillaNetworking;
-using HarmonyLib;
 using Undefined.Utilities;
 using UnityEngine;
 using static Undefined.Utilities.GunLib;
@@ -271,9 +272,9 @@ public class Overpowered
         GRElevatorManager._instance.photonView.RPC("RemoteActivateTeleport", RpcTarget.Others, new object[] { GRElevatorManager._instance.currentLocation, GRElevatorManager.ElevatorLocation.GhostReactor, GRElevatorManager.LowestActorNumberInElevator() });
     }
 
-    public static void shit()
+    public static void BreakOthersAudio()
     {
-        ArtilleryCannonState.print("hello");
+        
     }
     
     private static float LagDelay;

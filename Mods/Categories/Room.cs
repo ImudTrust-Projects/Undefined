@@ -14,7 +14,7 @@ public class Room
 {
     public static void Disconnect()
     {
-        PhotonNetwork.Disconnect();
+        NetworkSystem.Instance.ReturnToSinglePlayer();
     }
 
     public static void JoinRandomPublic()
@@ -27,7 +27,7 @@ public class Room
     {
         if (InputHandler.Instance.RightPrimary.WasPressed | UnityInput.Current.GetKey(KeyCode.F))
         {
-            PhotonNetwork.Disconnect();
+            NetworkSystem.Instance.ReturnToSinglePlayer();
         }
     }
 
