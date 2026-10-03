@@ -70,8 +70,8 @@ public class Main : MonoBehaviour
                 {
                     PositionMenu(rightHanded, keyboardOpen);
 
-                    bool leftTrig = InputHandler.Instance.LeftTrigger.WasPressed || (pcMenu && UnityInput.Current.GetKey(KeyCode.Z));
-                    bool rightTrig = InputHandler.Instance.RightTrigger.WasPressed || (pcMenu && UnityInput.Current.GetKey(KeyCode.C));
+                    bool leftTrig = (!Themes.pageButtons && InputHandler.Instance.LeftTrigger.WasPressed) || (pcMenu && UnityInput.Current.GetKey(KeyCode.Z));
+                    bool rightTrig = (!Themes.pageButtons && InputHandler.Instance.RightTrigger.WasPressed) || (pcMenu && UnityInput.Current.GetKey(KeyCode.C));
 
                     if (leftTrig && !prevLeftTrigger)
                     {
@@ -310,6 +310,12 @@ public class Main : MonoBehaviour
             discTextTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
+        if (Themes.pageButtons)
+        {
+            BuildPageButton("PreviousPage", "<", 0.23f);
+            BuildPageButton("NextPage", ">", -0.23f);
+        }
+
         ModButtonInfo[] pageButtons = Buttons[activeCategory]
             .Skip(activePage * buttonsPerPage)
             .Take(buttonsPerPage)
@@ -319,6 +325,37 @@ public class Main : MonoBehaviour
         {
             BuildButton(i * 0.1f, pageButtons[i]);
         }
+    }
+
+    public static void BuildPageButton(string relatedText, string label, float side)
+    {
+        GameObject pageBtn = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        if (!UnityInput.Current.GetKey(keyboardButton))
+        {
+            pageBtn.layer = 2;
+        }
+        Destroy(pageBtn.GetComponent<Rigidbody>());
+        pageBtn.GetComponent<BoxCollider>().isTrigger = true;
+        pageBtn.transform.parent = activeMenu.transform;
+        pageBtn.transform.rotation = Quaternion.identity;
+        pageBtn.transform.localScale = new Vector3(0.09f, 0.42f, 0.08f);
+        pageBtn.transform.localPosition = new Vector3(0.56f, side, -0.6f);
+        pageBtn.GetComponent<Renderer>().material.color = buttonColors[0].colors[0].color;
+        pageBtn.AddComponent<Utilities.Button>().relatedText = relatedText;
+
+        Text pageText = new GameObject { transform = { parent = menuCanvas.transform } }.AddComponent<Text>();
+        pageText.text = label;
+        pageText.font = currentFont;
+        pageText.fontSize = 1;
+        pageText.color = textColors[0];
+        pageText.alignment = TextAnchor.MiddleCenter;
+        pageText.resizeTextForBestFit = true;
+        pageText.resizeTextMinSize = 0;
+        RectTransform pageTextTrans = pageText.GetComponent<RectTransform>();
+        pageTextTrans.localPosition = Vector3.zero;
+        pageTextTrans.sizeDelta = new Vector2(0.09f, 0.03f);
+        pageTextTrans.localPosition = new Vector3(0.064f, side * 0.3f, -0.23f);
+        pageTextTrans.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
     }
 
     public static void BuildButton(float offset, ModButtonInfo info)
@@ -533,6 +570,12 @@ public class Main : MonoBehaviour
 
     public static void ProcessClick(string text)
     {
+        if (text == "PreviousPage" || text == "NextPage")
+        {
+            ChangePage(text == "NextPage");
+            return;
+        }
+
         if (text == "Disconnect")
         {
             if (PhotonNetwork.InRoom)

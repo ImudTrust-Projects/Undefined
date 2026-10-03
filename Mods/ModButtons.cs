@@ -29,6 +29,7 @@ public static class ModButtons
             new ModButtonInfo("Join Discord", JoinDiscord, false),
 
             Category("Settings", Category.Settings),
+            Category("Themes", Category.Themes),
             Category("Enabled", Category.EnabledMods),
             Category("Favourites", Category.FavouriteMods),
             Category("Room", Category.RoomMods),
@@ -62,6 +63,38 @@ public static class ModButtons
             new ModButtonInfo("Font", MENUSETTINGS.Settings.fontOptions, MENUSETTINGS.Settings.SetFont, 2),
             new ModButtonInfo("Platform Mode", Movement.PlatformMode, Movement.SetPlatformMode),
             new ModButtonInfo("Speed Mode", Movement.SpeedBoostNames, Movement.SetSpeedBoost),
+        },
+
+        [Category.Themes] = new ModButtonInfo[]
+        {
+            Back(Category.Main),
+            Category("Colors", Category.ThemeColors),
+            Category("Button Types", Category.ButtonTypes),
+        },
+
+        [Category.ButtonTypes] = new ModButtonInfo[]
+        {
+            Back(Category.Themes),
+            new ModButtonInfo("Triggers", Themes.UseTriggers, Themes.TriggersOff) { enabled = true },
+            new ModButtonInfo("Buttons", Themes.UseButtons, Themes.ButtonsOff),
+        },
+
+        [Category.ThemeColors] = new ModButtonInfo[]
+        {
+            Back(Category.Themes),
+            new ModButtonInfo("R", Themes.ColorValues, Themes.SetRed, 1),
+            new ModButtonInfo("G", Themes.ColorValues, Themes.SetGreen, 1),
+            new ModButtonInfo("B", Themes.ColorValues, Themes.SetBlue, 1),
+            new ModButtonInfo("Default", () => Themes.SetColor(25, 25, 25), false),
+            new ModButtonInfo("Red", () => Themes.SetColor(200, 25, 25), false),
+            new ModButtonInfo("Orange", () => Themes.SetColor(225, 100, 0), false),
+            new ModButtonInfo("Yellow", () => Themes.SetColor(200, 175, 0), false),
+            new ModButtonInfo("Green", () => Themes.SetColor(25, 150, 50), false),
+            new ModButtonInfo("Cyan", () => Themes.SetColor(0, 150, 175), false),
+            new ModButtonInfo("Blue", () => Themes.SetColor(25, 75, 200), false),
+            new ModButtonInfo("Purple", () => Themes.SetColor(100, 25, 175), false),
+            new ModButtonInfo("Pink", () => Themes.SetColor(200, 50, 125), false),
+            new ModButtonInfo("Black", () => Themes.SetColor(0, 0, 0), false),
         },
 
         [Category.EnabledMods] = new ModButtonInfo[]
