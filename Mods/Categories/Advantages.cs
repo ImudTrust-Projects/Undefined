@@ -12,7 +12,7 @@ namespace Undefined.Mods.Categories;
 
 public class Advantages
 {
-    /*public static void TagGun2()
+    public static void TagGun()
     {
         GunLib.StartGun(() =>
         {
@@ -29,47 +29,6 @@ public class Advantages
 
             GameMode.ReportTag(GunLib.LockedPlayer.Creator);
         }, true);
-    }*/
-
-    public static void TagGun()
-    {
-        GunLib.StartGun(() =>
-        {
-            TagPlayer(GunLib.LockedPlayer);
-        }, true);
-    }
-
-    private static void TagPlayer(VRRig targetRig)
-    {
-        bool isRealPlayer = !targetRig.isOfflineVRRig;
-
-        if (isRealPlayer)
-        {
-            bool targetIsNotInfected =
-                !targetRig.mainSkin.material.name.Contains("fected");
-
-            if (targetIsNotInfected)
-            {
-                GorillaTagger.Instance.offlineVRRig.enabled = false;
-                GorillaTagger.Instance.offlineVRRig.transform.position =
-                    targetRig.headConstraint.transform.position;
-
-                GameMode.ReportTag(targetRig.Creator);
-            }
-            else
-            {
-                GorillaTagger.Instance.offlineVRRig.enabled = true;
-            }
-        }
-
-        bool shouldEnableOfflineRig =
-            !PhotonNetwork.InRoom ||
-            targetRig.mainSkin.material.name.Contains("fected");
-
-        if (shouldEnableOfflineRig)
-        {
-            GorillaTagger.Instance.offlineVRRig.enabled = true;
-        }
     }
 
     public static void TagAll()

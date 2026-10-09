@@ -1,4 +1,4 @@
-﻿using GorillaLocomotion;
+using GorillaLocomotion;
 using Photon.Pun;
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ using Undefined.Menu;
 using Undefined.Mods;
 using Undefined.Mods.Categories;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using Debug = UnityEngine.Debug;
@@ -53,6 +54,14 @@ public class Variables
 
     public static bool fpsCounter = false;
     public static bool disconnectButton = true;
+    public static bool throwableMenu;
+    public static bool menuColliders;
+    public static bool zeroGravityMenu;
+    public static bool explodeMenu;
+    public static bool disappearAnimation;
+    public static bool keepMenu;
+    public static bool searchingEnabled;
+    public static bool customBoardColor;
     public static bool rightHanded;
 
     public static bool rainbowOutline = true;
@@ -428,6 +437,52 @@ public class Variables
         return tgo;
     }
 
+    public static void PcButtonClick()
+    {
+        GameObject finger = GorillaTagger.Instance.rightHandTriggerCollider;
+        TransformFollow follow = finger.GetComponent<TransformFollow>();
+
+        if (Mouse.current != null && Mouse.current.leftButton.isPressed)
+        {
+            Camera camera = GameObject.Find("Player Objects/Third Person Camera/Shoulder Camera")?.GetComponent<Camera>();
+
+            if (camera != null)
+            {
+                Ray ray = camera.ScreenPointToRay(Mouse.current.position.ReadValue());
+                RaycastHit[] hits = Physics.RaycastAll(ray, 50f, ~0, QueryTriggerInteraction.Collide);
+                Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+                foreach (RaycastHit hit in hits)
+                {
+                    Transform hitTransform = hit.collider.transform;
+
+                    if (hitTransform == finger.transform || hitTransform.IsChildOf(GorillaTagger.Instance.transform))
+                        continue;
+
+                    if (hit.collider.isTrigger && hit.collider.bounds.size.magnitude > 1.5f)
+                        continue;
+
+                    if (follow != null)
+                        follow.enabled = false;
+
+                    finger.transform.position = hit.point;
+                    return;
+                }
+            }
+        }
+
+        if (follow != null)
+            follow.enabled = true;
+    }
+
+    public static void StopPcButtonClick()
+    {
+        TransformFollow follow = GorillaTagger.Instance.rightHandTriggerCollider.GetComponent<TransformFollow>();
+
+        if (follow != null)
+            follow.enabled = true;
+    }
+
     public static void bypasstp(Vector3 position, bool tprig = false)
     {
         if (tprig)
@@ -534,16 +589,16 @@ public class ModButtonInfo
         }
     }
 
-    public ModButtonInfo(string buttonText, Action enableMethod, Action disableMethod)
+    public ModButtonInfo(string buttonText, Action method, Action disableMethod)
     {
         this.buttonText = buttonText;
-        this.enableMethod = enableMethod;
+        this.method = method;
         this.disableMethod = disableMethod;
         this.isTogglable = true;
 
-        if (enableMethod != null)
+        if (method != null)
         {
-            var tooltipAttr = enableMethod.Method.GetCustomAttribute<TooltipAttribute>();
+            var tooltipAttr = method.Method.GetCustomAttribute<TooltipAttribute>();
             if (tooltipAttr != null)
                 this.toolTip = tooltipAttr.Tooltip;
         }
@@ -573,16 +628,6 @@ public class ModButtonInfo
         this.incrementalValues = incrementalValues;
         this.incrementalMethod = incrementalMethod;
         this.currentIncrementalIndex = currentIncrementalIndex;
-    }
-
-    public static ModButtonInfo Run(string buttonText, Action method, Action disableMethod)
-    {
-        return new ModButtonInfo
-        {
-            buttonText = buttonText,
-            method = method,
-            disableMethod = disableMethod
-        };
     }
 
     public static ModButtonInfo Category(string name, Category category)

@@ -91,10 +91,16 @@ public class RigManager
 
     public static Player GetPlayerFromVRRig(VRRig p) =>
         GetPhotonViewFromVRRig(p).Owner;
+    
+    public static NetPlayer GetPlayerFromVRRig2(VRRig p) =>
+        p.Creator ?? NetworkSystem.Instance.GetPlayer(NetworkSystem.Instance.GetOwningPlayerID(p.rigSerializer.gameObject));
 
     public static NetPlayer GetPlayerFromVRRigg(VRRig p) =>
     p.Creator ?? NetworkSystem.Instance.GetPlayer(NetworkSystem.Instance.GetOwningPlayerID(p.rigSerializer.gameObject));
 
+    public static Player NetPlayerToPlayer(NetPlayer p) =>
+        p.GetPlayerRef();
+    
     public static Player GetPlayerFromID(string id)
     {
         Player found = null;
@@ -134,6 +140,20 @@ public class RigManager
 
 public static class extarstuff
 {
+    public static Player GetPlayerFromVRRig(VRRig p)
+    {
+        return p.Creator.GetPlayerRef();
+    }
+    
+    public static Photon.Realtime.Player GetPhotonPlayer(this VRRig rig) =>
+        RigManager.NetPlayerToPlayer(RigManager.GetPlayerFromVRRig2(rig));
+
+    
+    public static PhotonView GetPhotonViewFromVRRig(VRRig p) =>
+        GetNetworkViewFromVRRig(p).GetView;
+    
+    public static NetworkView GetNetworkViewFromVRRig(VRRig p) =>
+        p.netView;
     
     public static VRRig VRRig(this NetPlayer self) =>
         GetVRRigFromPlayer(self);
@@ -152,8 +172,7 @@ public static class extarstuff
     public static VRRig GetVRRigFromPlayer(NetPlayer p) =>
     GorillaGameManager.StaticFindRigForPlayer(p);
 
-    public static NetPlayer GetPlayerFromVRRig(VRRig p) =>
-        p.Creator ?? NetworkSystem.Instance.GetPlayer(NetworkSystem.Instance.GetOwningPlayerID(p.rigSerializer.gameObject));
+    
 
     public static VRRig GhostRig;
 

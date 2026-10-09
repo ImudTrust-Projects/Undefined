@@ -25,7 +25,7 @@ namespace Undefined.Mods.Categories;
 
 public class Overpowered
 {
-    public static void DestroyAll()
+    /*public static void DestroyAll()
     {
         if (NetworkSystem.Instance.InRoom)
         {
@@ -46,9 +46,9 @@ public class Overpowered
     public static void STumpkickall()
     {
         GorillaComputer.instance.OnGroupJoinButtonPress(0, GorillaComputer.instance.friendJoinCollider);
-    }
+    }*
 
-    private static float grabCooldown;
+    /*private static float grabCooldown;
 
     private static bool HasGrabbableHand(VRRig rig)
     {
@@ -151,7 +151,7 @@ public class Overpowered
 
         VRRig.LocalRig.BreakHandLinks();
         SetGrabPatch(false);
-    }
+    }*/
 
     public static float hoverboarddelay = 0f;
 
@@ -277,7 +277,7 @@ public class Overpowered
         
     }
     
-    private static float LagDelay;
+    /*private static float LagDelay;
 
     public static void StutterMaster()
     {
@@ -350,9 +350,9 @@ public class Overpowered
 
             LagDelay = Time.time + 2.2f;
         }
-    }
+    }*/
 
-    private const float AnchorResetTime = 5f;
+    /*private const float AnchorResetTime = 5f;
     private const float SpamCooldownTime = 0.08f;
     private const float DisableAfter = 0.3f;
 
@@ -695,5 +695,5 @@ public class Overpowered
             }
         }
         catch { }
-    }
+    }*/
 }

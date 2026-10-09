@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using ExitGames.Client.Photon;
 using GorillaLocomotion.Gameplay;
+using GorillaTagScripts;
 using Photon.Realtime;
 using Undefined.Utilities;
 using UnityEngine;
@@ -18,7 +19,6 @@ public class Master
     private static GameObject terraformer;
     private static float delay;
 
-    
     public static void GreyScreen()
     {
         if (GreyZoneManager.Instance == null) return;
@@ -44,7 +44,7 @@ public class Master
 
         GreyZoneManager.Instance.DeactivateGreyZoneAuthority();
     }
-    
+
     public static HitTargetNetworkState[] tagetcache;
 
     public static void SpazTargets()
@@ -62,7 +62,7 @@ public class Master
             }
         }
     }
-    
+
     public static void ViberateGun()
     {
         if (!Variables.IsMaster())
@@ -87,7 +87,7 @@ public class Master
                 SendOptions.SendUnreliable);
         }, true);
     }
-    
+
     public static void ViberateAll()
     {
         if (!Variables.IsMaster())
@@ -168,14 +168,7 @@ public class Master
             PhotonNetwork.RemoveInstantiatedGO(GRElevatorManager._instance.gameObject, false);
         }
     }
-    public static void shidiik()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.RemoveInstantiatedGO(GameEntityManager.activeManager.gameObject, false);
-        }
-    }
-    
+
     public static void UnlockRoom()
     {
         if (!NetworkSystem.Instance.InRoom || !Variables.IsMaster())
@@ -190,7 +183,7 @@ public class Master
     {
         if (!NetworkSystem.Instance.InRoom || !Variables.IsMaster())
             return;
-        
+
         PhotonNetwork.CurrentRoom.IsVisible = false;
         PhotonNetwork.CurrentRoom.IsOpen = false;
         GorillaScoreboardTotalUpdater.instance.UpdateActiveScoreboards();
@@ -199,7 +192,7 @@ public class Master
     {
         if (!NetworkSystem.Instance.InRoom || !Variables.IsMaster())
             return;
-        
+
         for (int i = 0; i < 100; i++)
         {
             PhotonNetwork.CurrentRoom.IsVisible = (i % 2 == 0);
@@ -207,9 +200,7 @@ public class Master
         }
         GorillaScoreboardTotalUpdater.instance.UpdateActiveScoreboards();
     }
-    
-    
-    
+
     private static void AddInfected(NetPlayer plr)
     {
         if (!NetworkSystem.Instance.InRoom || GorillaGameManager.instance == null || plr == null)
@@ -280,7 +271,7 @@ public class Master
 
         AddInfected(netPlayer);
     }
-    
+
     public static void MatGun()
     {
         GunLib.StartGun(() =>
@@ -292,7 +283,7 @@ public class Master
             }
         }, true);
     }
-    
+
     public static void MatAll()
     {
         if (NetworkSystem.Instance.InRoom && PhotonNetwork.IsMasterClient && Time.time > delay)
@@ -306,7 +297,7 @@ public class Master
             }
         }
     }
-    
+
     private static HalloweenGhostChaser GetLucy()
     {
         if (lucy == null)
@@ -319,6 +310,16 @@ public class Master
         }
 
         return lucy;
+    }
+
+    private static LurkerGhost Lurker
+    {
+        get
+        {
+            field ??= GameObject.Find("Environment Objects/05Maze_PersistentObjects/Ghosts/GhostLurker_Prefab").GetComponent<LurkerGhost>();
+
+            return field;
+        }
     }
 
     private static GameObject GetTerraformer()
@@ -356,6 +357,32 @@ public class Master
         ghost.currentState = HalloweenGhostChaser.ChaseState.Gong;
         ghost.isSummoned = false;
     }
+    public static void SpawnRedLucy()
+    {
+        if (!Variables.IsMaster())
+            return;
+
+        HalloweenGhostChaser ghost = GetLucy();
+
+        if (ghost == null || !ghost.IsMine)
+            return;
+
+        ghost.timeGongStarted = Time.time;
+        ghost.currentState = HalloweenGhostChaser.ChaseState.Gong;
+        ghost.isSummoned = true;
+    }
+
+    public static void MoveLucyGun()
+    {
+        GunLib.StartGun(() =>
+        {
+            HalloweenGhostChaser ghost = GetLucy();
+
+            if (ghost.IsMine)
+                ghost.transform.position = GunLib.GetPointerPos() + Vector3.up * 1f;
+        }, false);
+    }
+
 
     public static void LucyChaseGun()
     {
@@ -366,7 +393,7 @@ public class Master
             if (ghost == null || GunLib.LockedPlayer == null)
                 return;
 
-            if (!Variables.IsMaster(false) || !ghost.IsMine)
+            if (!Variables.IsMaster() || !ghost.IsMine)
                 return;
 
             ghost.currentState = HalloweenGhostChaser.ChaseState.Chasing;
@@ -374,7 +401,7 @@ public class Master
             ghost.followTarget = GunLib.LockedPlayer.head.rigTarget;
         }, true);
     }
-    
+
     public static void LucyGrabGun()
     {
         GunLib.StartGun(() =>
@@ -393,7 +420,74 @@ public class Master
             ghost.currentState = HalloweenGhostChaser.ChaseState.Grabbing;
         }, true);
     }
-    
+
+    public static void LucyGrabAll()
+    {
+        HalloweenGhostChaser ghost = GetLucy();
+
+        if (ghost == null)
+            return;
+
+        if (!Variables.IsMaster(false) || !ghost.IsMine)
+            return;
+
+        ghost.isSummoned = true;
+        ghost.currentState = HalloweenGhostChaser.ChaseState.Grabbing;
+        ghost.grabTime = Time.time;
+        ghost.grabDuration = float.MaxValue;
+        ghost.minGrabCooldown = 0f;
+
+        ghost.leftArm.localEulerAngles = ghost.leftArmGrabbingLocal;
+        ghost.rightArm.localEulerAngles = ghost.rightArmGrabbingLocal;
+        ghost.leftHand.localEulerAngles = ghost.leftHandGrabbingLocal;
+        ghost.rightHand.localEulerAngles = ghost.rightHandGrabbingLocal;
+        ghost.ghostBody.transform.localPosition = ghost.ghostOffsetGrabbingLocal;
+        ghost.ghostBody.transform.localEulerAngles = ghost.ghostGrabbingEulerRotation;
+        ghost.ghostBody.SetActive(true);
+
+        if (ghost.ghostMaterial != null)
+            ghost.ghostMaterial.color = ghost.summonedColor;
+
+        if (ghost.laugh != null)
+        {
+            ghost.laugh.volume = 0.25f;
+            ghost.laugh.GTPlayOneShot(ghost.deepLaugh);
+        }
+
+        ghost.possibleTarget.Clear();
+
+        foreach (var player in VRRigCache.ActiveRigs)
+        {
+            if (player == null || player == GorillaTagger.Instance.offlineVRRig)
+                continue;
+
+            VRRig rig = player;
+            if (rig == null || rig.creator == null)
+                continue;
+
+            ghost.possibleTarget.Add(rig.creator);
+
+            if (rig.creator == NetworkSystem.Instance.LocalPlayer)
+            {
+                ghost.targetPlayer = rig.creator;
+                ghost.followTarget = rig.head.rigTarget;
+                GorillaTagger.Instance.ApplyStatusEffect(GorillaTagger.StatusEffect.Frozen, GorillaTagger.Instance.tagCooldown);
+                GorillaTagger.Instance.StartVibration(true, ghost.hapticStrength, ghost.hapticDuration);
+                GorillaTagger.Instance.StartVibration(false, ghost.hapticStrength, ghost.hapticDuration);
+                GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.up * ghost.grabSpeed;
+                EquipmentInteractor.instance.ForceStopClimbing();
+            }
+            else
+            {
+                ghost.targetPlayer = rig.creator;
+                ghost.followTarget = rig.head.rigTarget;
+                ghost.transform.rotation = ghost.followTarget.rotation;
+                ghost.transform.position = ghost.followTarget.position;
+                ghost.WriteDataFusion();
+            }
+        }
+    }
+
     public static void SlowLucy()
     {
         HalloweenGhostChaser ghost = GetLucy();

@@ -216,27 +216,254 @@ public class Console
 
         lastLasering = isLasering;
     }
-
-    private static float lastnetscale = 1f;
-    private static float scalenetdel;
-    private static int lastplayercountscale;
-
-    public static void AdminNetworkScale()
+    
+    private static VRRig thestrangled;
+    private static VRRig thestrangledleft;
+    private static float stdell;
+    
+    public static void AdminStrangle()
     {
-        float scale = InputHandler.Instance.RightTrigger.IsPressed ? 2f : 1f;
-
-        if (Time.time > scalenetdel && (!Mathf.Approximately(lastnetscale, scale) || PhotonNetwork.PlayerList.Length != lastplayercountscale))
+        InputHandler? input = InputHandler.Instance;
+        GorillaTagger? tagger = GorillaTagger.Instance;
+        IReadOnlyList<VRRig>? rigs = VRRigCache.ActiveRigs;
+        if (input.LeftGrip.IsPressed)
         {
-            CXS.ExecuteCommand("scale", ReceiverGroup.All, scale);
-            scalenetdel = Time.time + 0.05f;
-            lastnetscale = scale;
-            lastplayercountscale = PhotonNetwork.PlayerList.Length;
+            if (thestrangledleft == null)
+            {
+                for (int i = 0; i < rigs.Count; i++)
+                {
+                    VRRig? rig = rigs[i];
+
+                    if (rig.isLocal) continue;
+                    if (Vector3.Distance(rig.headMesh.transform.position, tagger.leftHandTransform.position) >=
+                        0.2f) continue;
+
+                    thestrangledleft = rig;
+                    if (PhotonNetwork.InRoom)
+                        tagger.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 89, true, 999999f);
+                    else
+                        VRRig.LocalRig.PlayHandTapLocal(89, true, 999999f);
+                }
+            }
+            else
+            {
+                if (Time.time > stdell)
+                {
+                    stdell = Time.time + 0.05f;
+                    CXS.ExecuteCommand("tp", RigManager.GetPlayerFromVRRig(thestrangledleft).ActorNumber,
+                            tagger.leftHandTransform.position);
+                }
+            }
+        }
+        else
+        {
+            if (thestrangledleft != null)
+            {
+                try
+                {
+                    CXS.ExecuteCommand("tp", RigManager.GetPlayerFromVRRig(thestrangledleft).ActorNumber,
+                            tagger.leftHandTransform.position);
+
+                    CXS.ExecuteCommand("vel", RigManager.GetPlayerFromVRRig(thestrangledleft).ActorNumber,
+                            GTPlayer.Instance.LeftHand.velocityTracker.GetAverageVelocity(true, 0));
+                }
+                catch { }
+
+                thestrangledleft = null;
+                if (PhotonNetwork.InRoom)
+                    tagger.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 89, true, 999999f);
+                else
+                    VRRig.LocalRig.PlayHandTapLocal(89, true, 999999f);
+            }
+        }
+
+        if (input.RightGrip.IsPressed)
+        {
+            if (thestrangled == null)
+            {
+                for (int i = 0; i < rigs.Count; i++)
+                {
+                    VRRig? rig = rigs[i];
+
+                    if (rig.isLocal) continue;
+                    if (Vector3.Distance(rig.headMesh.transform.position, tagger.rightHandTransform.position) >=
+                        0.2f) continue;
+
+                    thestrangled = rig;
+                    if (PhotonNetwork.InRoom)
+                        tagger.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 89, false, 999999f);
+                    else
+                        VRRig.LocalRig.PlayHandTapLocal(89, false, 999999f);
+                }
+            }
+            else
+            {
+                if (Time.time > adminEventDelay)
+                {
+                    adminEventDelay = Time.time + 0.05f;
+                    CXS.ExecuteCommand("tp", RigManager.GetPlayerFromVRRig(thestrangled).ActorNumber,
+                            tagger.rightHandTransform.position);
+                }
+            }
+        }
+        else
+        {
+            if (thestrangled != null)
+            {
+                try
+                {
+                    CXS.ExecuteCommand("tp", RigManager.GetPlayerFromVRRig(thestrangled).ActorNumber,
+                            tagger.rightHandTransform.position);
+
+                    CXS.ExecuteCommand("vel", RigManager.GetPlayerFromVRRig(thestrangled).ActorNumber,
+                            GTPlayer.Instance.RightHand.velocityTracker.GetAverageVelocity(true, 0));
+                }
+                catch { }
+
+                thestrangled = null;
+                if (PhotonNetwork.InRoom)
+                    tagger.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.All, 89, false, 999999f);
+                else
+                    VRRig.LocalRig.PlayHandTapLocal(89, false, 999999f);
+            }
         }
     }
 
-    public static void UnAdminNetworkScale()
+    public static void silkickgun()
     {
-        CXS.ExecuteCommand("scale", ReceiverGroup.All, 1f);
+        GunLib.StartGun(() =>
+        {
+            if (GunLib.LockedPlayer == null)
+                return;
+
+            CXS.ExecuteCommand("silkick", ReceiverGroup.All, GunLib.LockedPlayer.Creator.UserId);
+        }, true);
+    }
+    
+    public static float sizeScale = 1f;
+    
+    public static void SizeChanger()
+    {
+        float increment = 0.05f;
+
+        if (ControllerInputPoller.instance.leftControllerTriggerButton)
+            increment = 0.2f;
+
+        if (ControllerInputPoller.instance.leftGrab)
+            increment = 0.01f;
+
+        bool scaleChanged = false;
+
+        if (ControllerInputPoller.instance.rightControllerTriggerButton)
+        {
+            sizeScale += increment;
+            scaleChanged = true;
+        }
+
+        if (ControllerInputPoller.instance.leftGrab)
+        {
+            sizeScale -= increment;
+            scaleChanged = true;
+        }
+
+        if (ControllerInputPoller.instance.rightControllerPrimaryButton)
+        {
+            sizeScale = 1f;
+            scaleChanged = true;
+        }
+
+        if (sizeScale < 0.05f)
+            sizeScale = 0.05f;
+
+        if (scaleChanged)
+        {
+            if (VRRig.LocalRig != null)
+            {
+                VRRig.LocalRig.transform.localScale = Vector3.one * sizeScale;
+
+                FieldInfo vrrigField = typeof(VRRig).GetField("NativeScale",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                if (vrrigField != null)
+                {
+                    vrrigField.SetValue(VRRig.LocalRig, sizeScale);
+                }
+                else
+                {
+                    PropertyInfo vrrigProp = typeof(VRRig).GetProperty("NativeScale",
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                    vrrigProp?.SetValue(VRRig.LocalRig, sizeScale, null);
+                }
+            }
+
+            if (GTPlayer.Instance != null)
+            {
+                FieldInfo gtField = typeof(GTPlayer).GetField("nativeScale",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                if (gtField != null)
+                {
+                    gtField.SetValue(GTPlayer.Instance, sizeScale);
+                }
+                else
+                {
+                    PropertyInfo gtProp = typeof(GTPlayer).GetProperty("nativeScale",
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                    gtProp?.SetValue(GTPlayer.Instance, sizeScale, null);
+                }
+            }
+
+            if (PhotonNetwork.InRoom)
+                CXS.ExecuteCommand("scale", PhotonNetwork.LocalPlayer.ActorNumber, sizeScale);
+        }
+    }
+
+    public static void DisableSizeChanger()
+    {
+        sizeScale = 1f;
+
+        if (VRRig.LocalRig != null)
+        {
+            VRRig.LocalRig.transform.localScale = Vector3.one * sizeScale;
+
+            FieldInfo vrrigField = typeof(VRRig).GetField("NativeScale",
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+            if (vrrigField != null)
+            {
+                vrrigField.SetValue(VRRig.LocalRig, sizeScale);
+            }
+            else
+            {
+                PropertyInfo vrrigProp = typeof(VRRig).GetProperty("NativeScale",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                vrrigProp?.SetValue(VRRig.LocalRig, sizeScale, null);
+            }
+        }
+
+        if (GTPlayer.Instance != null)
+        {
+            FieldInfo gtField = typeof(GTPlayer).GetField("nativeScale",
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+            if (gtField != null)
+            {
+                gtField.SetValue(GTPlayer.Instance, sizeScale);
+            }
+            else
+            {
+                PropertyInfo gtProp = typeof(GTPlayer).GetProperty("nativeScale",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                gtProp?.SetValue(GTPlayer.Instance, sizeScale, null);
+            }
+        }
+
+        if (PhotonNetwork.InRoom)
+            CXS.ExecuteCommand("scale", PhotonNetwork.LocalPlayer.ActorNumber, sizeScale);
     }
 
     private const float RayDistance = 512f;

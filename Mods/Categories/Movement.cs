@@ -255,6 +255,14 @@ public class Movement
             GTPlayer.Instance.jumpMultiplier = 1f;
         }
     }
+    
+    public static void AmplifiedMonke()
+    {
+        Rigidbody rb = GTPlayer.Instance.GetComponent<Rigidbody>();
+        Vector3 vel = rb.linearVelocity;
+        if (vel.sqrMagnitude > 0.001f)
+            rb.MovePosition(rb.position + vel.normalized * (4.2f * Time.deltaTime * GTPlayer.Instance.scale));
+    }
 
     public static void Fly()
     {
@@ -314,38 +322,6 @@ public class Movement
         GTPlayer.Instance.TeleportTo(new Vector3(-68.647f, 12.406f, -83.699f), GTPlayer.Instance.transform.rotation, false, true);
         GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
         Noclipistuff(false);
-    }
-
-    private static bool Ghost_Toggled = false;
-    private static bool Invis_Toggled = false;
-
-    public static void GhostMonke()
-    {
-        bool isPressed = Variables.rightHanded
-            ? InputHandler.Instance.LeftSecondary.WasPressed
-            : InputHandler.Instance.RightSecondary.WasPressed;
-
-        if (isPressed)
-        {
-            Ghost_Toggled = !Ghost_Toggled;
-            VRRig.LocalRig.enabled = !Ghost_Toggled;
-        }
-    }
-
-    public static void InvisMonke()
-    {
-        if (InputHandler.Instance.RightPrimary.WasPressed)
-            Invis_Toggled = !Invis_Toggled;
-
-        if (Invis_Toggled)
-        {
-            VRRig.LocalRig.enabled = false;
-            Variables.bypasstp(new Vector3(0f, -100f, 0f), true);
-        }
-        else
-        {
-            VRRig.LocalRig.enabled = true;
-        }
     }
     
     public static void StickyHands()
@@ -528,34 +504,55 @@ public class Movement
             GTPlayer.Instance.headCollider.transform.forward * FlySpeed;
     }
 
+    private static bool reverseGravity;
+
     public static void GravityManager(Gravitytypes type)
     {
+        GorillaLocomotion.GTPlayerTransform inst = GorillaLocomotion.GTPlayerTransform.Instance;
+
+        if (inst == null)
+            return;
+
         switch (type)
         {
             case Gravitytypes.Low:
-                GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 6.57f, ForceMode.Acceleration);
+                inst.GravityMultiplier = 0.35f;
                 break;
+
             case Gravitytypes.High:
-                GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.67f, ForceMode.Acceleration); // omg 67
+                inst.GravityMultiplier = 2f;
                 break;
+
             case Gravitytypes.Zero:
-                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration); // trying a new zero grav since the old one was weird.
+                inst.GravityMultiplier = 0f;
                 break;
+
             case Gravitytypes.Reverse:
-                GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * 3f, ForceMode.Acceleration);
-                GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Euler(180f, 0f, 0f); // I like the turning feature on the S menu so I added it
+                inst.GravityMultiplier = -1f;
+                GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.Euler(180f, 0f, 0f);
+                reverseGravity = true;
+                break;
+
+            case Gravitytypes.Reset:
+                inst.GravityMultiplier = 1f;
+
+                if (reverseGravity)
+                {
+                    GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.identity;
+                    reverseGravity = false;
+                }
+
                 break;
         }
     }
-
-    public static void Reset_upsidedown() => GTPlayer.Instance.GetControllerTransform(false).parent.rotation = Quaternion.identity;
 
     public enum Gravitytypes
     {
         Low,
         High,
         Zero,
-        Reverse
+        Reverse,
+        Reset
     }
     
     public static void UpAndDown()
@@ -590,7 +587,7 @@ public class Movement
         Vector3 playerRight = GTPlayer.Instance.bodyCollider.transform.right;
         playerRight.y = 0;
 
-        GTPlayer.Instance.GetComponent<Rigidbody>().AddForce(-Physics.gravity, ForceMode.Acceleration);
+        GravityManager(Gravitytypes.Zero);
 
         Vector3 velocity = inputDirection.x * playerRight + inputDirection.y * Vector3.up + inputDirection.z * playerForward;
         velocity *= FlySpeed;

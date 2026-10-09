@@ -16,7 +16,7 @@ public static class FavouriteMods
         return Favourites.Contains(button.buttonText);
     }
 
-    public static void AddStar(RectTransform buttonText)
+    public static void AddStar(RectTransform buttonText, float width)
     {
         if (starFont == null)
             starFont = Font.CreateDynamicFontFromOSFont("Segoe UI Symbol", 32);
@@ -32,7 +32,7 @@ public static class FavouriteMods
 
         RectTransform starTrans = star.GetComponent<RectTransform>();
         starTrans.localPosition = buttonText.localPosition;
-        starTrans.sizeDelta = new Vector2(0.2f, 0.03f);
+        starTrans.sizeDelta = new Vector2(width, 0.03f);
         starTrans.rotation = buttonText.rotation;
     }
 

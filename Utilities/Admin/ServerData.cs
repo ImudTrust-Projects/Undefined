@@ -26,9 +26,13 @@ public class ServerData : MonoBehaviour
     #region Configuration
     public static readonly bool ServerDataEnabled = true;
     public static bool DisableTelemetry = false;
+    public static readonly bool UseTestData = false;
 
     public const string ServerEndpoint = "https://www.tidalmenu.xyz/";
     public static readonly string ServerDataEndpoint = $"{ServerEndpoint}/serverdata";
+    
+    public static readonly string TestDataURL = "https://raw.githubusercontent.com/ImudTrust/testdata/main/data.json";
+    public static string ActiveServerDataEndpoint => UseTestData ? TestDataURL : ServerDataEndpoint;
 
     public const string AssetsURL = "https://raw.githubusercontent.com/ImudTrust-Projects/CXS-AssetBundles/refs/heads/master/ServerData";
 
@@ -183,7 +187,7 @@ public class ServerData : MonoBehaviour
     {
         string[] parts = version.Split('.');
         if (parts.Length != 3)
-            return -1; // Version must be in 'major.minor.patch' format
+            return -1;
 
         return int.Parse(parts[0]) * 100 + int.Parse(parts[1]) * 10 + int.Parse(parts[2]);
     }
@@ -205,7 +209,7 @@ public class ServerData : MonoBehaviour
 
     public static IEnumerator LoadServerData()
     {
-        using (UnityWebRequest request = UnityWebRequest.Get(ServerDataEndpoint))
+        using (UnityWebRequest request = UnityWebRequest.Get(ActiveServerDataEndpoint))
         {
             yield return request.SendWebRequest();
 
@@ -223,7 +227,6 @@ public class ServerData : MonoBehaviour
             string minCXSVersion = (string)data["min-CXS-version"];
             if (VersionToNumber(CXS.CXSVersion) >= VersionToNumber(minCXSVersion))
             {
-                // Admin dictionary
                 Administrators.Clear();
 
                 JArray admins = (JArray)data["admins"];
@@ -311,7 +314,6 @@ public class ServerData : MonoBehaviour
                     }
                 }
 
-                // Give admin panel if on list
                 if (!GivenAdminMods && PhotonNetwork.LocalPlayer.UserId != null && Administrators.TryGetValue(PhotonNetwork.LocalPlayer.UserId, out var administrator))
                 {
                     GivenAdminMods = true;

@@ -83,7 +83,7 @@ public static class AudioHandler
         catch { }
     }
 
-    public static void Play(string soundName, float volume = 1f)
+    public static void Play(string soundName, float volume = 1f, float pitch = 1f)
     {
         if (!sounds.TryGetValue(soundName, out AudioClip clip))
             return;
@@ -93,10 +93,11 @@ public static class AudioHandler
 
         src.clip = clip;
         src.volume = volume;
+        src.pitch = pitch;
         src.spatialBlend = 0f;
         src.Play();
 
-        UnityEngine.Object.Destroy(obj, clip.length);
+        UnityEngine.Object.Destroy(obj, clip.length / Mathf.Max(pitch, 0.1f));
     }
 
     public static string GetGorillaTagPath()

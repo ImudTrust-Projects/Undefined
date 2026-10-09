@@ -74,28 +74,27 @@ public class Plugin : BaseUnityPlugin
 
     private void Start()
     {
-        CXS.LoadCXS();
-
-        AudioHandler.LoadSounds();
-
         harmony = new Harmony(Constants.PluginGUID);
-        
-        harmony.PatchAll();
+        harmony.PatchAll(typeof(Plugin).Assembly);
         PatchAwakePatches();
 
+        CXS.LoadCXS();
+        AudioHandler.LoadSounds();
+
         ComponentHolder.AddComponent<Main>();
-        ComponentHolder.AddComponent<BoardManager>();
         ComponentHolder.AddComponent<CoroutineManager>();
         ComponentHolder.AddComponent<NotificationLib>();
         ComponentHolder.AddComponent<RoomNotifications>();
         ComponentHolder.AddComponent<DiscordPresence>();
-        ComponentHolder.AddComponent<SearchAndKeyboard>();
+        ComponentHolder.AddComponent<KeyboardManager>();
         ComponentHolder.AddComponent<SoundBoard>();
         ComponentHolder.AddComponent<RoomJoiner>();
 
         Variables.LoadEmbeddedBackground("Undefined.Resources.Embedded.icon.png");
 
         StartCoroutine(StartVersionCheck());
+
+        GorillaTagger.OnPlayerSpawned(OnPlayerSpawned);
     }
 
     private void OnPlayerSpawned()

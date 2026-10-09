@@ -4,12 +4,14 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using GorillaNetworking;
 using GorillaTagScripts;
 using GorillaTagScripts.ScavengerHunt;
 using HarmonyLib;
+using Undefined.Menu;
 using Undefined.Patches;
 using Undefined.Utilities;
 using UnityEngine;
@@ -73,6 +75,38 @@ public class Fun
     public static void SetQuestScoreMax()
     {
         SetQuestScore(999999999);
+    }
+    
+    [Utilities.Tooltip("Sets your quest score to the custom value.")]
+    public static void SetCustomQuestScore()
+    {
+        KeyboardManager.OpenTyping(
+            prefill: "",
+            placeholderText: "Enter quest score...",
+            onSubmit: value =>
+            {
+                value = value.Trim();
+
+                if (string.IsNullOrEmpty(value))
+                    return;
+
+                if (!int.TryParse(value, out int score))
+                {
+                    NotificationLib.SendNotification(
+                        NotificationLib.NotificationType.Info,
+                        "Not a valid number!"
+                    );
+                    return;
+                }
+
+                SetQuestScore(score);
+
+                NotificationLib.SendNotification(
+                    NotificationLib.NotificationType.Info,
+                    $"Quest score set to {score}"
+                );
+            }
+        );
     }
 
     [Utilities.Tooltip("Gives you a Bracelet.")]
@@ -154,13 +188,6 @@ public class Fun
             ? SubscriptionManager.SUBSCRIBER_NAME_COLOR
             : Color.white;
     }
-    [Utilities.Tooltip("Gives You Fake body Tracking.")]
-    public static void FakeBodyTracking()
-    {
-        GorillaTagger.Instance.offlineVRRig.transform.rotation = Camera.main.transform.rotation;
-        GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.position = Variables.playerInstance.LeftHand.handFollower.transform.position;
-        GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.position = Variables.playerInstance.RightHand.handFollower.transform.position;
-    }
     [Utilities.Tooltip("Makes you RGB in stump.")]
     public static void RGBMonke()
     {
@@ -232,6 +259,18 @@ public class Fun
         FixHoverBoard.Field("hoverboardBoostGracePeriod").SetValue(1f);
         FixHoverBoard.Field("hoverboardPaddleBoostMax").SetValue(10f);
         FixHoverBoard.Field("hoverTiltAdjustsForwardFactor").SetValue(0.2f);
+    }
+    
+    public static void OpenElevator()
+    {
+        GRElevatorManager.ElevatorButtonPressed(GRElevator.ButtonType.Open, GRElevatorManager._instance.currentLocation);
+        Variables.RPCProtection();
+    }
+
+    public static void CloseElevator()
+    {
+        GRElevatorManager.ElevatorButtonPressed(GRElevator.ButtonType.Close, GRElevatorManager._instance.currentLocation);
+        Variables.RPCProtection();
     }
     
     static Dictionary<string, string> modsForModCheck = new Dictionary<string, string> {
@@ -420,113 +459,6 @@ public class Fun
     {
         SetName("404");
     }
-
-    [Utilities.Tooltip("Spazes ur head when u hold right grip.")]
-    public static void SpazHead()
-    {
-        if (InputHandler.Instance.RightGrip.IsPressed)
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x += Random.Range(1f, 360f);
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y += Random.Range(1f, 360f);
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z += Random.Range(1f, 360f);
-        }
-        else
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x = 0f;
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y = 0f;
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 0f;
-        }
-    }
-    
-    [Utilities.Tooltip("Spins ur head X.")]
-    public static void SpinHeadX()
-    {
-        if (InputHandler.Instance.RightGrip.IsPressed)
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x += Random.Range(1f, 360f);
-        }
-        else
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.x = 0f;
-        }
-    }
-    [Utilities.Tooltip("Spins ur head Y.")]
-    public static void SpinHeadY()
-    {
-        if (InputHandler.Instance.RightGrip.IsPressed)
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y += Random.Range(1f, 360f);
-        }
-        else
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y = 0f;
-        }
-    }
-    [Utilities.Tooltip("Spins ur head Z.")]
-    public static void SpinHeadZ()
-    {
-        if (InputHandler.Instance.RightGrip.IsPressed)
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z += Random.Range(1f, 360f);
-        }
-        else
-        {
-            GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 0f;
-        }
-    }
-    [Utilities.Tooltip("Makes u an helicopter.")]
-    public static void HelicopterRig()
-    {
-        if (InputHandler.Instance.RightGrip.IsPressed)
-        {
-            GorillaTagger.Instance.offlineVRRig.enabled = false;
-
-            GorillaTagger.Instance.offlineVRRig.transform.position += new Vector3(0f, 0.05f, 0f);
-
-
-            GorillaTagger.Instance.offlineVRRig.transform.rotation = Quaternion.Euler(GorillaTagger.Instance.offlineVRRig.transform.rotation.eulerAngles + new Vector3(0f, 10f, 0f));
-
-
-            GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform.rotation = GorillaTagger.Instance.offlineVRRig.transform.rotation;
-
-            GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.transform.position = GorillaTagger.Instance.offlineVRRig.transform.position + GorillaTagger.Instance.offlineVRRig.transform.right * -1f;
-            GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.transform.position = GorillaTagger.Instance.offlineVRRig.transform.position + GorillaTagger.Instance.offlineVRRig.transform.right * 1f;
-
-            GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.transform.rotation = GorillaTagger.Instance.offlineVRRig.transform.rotation;
-            GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.transform.rotation = GorillaTagger.Instance.offlineVRRig.transform.rotation;
-
-            GorillaTagger.Instance.offlineVRRig.leftHand.rigTarget.transform.rotation *= Quaternion.Euler(GorillaTagger.Instance.offlineVRRig.leftHand.trackingRotationOffset);
-            GorillaTagger.Instance.offlineVRRig.rightHand.rigTarget.transform.rotation *= Quaternion.Euler(GorillaTagger.Instance.offlineVRRig.rightHand.trackingRotationOffset);
-        }
-        else
-        {
-            GorillaTagger.Instance.offlineVRRig.enabled = true;
-        }
-    }
-    
-    public static void GrabRig()
-    {
-        if (InputHandler.Instance.RightGrip.IsPressed)
-        {
-            VRRig.LocalRig.enabled = false;
-            VRRig.LocalRig.transform.position = VRRig.LocalRig.rightHandTransform.position;
-        }
-        else if (!InputHandler.Instance.RightGrip.IsPressed)
-        {
-            VRRig.LocalRig.enabled = true;
-        }
-    }
-    
-    public static void MoveRigGun()
-    {
-        GorillaTagger.Instance.offlineVRRig.enabled = true;
-
-        GunLib.StartGun(() =>
-        {
-            GorillaTagger.Instance.offlineVRRig.enabled = false;
-            GorillaTagger.Instance.offlineVRRig.transform.position = GunLib.GetPointerPos() + Vector3.up * 1f;
-        }, false);
-    }
     
     public static GameObject UCam;
     
@@ -572,98 +504,5 @@ public class Fun
             Object.Destroy(UCam);
             UCam = null;
         }
-    }
-
-
-
-    public static void UpsideDownHead()
-    {
-        GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.z = 180f;
-    }
-
-    public static void BackwardsHead()
-    {
-        GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset.y = 180f;
-    }
-
-    public static void ResetHead()
-    {
-        GorillaTagger.Instance.offlineVRRig.head.trackingRotationOffset = Vector3.zero;
-    }
-
-    private static Vector3 rigOffset;
-
-    private static bool HoldRig()
-    {
-        VRRig rig = GorillaTagger.Instance.offlineVRRig;
-
-        if (!InputHandler.Instance.RightGrip.IsPressed)
-        {
-            rig.enabled = true;
-            return false;
-        }
-
-        if (rig.enabled)
-        {
-            rigOffset = rig.transform.position - GorillaTagger.Instance.bodyCollider.transform.position;
-            rig.enabled = false;
-        }
-
-        rig.transform.position = GorillaTagger.Instance.bodyCollider.transform.position + rigOffset;
-        rig.transform.rotation = Quaternion.Euler(0f, GorillaTagger.Instance.headCollider.transform.eulerAngles.y, 0f);
-        rig.head.rigTarget.transform.rotation = GorillaTagger.Instance.headCollider.transform.rotation;
-        return true;
-    }
-
-    private static void SetHands(Vector3 left, Vector3 right)
-    {
-        VRRig rig = GorillaTagger.Instance.offlineVRRig;
-
-        rig.leftHand.rigTarget.transform.position = left;
-        rig.rightHand.rigTarget.transform.position = right;
-
-        rig.leftHand.rigTarget.transform.rotation = rig.transform.rotation * Quaternion.Euler(rig.leftHand.trackingRotationOffset);
-        rig.rightHand.rigTarget.transform.rotation = rig.transform.rotation * Quaternion.Euler(rig.rightHand.trackingRotationOffset);
-    }
-
-    public static void FlapArms()
-    {
-        if (!HoldRig())
-            return;
-
-        Transform rig = GorillaTagger.Instance.offlineVRRig.transform;
-        Vector3 flap = Vector3.up * (Mathf.Sin(Time.time * 14f) * 0.35f);
-
-        SetHands(rig.position - rig.right * 0.55f + flap, rig.position + rig.right * 0.55f + flap);
-    }
-
-    public static void Clap()
-    {
-        if (!HoldRig())
-            return;
-
-        Transform rig = GorillaTagger.Instance.offlineVRRig.transform;
-        Vector3 front = rig.position + rig.forward * 0.35f + Vector3.up * 0.1f;
-        float gap = 0.05f + Mathf.Abs(Mathf.Sin(Time.time * 10f)) * 0.35f;
-
-        SetHands(front - rig.right * gap, front + rig.right * gap);
-    }
-
-    public static void Wave()
-    {
-        if (!HoldRig())
-            return;
-
-        Transform rig = GorillaTagger.Instance.offlineVRRig.transform;
-        Vector3 left = rig.position - rig.right * 0.3f - Vector3.up * 0.4f;
-        Vector3 right = rig.position + rig.right * (0.35f + Mathf.Sin(Time.time * 10f) * 0.15f) + Vector3.up * 0.45f;
-
-        SetHands(left, right);
-    }
-
-
-    public static void ResetRig()
-    {
-        GorillaTagger.Instance.offlineVRRig.enabled = true;
     }
 }

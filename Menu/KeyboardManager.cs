@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Undefined.Menu;
 
-public class SearchAndKeyboard : MonoBehaviour
+public class KeyboardManager : MonoBehaviour
 {
     public class KeyBounceHandler : MonoBehaviour
     {
@@ -89,6 +89,15 @@ public class SearchAndKeyboard : MonoBehaviour
             if (Time.frameCount < _lastFrameClick + 12.5f) return;
 
             _lastFrameClick = Time.frameCount;
+
+            bool isLeft = other.gameObject == Variables.keyclickerObj2;
+
+            GorillaTagger.Instance.StartVibration(
+                isLeft,
+                GorillaTagger.Instance.tagHapticStrength / 2f,
+                GorillaTagger.Instance.tagHapticDuration / 2f
+            );
+
             HandleKeyPress(keyValue);
         }
 
@@ -129,7 +138,7 @@ public class SearchAndKeyboard : MonoBehaviour
         KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
         KeyCode.Alpha0, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, KeyCode.Alpha5, KeyCode.Alpha6,
         KeyCode.Alpha7, KeyCode.Alpha8, KeyCode.Alpha9,
-        KeyCode.Space, KeyCode.Backspace, KeyCode.Delete
+        KeyCode.Space, KeyCode.Backspace, KeyCode.Delete, KeyCode.Return
     };
 
     public static string placeholder = "Type to search...";
@@ -184,6 +193,8 @@ public class SearchAndKeyboard : MonoBehaviour
         onComplete = null;
         onCancel = null;
         showSearchText = false;
+
+        Main.SetPcSearch(false);
 
         Cleanup();
         Main.RebuildMenu();
@@ -464,6 +475,8 @@ public class SearchAndKeyboard : MonoBehaviour
         isTyping = false;
         showSearchText = false;
 
+        Main.SetPcSearch(false);
+
         Action<string> done = onComplete;
         Action cancel = onCancel;
         onComplete = null;
@@ -518,17 +531,25 @@ public class SearchAndKeyboard : MonoBehaviour
             Main.RebuildMenu();
     }
 
-    public static void OpenTyping(string prefill = "", string placeholderText = "Type here...")
+    public static void OpenTyping(string prefill, string placeholderText, Action<string> onSubmit, Action onCancelCb = null)
     {
-        onComplete = null;
-        onCancel = null;
+        onComplete = onSubmit;
+        onCancel = onCancelCb;
         isSearching = true;
         isTyping = true;
         showSearchText = true;
-        currentInput = prefill;
-        placeholder = placeholderText;
+        currentInput = prefill ?? "";
+        placeholder = placeholderText ?? "Type here...";
 
-        if (!Variables.InPcCondition)
+        bool onPc = Main.pcMenuOpen ||
+                    (UnityEngine.InputSystem.Mouse.current != null &&
+                     UnityEngine.InputSystem.Mouse.current.enabled);
+
+        if (onPc)
+        {
+            Main.SetPcSearch(true);
+        }
+        else
         {
             BuildKeyboard();
             SetupClickerLeft(Variables.playerInstance.RightHand.controllerTransform);
@@ -536,6 +557,24 @@ public class SearchAndKeyboard : MonoBehaviour
         }
 
         Main.RebuildMenu();
+    }
+    
+    public static void RefreshColors()
+    {
+        if (keyboardObject == null) return;
+
+        Color buttonColor = MENUSETTINGS.Settings.buttonColors[0].colors[0].color;
+        Color bgColor = MENUSETTINGS.Settings.backgroundColor.colors[0].color;
+
+        foreach (Material m in _materials)
+        {
+            if (m == null) continue;
+
+            if (m == _backgroundMat)
+                m.color = bgColor;
+            else
+                m.color = buttonColor;
+        }
     }
 
     public static void UpdateBlink()

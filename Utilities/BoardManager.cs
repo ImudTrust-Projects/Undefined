@@ -19,6 +19,14 @@ public class BoardManager : MonoBehaviour
 
     private readonly Dictionary<string, GameObject> boards = new();
 
+    private readonly Dictionary<Renderer, Material> boardRenderers = new();
+    private readonly Dictionary<TextMeshPro, Renderer> boardPlates = new();
+    private readonly Dictionary<JoinTriggerUITemplate, Material[]> joinScreens = new();
+    private Material boardMaterial;
+    private float boardCheckTime;
+
+    private static readonly Color DefaultBoardColor = new Color32(15, 15, 15, 255);
+
 
     private static string MenuColor =>
         ColorUtility.ToHtmlStringRGB(Settings.backgroundColor.colors[0].color);
@@ -87,6 +95,218 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+
+    private void Update()
+    {
+        if (!Variables.customBoardColor)
+        {
+            if (boardRenderers.Count > 0 || joinScreens.Count > 0 || boardPlates.Count > 0)
+                ResetBoards();
+
+            return;
+        }
+
+        if (boardMaterial == null)
+            boardMaterial = new Material(Shader.Find("GorillaTag/UberShader"));
+
+        Color color = Settings.backgroundColor.colors[0].color;
+        boardMaterial.color = color;
+
+        if (Time.time > boardCheckTime)
+        {
+            boardCheckTime = Time.time + 3f;
+
+            try
+            {
+                ColorBoards();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"{Constants.PluginName} Board Color Err: {ex.Message}");
+            }
+        }
+
+        foreach (Renderer plate in boardPlates.Values)
+        {
+            if (plate != null)
+                plate.material.color = color;
+        }
+
+        foreach (GameObject board in boards.Values)
+        {
+            if (board != null)
+                board.GetComponent<Renderer>().material.color = color;
+        }
+    }
+
+    private void ColorBoards()
+    {
+        foreach (MeshCollider collider in FindObjectsByType<MeshCollider>(FindObjectsSortMode.None))
+        {
+            string name = collider.name;
+
+            if (name == "wallmonitorforestbg" || name == "wallmonitorscreen_small")
+                ColorRenderer(collider.GetComponent<Renderer>());
+        }
+
+        foreach (TextMeshPro text in FindObjectsByType<TextMeshPro>(FindObjectsSortMode.None))
+        {
+            if (IsBoardText(text.name) && !boardPlates.ContainsKey(text))
+                boardPlates[text] = CreatePlate(text);
+        }
+
+        GameObject monitor = Variables.GetObject("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/monitor/monitorScreen");
+        if (monitor != null)
+            ColorRenderer(monitor.GetComponent<Renderer>());
+
+        if (PhotonNetworkController.Instance == null)
+            return;
+
+        foreach (GorillaNetworkJoinTrigger joinTrigger in PhotonNetworkController.Instance.allJoinTriggers)
+        {
+            JoinTriggerUITemplate template = joinTrigger?.ui?.template;
+
+            if (template == null || joinScreens.ContainsKey(template))
+                continue;
+
+            joinScreens[template] = new Material[]
+            {
+                template.ScreenBG_AbandonPartyAndSoloJoin,
+                template.ScreenBG_AlreadyInRoom,
+                template.ScreenBG_ChangingGameModeSoloJoin,
+                template.ScreenBG_Error,
+                template.ScreenBG_InPrivateRoom,
+                template.ScreenBG_LeaveRoomAndGroupJoin,
+                template.ScreenBG_LeaveRoomAndSoloJoin,
+                template.ScreenBG_NotConnectedSoloJoin
+            };
+
+            SetJoinScreens(template, new Material[] { boardMaterial, boardMaterial, boardMaterial, boardMaterial, boardMaterial, boardMaterial, boardMaterial, boardMaterial });
+        }
+
+        PhotonNetworkController.Instance.UpdateTriggerScreens();
+    }
+
+    private static bool IsBoardText(string name)
+    {
+        return name == "motdHeadingText" || name == "CodeOfConductHeadingText" || name == "WelcomeToGorilllaTagHeadingText";
+    }
+
+    private static Renderer CreatePlate(TextMeshPro heading)
+    {
+        RectTransform root = heading.rectTransform;
+        Vector3[] corners = new Vector3[4];
+        Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
+        Vector2 max = new Vector2(float.MinValue, float.MinValue);
+
+        foreach (TMP_Text text in heading.GetComponentsInChildren<TMP_Text>(true))
+        {
+            text.rectTransform.GetWorldCorners(corners);
+
+            foreach (Vector3 corner in corners)
+            {
+                Vector3 local = root.InverseTransformPoint(corner);
+                min = Vector2.Min(min, local);
+                max = Vector2.Max(max, local);
+            }
+        }
+
+        float glyphBottom = float.MaxValue;
+        float glyphTop = float.MinValue;
+
+        foreach (TMP_Text text in heading.GetComponentsInChildren<TMP_Text>(true))
+        {
+            Bounds bounds = text.textBounds;
+
+            if (bounds.size.sqrMagnitude <= 0f)
+                continue;
+
+            glyphBottom = Mathf.Min(glyphBottom, root.InverseTransformPoint(text.transform.TransformPoint(bounds.min)).y, root.InverseTransformPoint(text.transform.TransformPoint(bounds.max)).y);
+            glyphTop = Mathf.Max(glyphTop, root.InverseTransformPoint(text.transform.TransformPoint(bounds.min)).y, root.InverseTransformPoint(text.transform.TransformPoint(bounds.max)).y);
+        }
+
+        Vector2 padding = (max - min) * 0.04f;
+        min -= padding;
+        max += padding;
+
+        if (glyphBottom < float.MaxValue)
+        {
+            min.y = Mathf.Max(min.y, glyphBottom - padding.y);
+            max.y = Mathf.Min(max.y, glyphTop + padding.y);
+        }
+
+        GameObject plate = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        Destroy(plate.GetComponent<MeshCollider>());
+        plate.name = $"{Constants.PluginName}BoardColor";
+        plate.transform.SetParent(root, false);
+        plate.transform.localRotation = Quaternion.identity;
+        plate.transform.localPosition = (min + max) / 2f;
+        plate.transform.localScale = new Vector3(max.x - min.x, max.y - min.y, 1f);
+        plate.transform.position -= root.forward * 0.0005f;
+
+        Renderer renderer = plate.GetComponent<Renderer>();
+        renderer.material = new Material(Shader.Find("Sprites/Default")) { renderQueue = 2001 };
+        return renderer;
+    }
+
+    private void ColorRenderer(Renderer renderer)
+    {
+        if (renderer == null || renderer.sharedMaterial == boardMaterial)
+            return;
+
+        if (!boardRenderers.ContainsKey(renderer))
+            boardRenderers[renderer] = renderer.sharedMaterial;
+
+        renderer.sharedMaterial = boardMaterial;
+    }
+
+    private static void SetJoinScreens(JoinTriggerUITemplate template, Material[] materials)
+    {
+        template.ScreenBG_AbandonPartyAndSoloJoin = materials[0];
+        template.ScreenBG_AlreadyInRoom = materials[1];
+        template.ScreenBG_ChangingGameModeSoloJoin = materials[2];
+        template.ScreenBG_Error = materials[3];
+        template.ScreenBG_InPrivateRoom = materials[4];
+        template.ScreenBG_LeaveRoomAndGroupJoin = materials[5];
+        template.ScreenBG_LeaveRoomAndSoloJoin = materials[6];
+        template.ScreenBG_NotConnectedSoloJoin = materials[7];
+    }
+
+    private void ResetBoards()
+    {
+        foreach (var pair in boardRenderers)
+        {
+            if (pair.Key != null)
+                pair.Key.sharedMaterial = pair.Value;
+        }
+
+        boardRenderers.Clear();
+
+        foreach (Renderer plate in boardPlates.Values)
+        {
+            if (plate != null)
+                Destroy(plate.gameObject);
+        }
+
+        boardPlates.Clear();
+
+        foreach (var pair in joinScreens)
+        {
+            if (pair.Key != null)
+                SetJoinScreens(pair.Key, pair.Value);
+        }
+
+        joinScreens.Clear();
+
+        if (PhotonNetworkController.Instance != null)
+            PhotonNetworkController.Instance.UpdateTriggerScreens();
+
+        foreach (GameObject board in boards.Values)
+        {
+            if (board != null)
+                board.GetComponent<Renderer>().material.color = DefaultBoardColor;
+        }
+    }
 
     private void OnDestroy()
     {
@@ -181,7 +401,7 @@ public class BoardManager : MonoBehaviour
         );
 
 
-        /*SetText(
+        SetText(
             "Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText",
             CoCTitle
         );
@@ -190,7 +410,7 @@ public class BoardManager : MonoBehaviour
         SetText(
             "Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData",
             CoCText
-        );*/
+        );
     }
 
 

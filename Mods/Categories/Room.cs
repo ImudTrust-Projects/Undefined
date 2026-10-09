@@ -3,8 +3,11 @@ using GorillaNetworking;
 using Photon.Pun;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GorillaTagScripts;
+using Undefined.Menu;
 using Undefined.Utilities;
 using UnityEngine;
 
@@ -53,6 +56,28 @@ public class Room
     public static void JoinRoom(string RoomCode)
     {
         PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(RoomCode, GorillaNetworking.JoinType.Solo);
+    }
+
+    public static void JoinCustomRoom()
+    {
+        KeyboardManager.OpenTyping(
+            prefill: "",
+            placeholderText: "Enter room code...",
+            onSubmit: code =>
+            {
+                code = code.Trim().ToUpper();
+
+                if (string.IsNullOrEmpty(code))
+                    return;
+
+                JoinRoom(code);
+
+                NotificationLib.SendNotification(
+                    NotificationLib.NotificationType.Info,
+                    $"Joining room: {code}"
+                );
+            }
+        );
     }
 
     public static void EnableAntiAFK()
@@ -142,6 +167,25 @@ public class Room
         {
             line.muteButton.isOn = mute;
             line.PressButton(mute, GorillaPlayerLineButton.ButtonType.Mute);
+        }
+    }
+    
+    public static void UnlockVIM()
+    {
+        SubscriptionManager manager = ReflectionCompat.GetStaticField<SubscriptionManager>(typeof(SubscriptionManager), "Instance");
+        Dictionary<NetPlayer, SubscriptionManager.SubscriptionDetails> subData = ReflectionCompat.GetField<Dictionary<NetPlayer, SubscriptionManager.SubscriptionDetails>>(manager, "subData");
+        if (subData == null) return;
+
+        foreach (var entry in subData.ToList())
+        {
+            if (entry.Key.IsLocal)
+            {
+                SubscriptionManager.SubscriptionDetails details = entry.Value;
+                details.active = true;
+                details.tier = 1;
+                details.daysAccrued = 128;
+                subData[entry.Key] = details;
+            }
         }
     }
 }

@@ -38,7 +38,7 @@ public class Safety
         }
     }
 
-    private static float antiReportFlingDelay;
+    /*private static float antiReportFlingDelay;
 
     public static void AntiReportSnowballfling()
     {
@@ -65,7 +65,7 @@ public class Safety
                 antiReportFlingDelay = Time.time + 0.1f;
             }
         }
-    }
+    }*/
 
     public static void RestartGame()
     {
