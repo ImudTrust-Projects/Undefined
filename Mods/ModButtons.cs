@@ -365,6 +365,7 @@ public static class ModButtons
             new ModButtonInfo("Lucy Chase Gun", () => Master.LucyChaseGun()),
             new ModButtonInfo("Lucy Grab Gun", () => Master.LucyGrabGun()),
             new ModButtonInfo("Lucy Grab All", () => Master.LucyGrabAll()),
+            new ModButtonInfo("Move Lucy Gun", () => Master.MoveLucyGun()),
             new ModButtonInfo("Fast Lucy", () => Master.FastLucy(), () => Master.ResetLucySpeed()),
             new ModButtonInfo("Slow Lucy", () => Master.SlowLucy(), () => Master.ResetLucySpeed()),
         },
